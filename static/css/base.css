@@ -1,0 +1,46 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    font-family: 'GTWalsheimPro';
+    --fog: #FAF8FF;
+    --sand: #F1E8E6;
+    --orange: #F98232;
+    --blue: #070A1C;
+    --bg: #0D133F;
+    user-select: none;
+    --s8: 0.98765432vh;
+    --s10: 1.234567901vh;
+    --s16: 1.975308641vh;
+    --s24: 2.962962962vh;
+    --s20: 2.469135802vh;
+}
+
+@font-face {
+    font-family: 'GTWalsheimPro';
+    src: url('../baseFont/GTWalsheimPro-Regular.woff2') format('woff2'),
+         url('../baseFont/GTWalsheimPro-Regular.woff') format('woff');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'GTWalsheimPro';
+    src: url('../baseFont/GTWalsheimPro-Medium.woff2') format('woff2'),
+         url('../baseFont/GTWalsheimPro-Medium.woff') format('woff');
+    font-weight: 500;
+}
+@font-face {
+    font-family: 'GTWalsheimPro';
+    src: url('../baseFont/GTWalsheimPro-Bold.woff2') format('woff2'),
+         url('../baseFont/GTWalsheimPro-Bold.woff') format('woff');
+    font-weight: 700;
+}
+
+html, body{
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 768px) {
+    .desktop-only { display: none; }
+}

@@ -1,0 +1,80 @@
+@media (max-width: 750px) {
+    #closeMenu{
+        display: flex;
+        cursor: pointer;
+        height: 24px;
+    }
+    #headerMenu{
+        gap: 0;
+    }
+    #backMenu{
+        display: none;
+    }
+    aside{
+        width: 100%;
+        position: fixed;
+        z-index: 1;
+        padding: 18px 10px;
+    }
+    #logoBlock{
+        margin-right: 24px;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    aside, main #headerPart{
+        display: none;
+    }
+    main{
+        margin-left: 0;
+        padding-top: 24px;
+        width: 100%;
+    }
+    header{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px;
+        height: 60px;
+        background-color: var(--bg);
+    }
+    #menu{
+        width: 30%;
+        display: flex;
+        flex-direction: row;
+        justify-content: start;
+    }
+    #logo{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #menu img{
+        height: 24px;
+        cursor: pointer;
+    }
+    .menu-buttons{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: end;
+        gap: 10px;
+        width: 30%;
+    }
+    .menu-buttons #avatar{
+        height: 24px;
+        width: 24px;
+        border-radius: 100%
+    }
+    #notification{
+        min-width: 24px;
+        min-height: 24px;
+    }
+    #logo img{
+        height: 18.2px;
+    }
+}

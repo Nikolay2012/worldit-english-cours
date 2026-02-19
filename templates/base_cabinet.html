@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load sidebar_tags %}
+
+{% block links %}
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sidebar_mobile.css' %}">
+{% endblock %}
+
+{% block menu %}
+    <aside>
+        <div id="mainLinks">
+            <div id="headerMenu">
+                <img src="{% static 'img/sideBar/icons/back.svg' %}" alt="" id="backMenu">
+                <img src="{% static 'img/menu.svg' %}" alt="" id="closeMenu">
+                <div id="logoBlock">
+                    <img src="{% static 'img/sideBar/logo.svg' %}" alt="">
+                </div>
+            </div>
+            <div id="userMenu">
+                <img src="{% static 'img/sideBar/anonim.png' %}" alt="">
+                <span>
+                    <h5>Mykola Skrypnyk</h5>
+                    <p>you@example.com</p>
+                </span>
+            </div>
+            <nav>
+                {% get_sidebar as sidebar %}
+                {% for data in sidebar %}
+                    <a href="{{ data.link }}" class="menu-item {% if data.active %}selected-item{% endif %}">
+                        <img src="{{ data.img }}" alt="">
+                        <p>{{ data.title }}</p>
+                    </a>
+                {% endfor %}
+            </nav>
+        </div>
+        <nav id="accountLinks">
+            <a href="#" class="menu-item">
+                <img src="{% static 'img/sideBar/icons/settings.svg' %}" alt="">
+                <p>Налаштування</p>
+            </a>
+            <a href="{% url 'logout' %}" class="menu-item">
+                <img src="{% static 'img/sideBar/icons/exit.svg' %}" alt="">
+                <p>Вийти</p>
+            </a>
+        </nav>
+    </aside>
+    <header>
+        <div id="menu">
+            <img src="{% static 'img/menu.svg' %}" alt="">
+        </div>
+        <a href="" id="logo">
+            <img src="{% static 'img/sideBar/logo.svg' %}" alt="">
+        </a>
+        <div class="menu-buttons">
+            <img id="avatar" src="{% static 'img/sideBar/anonim.png' %}" alt="">
+            <a href="#" id="notification" class="button">
+                <img src="{% static 'img/bell.svg' %}" alt="">
+            </a>
+        </div>
+    </header>
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/sidebar.js' %}"></script>
+{% endblock %}
