@@ -25,4 +25,5 @@ def get_sidebar(context):
             {"title": "Рахунки", "active": url_name == "#", "link": "#", "img": static(f'img/sideBar/icons/wallet.svg')}
         ]
 
+
     return []
