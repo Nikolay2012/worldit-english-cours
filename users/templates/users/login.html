@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load socialaccount %}
+
+{% block title %}WorldIT{% endblock %}
+
+{% block links %}
+<link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/login.css' %}">
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'Menu/js/firstPage.js' %}"></script>
+<script>startPage1Animation()</script>
+<script src="{% static 'Menu/js/blockDevTools.js' %}"></script>
+<script src="{% static 'users/js/login.js' %}"></script>
+<script src="{% static 'js/changeTheme.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <main>
+        <div id="deco">
+            <a id="logo" href="/"><img loading="lazy" src="{% static 'Preview/img/logo.png' %}" alt=""></a>
+            <span>
+                <h4>“This library has saved me countless hours of work and helped me deliver stunning designs to my clients faster than ever before.”</h4>
+                <p>Sofia Davis</p>
+            </span>
+            <div id="bg">
+                <img loading="lazy" id="mainBg" src="{% static 'Menu/img/FirstPage/bg.webp' %}" alt="">
+                <video autoplay loop muted playsinline preload="none" class="desktop-only">
+                    <source src="{% static 'Menu/img/FirstPage/star.webm' %}" type="video/webm">
+                </video>
+                <img loading="lazy" id="grassBack" src="{% static 'Menu/img/FirstPage/grass/grassBack-1.webp' %}" alt="">
+                <img loading="lazy" id="stone" src="{% static 'Menu/img/FirstPage/stone.webp' %}" alt="">
+                <img loading="lazy" id="character" src="{% static 'Menu/img/FirstPage/characterSit.webp' %}" alt="">
+                <img loading="lazy" id="grassFront" src="{% static 'Menu/img/FirstPage/grass/grassFront-1.webp' %}" alt="">
+            </div>
+        </div>
+        <div id="content">
+            <p id="changeTheme" class="button">
+                <img src="{% static 'img/moon.svg' %}" alt="">
+            </p>
+            <div id="text">
+                <h1>Увійти</h1>
+                <p>Введіть логін та пароль, щоб увійти в обліковий запис</p>
+            </div>
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                <input type="text" id="inputUsername" name="username" placeholder="Імʼя">
+                <input type="password" id="inputPassword" name="password" placeholder="Пароль">
+                <button>Увійти</button>
+                <span id="or-continue">
+                    <div></div>
+                    <p id="info">АБО ПРОДОВЖИТИ З</p>
+                    <div></div>
+                </span>
+                <a href="{% provider_login_url 'google' %}" id="google-login"><img src="{% static 'users/img/google.svg' %}" alt="">Google</a>
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if message.level_tag == "error" %}
+                            <span class="error">{{ message }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </form>
+            <p id="info">Натискаючи «Продовжити», ви погоджуєтеся з нашими <br>Умовами обслуговування та Політикою конфіденційності.</p>
+        </div>
+    </main>
+{% endblock %}

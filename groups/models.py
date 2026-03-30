@@ -21,13 +21,22 @@ class Schedule(models.Model):
 
 class Group(models.Model):
     students = models.ManyToManyField(to = Student, related_name = "groups")
-    mentor = models.ManyToManyField(to = Mentor, related_name = "groups")
-    manager = models.ManyToManyField(to = Manager, related_name = "groups")
+    mentor = models.ForeignKey(to = Mentor, on_delete=models.SET_NULL, blank=True, null=True, related_name = "groups")
+    manager = models.ForeignKey(to = Manager, on_delete=models.SET_NULL, null=True, related_name = "groups")
     course = models.ForeignKey(to = Course, related_name = "groups", on_delete = models.SET_NULL, null = True)
-    schedules = models.ForeignKey(Schedule, related_name = "groups", on_delete = models.SET_NULL, null = True)
+    schedules = models.ManyToManyField(Schedule, related_name = "groups", null = True)
+    sub_mentor = models.ForeignKey(to = Mentor, on_delete=models.SET_NULL, blank=True, null=True, related_name = "sub_groups")
+    
+    type_choice = (
+        ("group", "Група"),
+        ("individual_mentor", "Індивідуально з ментором"),
+        ("individual", "Індивідуально без ментора"),
+        ("individual_task", "Індивідуально з перевіркою завдань"),
+    )
+    type = models.CharField(max_length = 50, choices = type_choice, default="group")
     
     def __str__(self):
-        return f"<Group: {self.course.name} - {self.schedules.first()}, {self.mentor.user.first_name} {self.mentor.user.last_name}>"
+        return f"<Group: {self.course.name} - {self.schedules.first()}, {self.mentor.user.full_name}>"
     
 class OpenLesson(models.Model):
     lesson = models.ManyToManyField(to = Lesson, related_name = "open_lessons")

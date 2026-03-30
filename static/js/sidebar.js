@@ -16,3 +16,15 @@ window.addEventListener('resize', ()=>{
         sideMenu.style.display = "none"
     }
 });
+
+document.querySelectorAll(".open-menu-btn").forEach(btn => {
+    btn.addEventListener("click", function(event){
+        event.preventDefault()
+        btn.classList.toggle("select-open-menu")
+        btn.closest("a").nextElementSibling.classList.toggle("hide-list")
+    })
+})
+
+document.getElementById("back").addEventListener("click", function(){
+    window.history.back()
+})

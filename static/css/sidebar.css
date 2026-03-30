@@ -1,5 +1,37 @@
+body{
+    --white: #FFFFFF;
+    --text-fg-primary: #252A52;
+    --text-main: #070A1C;
+    --text-fg: #09090B;
+    --text-btn: #18181B;
+    --text-fog: #FAF8FF;
+    --text-muted-fg: #B3B3C5;
+    --bg-muted: #E2E1EC;
+    --bg-muted-50: #E2E1EC80;
+    --border-destruc: #E2E1EC66;
+    --bg-primary: #0D133F;
+    --bg-secondary: #0D133F;
+    --bg-acent: #f4f4f5;
+}
+
+.dark-body{
+    --bg-muted: #252A52;
+    --text-main: #FAF8FF;
+    --text-fg: #FAF8FF;
+    --text-btn: #FAF8FF;
+    --white: #3C4165;
+    --bg-acent: #303457;
+    --text-muted-fg: #545879;
+    --text-fog: #0D133F;
+    --bg-primary: #B3B3C5;
+    --text-fg-primary: #FFFFFF;
+    --bg-muted-50: #30355ccc;
+    --border-destruc: #252A52;
+}
+
 aside{
     position: fixed;
+    overflow: hidden;
     left: 0;
     top: 0;
 
@@ -10,8 +42,8 @@ aside{
 
     width: 290px;
     height: 100dvh;
-    padding: 16px 20px;
-    background-color: var(--bg);
+    padding: 16px 0 16px 20px;
+    background-color: var(--bg-secondary);
 }
 
 #accountLinks, #mainLinks, #headerMenu, #userMenu, #mainLinks nav, #userMenu span{
@@ -63,33 +95,64 @@ aside{
     width: 100%;
 }
 
-.menu-item{
+.menu-item, .menu-subitem-list a{
     width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
     height: 40px;
-    border-radius: 10px;
+    border-radius: 6px 0 0 6px;
     gap: 16px;
     padding: 8px 16px;
 }
 
 .menu-item img{
     height: 24px;
+    transition: all 0.3s;
 }
 
-.menu-item p{
-    color: #FAF8FF;
+.menu-item p, .menu-subitem-list a{
+    color: #FFFFFF;
     font-size: 16px;
     font-weight: 400;
+    width: 100%;
 }
 
 .selected-item{
-    background-color: #E2E1EC80;
+    background-color: var(--bg-muted-50);
+}
+
+.menu-subitem-list{
+    margin-top: 2px;
+    margin-left: 32px;
+    padding-left: 16px;
+    border-left: 1px solid #FAF8FF;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    width: 100%;
+}
+.selected-subitem{
+    background-color: #3C4165;
+}
+
+#logoBlock{
+    height: 18.2px;
+}
+#logoBlock img{
+    height: 100%;
+}
+
+.select-open-menu{
+    rotate: -90deg;
+}
+
+.hide-list{
+    display: none;
 }
 
 body{
-    background-color: #E2E1EC;
+    background-color: var(--bg-muted);
 }
 
 main{
@@ -102,6 +165,50 @@ main{
     flex-direction: column;
     gap: 16px;
 }
+
+#headerPart{
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+}
+
+#back{
+    border: 1px solid var(--bg-muted);
+    background-color: var(--white);
+    min-width: 40px;
+    min-height: 40px;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#back img, #notification img{
+    height: 16px;
+}
+
+#page-path{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+}
+
+#page-path p{
+    color: var(--bg-primary);
+    font-weight: 400;
+    font-size: 14px;
+}
+#page-path img{
+    height: 16px;
+}
+#page-path .dissable{
+    color: var(--text-muted-fg);
+}
+
 
 #closeMenu, header{
     display: none;
@@ -116,16 +223,19 @@ main{
     align-items: center;
     justify-content: center;
     border-radius: 5px;
-    border: 1px solid #E2E1EC;
-    background-color: white;
+    border: 1px solid var(--bg-muted);
+    background-color: var(--white);
     cursor: pointer;
 }
 .button:hover{
-    background-color: #f4f4f5;
+    background-color: var(--bg-acent);
 }
 
 .button img{
     height: 16px;
+}
+.dark-body .button img, .dark-body #page-path img, .dark-body #montHeader img, .dark-body #back img, .dark-body #google-login img{
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
 #notification{

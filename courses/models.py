@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import CustomUser
 
 # Create your models here.
 class CourseStatus(models.Model):
@@ -10,10 +11,13 @@ class CourseStatus(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length = 255)
     description = models.TextField()
-    short_description = models.CharField(max_length=255)
+    preview_description = models.CharField(max_length=255)
     range_age = models.CharField(max_length=5, default="9-17")
-    image = models.ImageField(upload_to="courses/")
+    preview_image = models.ImageField(upload_to="courses/")
+    dark_preview_image = models.ImageField(upload_to="courses/dark/", blank=True, null=True)
     status = models.ForeignKey(to = CourseStatus, related_name = "courses", on_delete = models.SET_NULL, null = True)
+    editors = models.ManyToManyField(to = CustomUser, related_name= 'editable_courses')
+    users = models.ManyToManyField(to = CustomUser, related_name="courses")
 
     def __str__(self):
         return f"<Course: {self.name}>"
@@ -27,6 +31,7 @@ class Module(models.Model):
     
 class Lesson(models.Model):
     name = models.CharField(max_length = 255)
+    order_number = models.IntegerField(default = 0)
     module = models.ForeignKey(to = Course, related_name = "lessons", on_delete = models.CASCADE)
 
     def __str__(self):

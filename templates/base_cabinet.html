@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load sidebar_tags %}
+{% load menu_tags %}
 
 {% block links %}
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
@@ -18,10 +18,14 @@
                 </div>
             </div>
             <div id="userMenu">
-                <img src="{% static 'img/sideBar/anonim.png' %}" alt="">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="">
+                {% else %}
+                    <img src="{% static 'img/sideBar/anonim.png' %}" alt="">
+                {% endif %}
                 <span>
-                    <h5>Mykola Skrypnyk</h5>
-                    <p>you@example.com</p>
+                    <h5>{{ user.full_name }}</h5>
+                    <p>{{ user.email }}</p>
                 </span>
             </div>
             <nav>
@@ -30,12 +34,20 @@
                     <a href="{{ data.link }}" class="menu-item {% if data.active %}selected-item{% endif %}">
                         <img src="{{ data.img }}" alt="">
                         <p>{{ data.title }}</p>
+                        {% if data.sub_items %} <img class="open-menu-btn {% if data.active %}select-open-menu{% endif %}" src="{% static 'img/sideBar/icons/open.svg' %}" alt=""> {% endif %}
                     </a>
+                    {% if data.sub_items %}
+                        <div class="menu-subitem-list {% if not data.active %}hide-list{% endif %}">
+                            {% for item in data.sub_items %}
+                                <a href="{{ item.link }}" class="{% if item.active %}selected-subitem{% endif %}">{{ item.title }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 {% endfor %}
             </nav>
         </div>
         <nav id="accountLinks">
-            <a href="#" class="menu-item">
+            <a href="{% url 'settings' %}" class="menu-item">
                 <img src="{% static 'img/sideBar/icons/settings.svg' %}" alt="">
                 <p>Налаштування</p>
             </a>
@@ -54,12 +66,31 @@
         </a>
         <div class="menu-buttons">
             <img id="avatar" src="{% static 'img/sideBar/anonim.png' %}" alt="">
-            <a href="#" id="notification" class="button">
+            <a href="{% url 'notification' %}" id="notification" class="button">
                 <img src="{% static 'img/bell.svg' %}" alt="">
             </a>
         </div>
     </header>
     <main>
+        <div id="headerPart">
+            <a href="#" id="back">
+                <img src="{% static 'cabinet/img/arrowBack.svg' %}" alt="">
+            </a>
+            <div id="page-path">
+                <p class="dissable">Головна</p>
+                {% get_header_links as header_links %}
+                {% for link in header_links %}
+                    <img src="{% static 'cabinet/img/arrowRight.svg' %}" alt="">
+                    <p class="{% if forloop.counter != header_links|length %} dissable {% endif %}">{{ link }}</p>
+                {% endfor %}
+            </div>
+            <a href="{% url 'notification' %}" id="notification" class="button">
+                <img src="{% static 'img/bell.svg' %}" alt="">
+            </a>
+            <p id="changeTheme" class="button">
+                <img src="{% static 'img/moon.svg' %}" alt="">
+            </p>
+        </div>
         {% block main %}
         {% endblock %}
     </main>
@@ -67,4 +98,5 @@
 
 {% block scripts %}
 <script src="{% static 'js/sidebar.js' %}"></script>
+<script src="{% static 'js/changeTheme.js' %}"></script>
 {% endblock %}

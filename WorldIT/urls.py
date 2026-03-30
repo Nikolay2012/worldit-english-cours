@@ -16,11 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls.static import static
+from django.views.generic import TemplateView
 from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
+
+    path('', include('users.urls')),
+    path('', include('Menu.urls')),
+    path('cabinet/', include('cabinet.urls')),
+    path('courses/', include('courses.urls')),
+    path('groups/', include('groups.urls')),
 ]
 
 if settings.DEBUG:
