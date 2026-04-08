@@ -31,6 +31,6 @@ def render_notification(request: HttpRequest):
     return render(request, "cabinet/notification.html")
 
 @require_GET
-@required_type("parent")
-def render_my_students(request: HttpRequest):
-    return render(request, "cabinet/my_students.html")
+@required_type("admin")
+def render_administration(request: HttpRequest):
+    return render(request, "cabinet/administration.html")

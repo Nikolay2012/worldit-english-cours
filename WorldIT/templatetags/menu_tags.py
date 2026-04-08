@@ -41,7 +41,7 @@ def get_sidebar(context):
         list_sub_courses = [{"title": "Всі курси", "link": "all_courses"}, {"title": "Мої курси", "link": "my_courses"}]
         if "student" in user.account_types:
             list_sub_courses.append({"title": "Завершені курси", "link": "completed_courses"})
-
+        
         list_menu = [ 
             create_item(url_name, "Дашборд", "dashboard", "dashboard"),
             create_item(url_name, "Курси", "my_courses", "rocket", list_sub_courses),
@@ -52,13 +52,19 @@ def get_sidebar(context):
             if len(user.account_types) == 1:
                 del list_menu[1]
                 del list_menu[1]
-            list_menu.insert(-1, create_item(url_name, "Мої Студенти", "my_students", "students"))
             list_menu.append(create_item(url_name, "Рахунки", "payment", "wallet"))
         
         if "admin" in user.account_types:
-            list_menu.append(create_item(url_name, "Ментори", "mentors", "mentors"))
-            list_menu.append(create_item(url_name, "Студенти", "students", "students"))
-
+            list_menu.insert(-1, create_item(url_name, "Ментори", "mentors", "mentors", [{"title": "Всі ментори", "link": "mentors"}, {"title": "Архів менторів", "link": "archive_mentors"}]))
+        
+        if not set(user.account_types).isdisjoint(["mentor", "manager", "admin", "parent"]):
+            list_student_links = [{"title": "Мої студенти", "link": "my_students"}]
+            if not set(user.account_types).isdisjoint(["mentor", "manager", "admin"]):
+                list_student_links.append({"title": "Архів студентів", "link": "archive_students"})
+                if "admin" in user.account_types:
+                    list_student_links.insert(0, {"title": "Всі студенти", "link": "all_students"})
+            list_menu.insert(-1, create_item(url_name, "Студенти", "my_students", "students", list_student_links))
+ 
         return list_menu
 
     return []

@@ -47,7 +47,13 @@
             </nav>
         </div>
         <nav id="accountLinks">
-            <a href="{% url 'settings' %}" class="menu-item">
+            {% if "admin" in user.account_types %}
+                <a href="{% url 'administration' %}" class="menu-item {% if request.resolver_match.url_name == 'administration' %}selected-item{% endif %}">
+                    <img src="{% static 'img/sideBar/icons/admin.svg' %}" alt="">
+                    <p>Адміністрування</p>
+                </a>
+            {% endif %}
+            <a href="{% url 'settings' %}" class="menu-item {% if request.resolver_match.url_name == 'settings' %}selected-item{% endif %}">
                 <img src="{% static 'img/sideBar/icons/settings.svg' %}" alt="">
                 <p>Налаштування</p>
             </a>

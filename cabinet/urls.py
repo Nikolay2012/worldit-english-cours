@@ -7,5 +7,5 @@ urlpatterns = [
     path('schedule/', render_schedule, name="schedule"),
     path('payment/', render_payment, name="payment"),
     path("notification/", render_notification, name="notification"),
-    path("my_students/", render_my_students, name="my_students"),
+    path("administration/", render_administration, name="administration"),
 ]

@@ -39,5 +39,20 @@ def render_mentors(request: HttpRequest):
 
 @require_GET
 @required_type("admin")
-def render_students(request: HttpRequest):
-    return render(request, "users/students.html")
+def render_archive_mentors(request: HttpRequest):
+    return render(request, "users/archive_mentors.html")
+
+@require_GET
+@required_type("admin")
+def render_all_students(request: HttpRequest):
+    return render(request, "users/all_students.html")
+
+@require_GET
+@required_type(["admin", "mentor", "manager", "parent"])
+def render_my_students(request: HttpRequest):
+    return render(request, "users/my_students.html")
+
+@require_GET
+@required_type(["admin", "mentor", "manager"])
+def render_archive_students(request: HttpRequest):
+    return render(request, "users/archive_students.html")

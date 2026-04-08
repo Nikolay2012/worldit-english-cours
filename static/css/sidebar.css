@@ -44,11 +44,17 @@ aside{
     height: 100dvh;
     padding: 16px 0 16px 20px;
     background-color: var(--bg-secondary);
+
+    overflow-y: auto;
 }
 
 #accountLinks, #mainLinks, #headerMenu, #userMenu, #mainLinks nav, #userMenu span{
     display: flex;
     flex-direction: column;
+}
+#accountLinks{
+    width: 100%;
+    margin-top: 40px;
 }
 
 #headerMenu{
