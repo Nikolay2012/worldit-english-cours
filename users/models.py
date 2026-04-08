@@ -6,9 +6,9 @@ class CustomUser(AbstractUser):
         ('Чоловічий', "Чоловічий"),
         ('Жіночий', 'Жіночий'),
     )
-    phone_number = models.CharField(max_length=15, unique=True, null=True)
+    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    city = models.CharField(max_length=60, default=None, null=True)
+    city = models.CharField(max_length=60, default=None, null=True, blank=True)
     gender = models.CharField(max_length=10, default=None, null=True, choices=gender_choices)
     avatar = models.ImageField(upload_to="users/avatars", blank=True, null=True)
 

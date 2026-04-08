@@ -16,8 +16,8 @@ class Course(models.Model):
     preview_image = models.ImageField(upload_to="courses/")
     dark_preview_image = models.ImageField(upload_to="courses/dark/", blank=True, null=True)
     status = models.ForeignKey(to = CourseStatus, related_name = "courses", on_delete = models.SET_NULL, null = True)
-    editors = models.ManyToManyField(to = CustomUser, related_name= 'editable_courses')
-    users = models.ManyToManyField(to = CustomUser, related_name="courses")
+    editors = models.ManyToManyField(to = CustomUser, related_name= 'editable_courses', blank=True)
+    users = models.ManyToManyField(to = CustomUser, related_name="courses", blank=True)
 
     def __str__(self):
         return f"<Course: {self.name}>"
