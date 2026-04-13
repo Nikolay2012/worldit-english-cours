@@ -17,14 +17,14 @@ class CalendarEvent(models.Model):
         ('Скасовано/Пенесено', 'Скасовано/Пенесено'),
         ('Канікули', "Канікули"),
     )
-    group = models.ManyToManyField(Group)
+    groups = models.ManyToManyField(Group, related_name="calendar_events")
     type = models.CharField(max_length=255, choices=type_choices)
     start_date = models.DateField()
-    finish_date = models.DateField(default=None, null=True)
-    time = models.TimeField(default=None, null=True)
+    finish_date = models.DateField(default=None, null=True, blank=True)
+    time = models.TimeField(default=None, null=True, blank=True)
 
     def __str__(self):
-        return f"<Calendar event: {self.type}, {self.start_date}, in group {self.group.name}>"
+        return f"<Calendar event: {self.type}, {self.start_date}, in {self.groups.count()} groups>"
     
 class StaffTask(models.Model):
     creator = models.ForeignKey(to=CustomUser, related_name="created_tasks", on_delete=models.SET_NULL, null=True)

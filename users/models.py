@@ -6,10 +6,14 @@ class CustomUser(AbstractUser):
         ('Чоловічий', "Чоловічий"),
         ('Жіночий', 'Жіночий'),
     )
-    phone_number = models.CharField(max_length=15, unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=25, unique=True, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     city = models.CharField(max_length=60, default=None, null=True, blank=True)
     gender = models.CharField(max_length=10, default=None, null=True, choices=gender_choices)
+    first_name_en = models.CharField(max_length=50, blank=True, null=True)
+    last_name_en = models.CharField(max_length=50, blank=True, null=True)
+    github_url = models.URLField(blank=True, null=True)
+    messenger = models.CharField(max_length=255, blank=True, null= True)
     avatar = models.ImageField(upload_to="users/avatars", blank=True, null=True)
 
     def __str__(self):
@@ -48,7 +52,6 @@ class Manager(models.Model):
     
 class Parent(models.Model):
     user = models.OneToOneField(to = CustomUser, on_delete=models.CASCADE, related_name="profile_parent")
-    telegram_username = models.CharField(max_length=32, default=None, null=True)
     type = models.CharField(max_length=32, default="Мати")
     
     def __str__(self):
@@ -64,6 +67,8 @@ class Student(models.Model):
     user = models.OneToOneField(to = CustomUser, on_delete=models.CASCADE, related_name="profile_student")
     parents = models.ManyToManyField(Parent, related_name="students")
     can_pay = models.BooleanField(default=False)
+    is_club_member = models.BooleanField(default=False)
+    hobbies = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"<Student: {self.user.full_name}>"
