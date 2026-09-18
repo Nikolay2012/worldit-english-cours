@@ -1,12 +1,21 @@
 from django import template
 from django.urls import reverse
 from django.templatetags.static import static
-
+from django.conf import settings
 
 register = template.Library()
 
-def create_item(url_name: str, title: str, link: str, img_name: str, sub_items: list[dict] = None) -> dict:
+@register.filter
+def first_word(value):
+    return value.split()[0]
+
+def create_item(url_name: str, title: str, link: str, img_name: str, sub_items: list[dict] = None, sub_links: list[str] = None) -> dict:
     active = url_name == link
+    if sub_links:
+        for sub_link in sub_links:
+            if url_name == sub_link:
+                active = True
+
     if sub_items: 
         for item in sub_items:
             item['active'] = url_name == item["link"]
@@ -31,41 +40,21 @@ def get_sidebar(context):
     url_name = request.resolver_match.url_name if request.resolver_match else None
     
 
-    if user: 
-        list_sub_groups = [{"title": "Мої групи", "link": "my_groups"}]
-        if not set(user.account_types).isdisjoint(["mentor", "manager", "admin"]):
-            list_sub_groups.append({"title": "Архів груп", "link": "archive_groups"})
-        if "admin" in user.account_types:
-            list_sub_groups.insert(0, {"title": "Всі групи", "link": "all_groups"})
+    if user and user.is_authenticated: 
+        list_menu = []
+        if settings.DEBUG or  "admin" in user.account_types:
+            list_sub_courses = [{"title": "Всі курси", "link": "all_courses"}, {"title": "Мої курси", "link": "my_courses"}]
+            if "student" in user.account_types:
+                list_sub_courses.append({"title": "Завершені курси", "link": "completed_courses"})
+            
+            list_menu = [ 
+                create_item(url_name, "Головна", "debug_main", "dashboard"),
+                create_item(url_name, "Курси", "my_courses", "rocket", list_sub_courses),
+            ]
 
-        list_sub_courses = [{"title": "Всі курси", "link": "all_courses"}, {"title": "Мої курси", "link": "my_courses"}]
-        if "student" in user.account_types:
-            list_sub_courses.append({"title": "Завершені курси", "link": "completed_courses"})
-        
-        list_menu = [ 
-            create_item(url_name, "Дашборд", "dashboard", "dashboard"),
-            create_item(url_name, "Курси", "my_courses", "rocket", list_sub_courses),
-            create_item(url_name, "Групи", "my_groups", "folder", list_sub_groups),
-            create_item(url_name, "Розклад", "schedule", "calendar")
-        ]
-        if "parent" in user.account_types:
-            if len(user.account_types) == 1:
-                del list_menu[1]
-                del list_menu[1]
-            list_menu.append(create_item(url_name, "Рахунки", "payment", "wallet"))
-        
-        if "admin" in user.account_types:
-            list_menu.insert(-1, create_item(url_name, "Ментори", "mentors", "mentors", [{"title": "Всі ментори", "link": "mentors"}, {"title": "Архів менторів", "link": "archive_mentors"}]))
-        
-        if not set(user.account_types).isdisjoint(["mentor", "manager", "admin", "parent"]):
-            list_student_links = [{"title": "Мої студенти", "link": "my_students"}]
-            if not set(user.account_types).isdisjoint(["mentor", "manager", "admin"]):
-                list_student_links.append({"title": "Архів студентів", "link": "archive_students"})
-                if "admin" in user.account_types:
-                    list_student_links.insert(0, {"title": "Всі студенти", "link": "all_students"})
-            list_menu.insert(-1, create_item(url_name, "Студенти", "my_students", "students", list_student_links))
- 
         return list_menu
+    elif user and not user.is_authenticated:
+        return create_item(url_name, "Увійти", "login", "login"),
 
     return []
 
@@ -74,6 +63,5 @@ def get_header_links(context):
     request = context.get('request')
     if request:
         url_name = request.resolver_match.url_name if request.resolver_match else None
-        if url_name == "dashboard":
-            return ["Дашборд"]
+        # Приклад роботи тегу: if url_name == "dashboard": return ["Дашборд"]
     return []

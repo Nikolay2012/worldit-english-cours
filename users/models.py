@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
     github_url = models.URLField(blank=True, null=True)
     messenger = models.CharField(max_length=255, blank=True, null= True)
     avatar = models.ImageField(upload_to="users/avatars", blank=True, null=True)
+    visible_password = models.CharField(max_length=100, default=None, blank=True, null=True)
 
     def __str__(self):
         return f"<User: {self.full_name}>"
@@ -37,10 +38,22 @@ class CustomUser(AbstractUser):
         else:
             return self.username
         
-    
+    def get_groups(self):
+        groups = []
+        for type in ["mentor", "manager", "student"]:
+            if hasattr(self, f"profile_{type}"):
+                groups.extend(getattr(self, f"profile_{type}").groups.all())
+        if hasattr(self, "profile_parent"):
+            for student in self.profile_parent.students.all():
+                for group in student.groups.all():
+                    group.student_id_for_parent = student.id
+                    groups.append(group)
+        return groups
+            
 class Mentor(models.Model):
     user = models.OneToOneField(to = CustomUser, on_delete=models.CASCADE, related_name="profile_mentor")
-    
+    identification_number = models.IntegerField(default=0)
+
     def __str__(self):
         return f"<Mentor: {self.user.full_name}>"
     
@@ -65,10 +78,10 @@ class Parent(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(to = CustomUser, on_delete=models.CASCADE, related_name="profile_student")
-    parents = models.ManyToManyField(Parent, related_name="students")
+    parents = models.ManyToManyField(Parent, related_name="students", blank=True, null=True)
     can_pay = models.BooleanField(default=False)
     is_club_member = models.BooleanField(default=False)
     hobbies = models.CharField(max_length=255, blank=True, null=True)
-    
+
     def __str__(self):
         return f"<Student: {self.user.full_name}>"

@@ -36,9 +36,37 @@
     font-weight: 700;
 }
 
+@font-face {
+    font-family: 'Inter';
+    src: url('../baseFont/Inter-Regular.woff2') format('woff2'),
+         url('../baseFont/Inter-Regular.woff') format('woff');
+    font-weight: 400;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('../baseFont/Inter-Medium.woff2') format('woff2'),
+         url('../baseFont/Inter-Medium.woff') format('woff');
+    font-weight: 500;
+}
+@font-face {
+    font-family: 'Inter';
+    src: url('../baseFont/Inter-SemiBold.woff2') format('woff2'),
+         url('../baseFont/Inter-SemiBold.woff') format('woff');
+    font-weight: 600;
+}
+
 html, body{
     width: 100%;
     height: 100%;
+    overflow-x: hidden;
+}
+.not-scroll{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 @media (max-width: 768px) {

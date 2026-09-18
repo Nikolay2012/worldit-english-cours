@@ -32,27 +32,9 @@ def logout_user(request: HttpRequest):
     logout(request)
     return redirect("login")
 
-@require_GET
-@required_type("admin")
-def render_mentors(request: HttpRequest):
-    return render(request, "users/mentors.html")
 
 @require_GET
-@required_type("admin")
-def render_archive_mentors(request: HttpRequest):
-    return render(request, "users/archive_mentors.html")
-
-@require_GET
-@required_type("admin")
-def render_all_students(request: HttpRequest):
-    return render(request, "users/all_students.html")
-
-@require_GET
-@required_type(["admin", "mentor", "manager", "parent"])
-def render_my_students(request: HttpRequest):
-    return render(request, "users/my_students.html")
-
-@require_GET
-@required_type(["admin", "mentor", "manager"])
-def render_archive_students(request: HttpRequest):
-    return render(request, "users/archive_students.html")
+@login_required
+# Порожня головна сторінка для тестування
+def rendet_debug_main(request: HttpRequest):
+    return render(request, "users/debug_main.html")

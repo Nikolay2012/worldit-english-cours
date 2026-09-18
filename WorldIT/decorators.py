@@ -10,6 +10,6 @@ def required_type(account_type: str | list):
                     if type in account_type:
                         return view_func(request, *args, **kwargs)
             
-            return redirect('dashboard') 
+            return redirect('main') 
         return _wrapped_view
     return decorator

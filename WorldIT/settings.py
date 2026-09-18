@@ -46,11 +46,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "django.contrib.sitemaps",
     # apllications
-    'Menu',
-    'cabinet',
     'users',
     "groups",
-    'courses'
+    'courses',
 ]
 
 SITE_ID = 1
@@ -125,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Kyiv'
 
 USE_I18N = True
 
@@ -152,6 +150,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
 AUTH_USER_MODEL = 'users.CustomUser'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
 
 SOCIALACCOUNT_ADAPTER = 'users.adapter.OnlyExistingUsersAdapter'
 AUTHENTICATION_BACKENDS = [

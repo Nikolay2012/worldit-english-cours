@@ -28,3 +28,9 @@ document.querySelectorAll(".open-menu-btn").forEach(btn => {
 document.getElementById("back").addEventListener("click", function(){
     window.history.back()
 })
+
+document.querySelector("aside .selected-item:has(.open-menu-btn)")?.addEventListener("click", (event)=>{
+    event.preventDefault()
+    event.currentTarget.querySelector(".open-menu-btn").classList.toggle("select-open-menu")
+    event.currentTarget.nextElementSibling.classList.toggle("hide-list")
+})

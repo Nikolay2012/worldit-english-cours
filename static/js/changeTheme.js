@@ -18,3 +18,23 @@ if (changeTheme){
         }
     })
 }
+
+const collapseMenu = document.getElementById("collapseMenu")
+
+if (localStorage.getItem("smallMenu") == "true"){
+    body.classList.add("small-menu")
+    if (collapseMenu) {collapseMenu.style.transform = "scaleX(-1)"}
+}
+
+if (collapseMenu){
+    collapseMenu.addEventListener('click', ()=>{
+        body.classList.toggle("small-menu")
+        if (body.classList.contains("small-menu")){
+            localStorage.setItem("smallMenu", "true")
+            collapseMenu.style.transform = "scaleX(-1)"
+        }else{
+            localStorage.setItem("smallMenu", "false")
+            collapseMenu.style.transform = "scaleX(1)"
+        }
+    })
+}

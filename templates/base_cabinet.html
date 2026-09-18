@@ -4,30 +4,34 @@
 
 {% block links %}
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cabinet.css' %}">
     <link rel="stylesheet" href="{% static 'css/sidebar_mobile.css' %}">
 {% endblock %}
 
 {% block menu %}
+    <!-- Left panel  -->
     <aside>
         <div id="mainLinks">
             <div id="headerMenu">
-                <img src="{% static 'img/sideBar/icons/back.svg' %}" alt="" id="backMenu">
+                <img src="{% static 'img/sideBar/icons/back.svg' %}" alt="" id="collapseMenu">
                 <img src="{% static 'img/menu.svg' %}" alt="" id="closeMenu">
                 <div id="logoBlock">
                     <img src="{% static 'img/sideBar/logo.svg' %}" alt="">
                 </div>
             </div>
-            <div id="userMenu">
-                {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="">
-                {% else %}
-                    <img src="{% static 'img/sideBar/anonim.png' %}" alt="">
-                {% endif %}
-                <span>
-                    <h5>{{ user.full_name }}</h5>
-                    <p>{{ user.email }}</p>
-                </span>
-            </div>
+            {% if user.is_authenticated %}
+                <div id="userMenu">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="">
+                    {% else %}
+                        <img src="{% static 'img/sideBar/anonim.png' %}" alt="">
+                    {% endif %}
+                    <span>
+                        <h5>{{ user.full_name }}</h5>
+                        <p>{{ user.email }}</p>
+                    </span>
+                </div>
+            {% endif %}
             <nav>
                 {% get_sidebar as sidebar %}
                 {% for data in sidebar %}
@@ -39,30 +43,26 @@
                     {% if data.sub_items %}
                         <div class="menu-subitem-list {% if not data.active %}hide-list{% endif %}">
                             {% for item in data.sub_items %}
-                                <a href="{{ item.link }}" class="{% if item.active %}selected-subitem{% endif %}">{{ item.title }}</a>
+                                <a href="{{ item.link }}" class="{% if item.active %}selected-subitem{% endif %}">
+                                    <p>{{ item.title }}</p>
+                                    <p>{{ item.title|first_word }}</p>
+                                </a>
                             {% endfor %}
                         </div>
                     {% endif %}
                 {% endfor %}
             </nav>
         </div>
-        <nav id="accountLinks">
-            {% if "admin" in user.account_types %}
-                <a href="{% url 'administration' %}" class="menu-item {% if request.resolver_match.url_name == 'administration' %}selected-item{% endif %}">
-                    <img src="{% static 'img/sideBar/icons/admin.svg' %}" alt="">
-                    <p>Адміністрування</p>
+        {% if user.is_authenticated %}
+            <nav id="accountLinks">
+                <a href="{% url 'logout' %}" class="menu-item">
+                    <img src="{% static 'img/sideBar/icons/exit.svg' %}" alt="">
+                    <p>Вийти</p>
                 </a>
-            {% endif %}
-            <a href="{% url 'settings' %}" class="menu-item {% if request.resolver_match.url_name == 'settings' %}selected-item{% endif %}">
-                <img src="{% static 'img/sideBar/icons/settings.svg' %}" alt="">
-                <p>Налаштування</p>
-            </a>
-            <a href="{% url 'logout' %}" class="menu-item">
-                <img src="{% static 'img/sideBar/icons/exit.svg' %}" alt="">
-                <p>Вийти</p>
-            </a>
-        </nav>
+            </nav>
+        {% endif %}
     </aside>
+    <!-- Mobile Header -->
     <header>
         <div id="menu">
             <img src="{% static 'img/menu.svg' %}" alt="">
@@ -71,8 +71,12 @@
             <img src="{% static 'img/sideBar/logo.svg' %}" alt="">
         </a>
         <div class="menu-buttons">
-            <img id="avatar" src="{% static 'img/sideBar/anonim.png' %}" alt="">
-            <a href="{% url 'notification' %}" id="notification" class="button">
+            {% if user.avatar %}
+                <img id="avatar" src="{{ user.avatar.url }}" alt="">
+            {% else %}
+                <img id="avatar" src="{% static 'img/sideBar/anonim.png' %}" alt="">
+            {% endif %}
+            <a href="#" id="notification" class="button">
                 <img src="{% static 'img/bell.svg' %}" alt="">
             </a>
         </div>
@@ -83,14 +87,14 @@
                 <img src="{% static 'cabinet/img/arrowBack.svg' %}" alt="">
             </a>
             <div id="page-path">
-                <p class="dissable">Головна</p>
+                <a href="#" class="dissable">Головна</a>
                 {% get_header_links as header_links %}
-                {% for link in header_links %}
+                {% for text, link in header_links %}
                     <img src="{% static 'cabinet/img/arrowRight.svg' %}" alt="">
-                    <p class="{% if forloop.counter != header_links|length %} dissable {% endif %}">{{ link }}</p>
+                    <a href="{% if link %}{% url link %}{% endif %}" class="{% if forloop.counter != header_links|length %} dissable {% endif %}">{{ text }}</a>
                 {% endfor %}
             </div>
-            <a href="{% url 'notification' %}" id="notification" class="button">
+            <a href="#" id="notification" class="button">
                 <img src="{% static 'img/bell.svg' %}" alt="">
             </a>
             <p id="changeTheme" class="button">
@@ -103,6 +107,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/sidebar.js' %}"></script>
-<script src="{% static 'js/changeTheme.js' %}"></script>
+    <script src="{% static 'js/changeTheme.js' %}"></script>
+    <script src="{% static 'js/sidebar.js' %}"></script>
 {% endblock %}
