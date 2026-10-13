@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'users',
     "groups",
     'courses',
+    "english"
 ]
 
 SITE_ID = 1
