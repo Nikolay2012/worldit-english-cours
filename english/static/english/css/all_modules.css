@@ -1,0 +1,152 @@
+
+main {
+    height: 100%;
+    padding-bottom: 16px;
+}
+
+.spacer {
+    display: block;
+    flex-shrink: 0;
+}
+
+.card-container {
+    width: 100%;
+    height: 100%;
+}
+
+.page-title {
+    font-weight: 600;
+}
+
+.card-header {
+    font-size: 24px;
+    color: var(--blue);
+    font-weight: 600;
+}
+
+.card {
+    height: 100%;
+    padding: 16px;
+}
+
+.card h2 {
+    color: var(--text-main);
+}
+
+#modulesContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow-x: clip;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
+.module-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 6px;    
+    padding: 16px;
+    gap: 6px;
+    width: 100%;
+    height: 68px;
+    background-color: transparent;
+}
+
+.module-container:hover {
+    background-color: rgba(15, 15, 55, 0.07);
+}
+
+.module-container.blocked {
+    filter: grayscale(100%);
+    opacity: 0.6;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.module-container.blocked:hover {
+    background-color: transparent;
+}
+
+.module-container p {
+    color: var(--text-main);
+}
+
+.module-container .info-labels-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+}
+
+.module-container .nav-buttons-container {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.module-container .pill-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    border: 1px solid #CBCAD9;
+    border-radius: 100px;
+    padding: 4px 10px 4px 10px;
+}
+
+.pill-container p {
+    color: #F98232;
+}
+
+.dark-body .module-container img {
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
+}
+
+.module-info-description,
+.module-info-list {
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.module-info-subtitle {
+    margin: 24px 0 8px;
+}
+
+.module-info-list {
+    margin: 0;
+    padding-left: 24px;
+}
+
+#moduleInfoModal {
+    width: 555px;
+    height: auto;
+    position: relative;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+#moduleInfoModal p {
+    color: var(--text-muted-fg);
+}
+
+#moduleInfoModal li {
+    color: var(--text-muted-fg);
+}
+
+#moduleInfoModal .closeModal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+#moduleInfoModal #moduleInfoTitle {
+    padding-right: 48px;
+    font-size: 18px;
+}

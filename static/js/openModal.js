@@ -8,6 +8,7 @@ function closeModal(){
         })
     }, 500)
 }
+
 function openModal(modal) {
     modalCover.style.top = `${document.body.scrollTop}px`
     document.body.classList.add("not-scroll")

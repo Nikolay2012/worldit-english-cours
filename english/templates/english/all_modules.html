@@ -7,12 +7,96 @@ World IT
 
 {% block links %}
 {{ block.super }}
+    <link rel="stylesheet" href="{% static 'english/css/all_modules.css' %}">
 {% endblock %}
 
 {% block main %}
-    <p>all modules</p>
+    <h2 class="page-title">
+        {% if course %}
+            {{ course.name }}
+        {% else %}
+            Курс
+        {% endif %}
+    </h2>
+    <div class="card-container">
+        <div class="card">
+            <h2 class="card-header">Модулі</h2>
+            <div id="modulesContainer">
+                {% if modules %}
+                    <!-- 
+                    {% if module.id == 2%} blocked {% endif %} 
+                    временная часть
+                    пока не решим, как именно будет блокироваться модуль
+                    -->
+                    {% for module in modules %}
+                        <div class="module-container {% if module.id == 2%} blocked {% endif %}">
+                            <div class="info-labels-container">
+                                <img src="
+                                    {% if module.id == 2%}
+                                        {% static 'english/img/lock-closed.svg' %}
+                                    {% else %}
+                                        {% static 'english/img/lock-open-1.svg' %}
+                                    {% endif %}    
+                                " 
+                                alt="lock">
+                                <p style="font-weight: 700;">Модуль №{{ module.id }}</p>
+                                <p>{{ module.name }}</p>
+
+                                <div class="spacer" style="width: 82px;"></div>
+
+                                <div class="pill-container">
+                                    <p>0.5%</p>
+                                </div>
+                            </div>
+
+                            <div class="nav-buttons-container">
+                                <a href="#" id="notification" class="button">
+                                    <img src="{% static 'english/img/arrow-right.svg' %}" alt="arrow_right">
+                                </a>
+                                <a 
+                                    href="#" 
+                                    id="notification" 
+                                    class="button module-info-button" 
+                                    module-id="{{ module.id }}"
+                                    module-name="{{ module.name }}"
+                                >
+                                    <img src="{% static 'english/img/info-circled.svg' %}" alt="info">
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div id="modalCover">
+                        <div class="modal" id="moduleInfoModal">
+                            <div class="row">
+                                <h3 id="moduleInfoTitle"></h3>
+                                <img src="{% static 'english/img/close.svg' %}" class="closeModal" alt="Закрити">
+                            </div>
+    
+                            <div class="info-block">
+                                <p class="module-info-description">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat
+                                    a ante venenatis dapibus posuere velit aliquet.
+                                </p>
+    
+                                <h4 class="module-info-subtitle">Що ви вивчите:</h4>
+                                <ol class="module-info-list">
+                                    <li>Lorem ipsum dolor sit amet</li>
+                                    <li>Consectetur adipiscing elit</li>
+                                    <li>Integer posuere erat a ante</li>
+                                    <li>Venenatis dapibus posuere velit</li>
+                                    <li>Aliquet sed do eiusmod tempor</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
-{{ block.super }}
+    {{ block.super }}
+    <script src="{% static 'js/openModal.js' %}"></script>
+    <script src="{% static 'english/js/all_modules.js' %}"></script>
 {% endblock %}
