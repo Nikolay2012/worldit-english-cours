@@ -32,7 +32,7 @@ class Module(models.Model):
 class Lesson(models.Model):
     name = models.CharField(max_length = 255)
     order_number = models.IntegerField(default = 0)
-    module = models.ForeignKey(to = Course, related_name = "lessons", on_delete = models.CASCADE)
+    module = models.ForeignKey(to = Module, related_name = "lessons", on_delete = models.CASCADE)
 
     def __str__(self):
         return f"<Lesson: {self.name}, course - {self.module.course.name}>"
