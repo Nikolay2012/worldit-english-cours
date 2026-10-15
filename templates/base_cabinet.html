@@ -91,7 +91,23 @@
                 {% get_header_links as header_links %}
                 {% for text, link in header_links %}
                     <img src="{% static 'cabinet/img/arrowRight.svg' %}" alt="">
-                    <a href="{% if link %}{% url link %}{% endif %}" class="{% if forloop.counter != header_links|length %} dissable {% endif %}">{{ text }}</a>
+                    <!-- Феликс: 15.10.2026 -->
+                    <a 
+                        href="
+                            {% if link %}
+                                {% if '/' in link %}
+                                    {{ link }}
+                                {% else %}
+                                    {% url link %}
+                                {% endif %}
+                            {% endif %}
+                            " 
+                        class="
+                            {% if forloop.counter != header_links|length %} 
+                                dissable
+                            {% endif %}">
+                    {{ text }}
+                    </a>
                 {% endfor %}
             </div>
             <a href="#" id="notification" class="button">
