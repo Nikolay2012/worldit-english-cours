@@ -25,7 +25,7 @@ main {
 }
 
 .card-header {
-    font-size: 24px;
+    font-size: 1.2rem;
     color: var(--blue);
     font-weight: 600;
     flex-shrink: 0;
@@ -142,6 +142,7 @@ main {
 
 .pill-container p {
     color: #F98232;
+    font-size: 0.875rem;
 }
 
 .module-container .nav-buttons-container {
@@ -159,12 +160,13 @@ main {
 .module-info-list {
     color: var(--text-secondary);
     line-height: 1.5;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
 .module-info-subtitle {
     margin: 24px 0 8px;
     color: var(--text-main);
+    font-size: 1rem;
 }
 
 .module-info-list {
@@ -186,6 +188,7 @@ main {
 
 #moduleInfoModal li {
     color: var(--text-fg-primary);
+    font-size: 0.875rem;
 }
 
 #moduleInfoModal .closeModal {
@@ -199,7 +202,7 @@ main {
 
 #moduleInfoModal #moduleInfoTitle {
     padding-right: 48px;
-    font-size: 18px;
+    font-size: 1.125rem;
     color: var(--text-main);
 }
 
@@ -214,17 +217,26 @@ main {
     }
 }
 
-@media (max-width: 500px) {
+.card p, .modal p {
+    font-size: 0.875rem;
+}
 
+@media (max-width: 500px) {
     .module-container {
+        --nav-size: 32px;/* ширина кнопки */
+
+        position: relative;
         flex-wrap: wrap;
         height: auto;
-        row-gap: 8px;
+        min-height: 98px;
+        row-gap: 6px;
         column-gap: 12px;
+        padding-right: calc(16px + var(--nav-size) + 12px); /* место под нее (кнопку ) */
     }
 
     .module-container .info-labels-container {
         order: 1;
+        flex: 0 0 100%;
         padding: 0;
         flex-wrap: wrap;
         row-gap: 4px;
@@ -244,19 +256,23 @@ main {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-
-    .module-container .nav-buttons-container {
-        order: 2;
-        flex: 0 0 auto;
-        align-self: flex-start;
+        font-size: 0.875rem;
     }
 
     .module-container .progress-container {
-        order: 3;
+        order: 2;
         flex: 0 0 100%;
         padding-left: 0;
         transform: none;
+    }
+
+    .module-container .nav-buttons-container {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%);
+        flex-direction: column;
+        flex: none;
     }
 
     #moduleInfoModal {
@@ -264,3 +280,4 @@ main {
         max-width: calc(100% - 32px);
     }
 }
+

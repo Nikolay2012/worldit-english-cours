@@ -43,8 +43,6 @@ def render_module(request: HttpRequest, pk: int):
         course_id=settings.ENGLISH_COURSE_ID
     )
     
-    print(reverse("english:english_module", args=[module.pk]))
-    
     return render(
         request=request, 
         template_name="english/module.html",
@@ -53,7 +51,6 @@ def render_module(request: HttpRequest, pk: int):
             "header_links": [
                 ("Курси", "all_courses"),
                 ("English", "english:all_english_modules"),
-                # Reverse for '' is not a valid view function or pattern name.
                 (f"Модуль №{module.pk}", reverse("english:english_module", args=[module.pk])) # вместо module_pk должен быть order_number. Но его, на данный момент, нету в модели Module
             ]
         }
