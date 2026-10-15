@@ -32,6 +32,8 @@ class Module(models.Model):
 class Lesson(models.Model):
     name = models.CharField(max_length = 255)
     order_number = models.IntegerField(default = 0)
+    
+    # Феликс: 14.10.2026 (комментарий добавлен 15.10.2026)
     module = models.ForeignKey(to = Module, related_name = "lessons", on_delete = models.CASCADE)
 
     def __str__(self):

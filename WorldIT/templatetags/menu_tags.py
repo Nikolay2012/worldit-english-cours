@@ -61,6 +61,11 @@ def get_sidebar(context):
 @register.simple_tag(takes_context=True)
 def get_header_links(context):
     request = context.get('request')
+    
+    # Феликс: 15.10.2026
+    if "header_links" in context:
+        return context["header_links"]
+    
     if request:
         url_name = request.resolver_match.url_name if request.resolver_match else None
         # Приклад роботи тегу: if url_name == "dashboard": return ["Дашборд"]

@@ -21,7 +21,11 @@ def render_all_modules(request: HttpRequest):
         template_name="english/all_modules.html",
         context={
             "course": english_course,
-            "modules": modules
+            "modules": modules,
+            "header_links": [
+                ("Курси", "all_courses"),
+                ("English", "english:all_english_modules")
+            ]
         }
     )
 

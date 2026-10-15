@@ -46,13 +46,13 @@ main {
 .module-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    border-radius: 6px;    
+    gap: 16px;
+    border-radius: 6px;
     padding: 16px;
-    gap: 6px;
     width: 100%;
     height: 68px;
+    box-sizing: border-box;
     background-color: transparent;
 }
 
@@ -75,27 +75,56 @@ main {
     color: var(--text-main);
 }
 
+.module-container .info-labels-container,
+.module-container .nav-buttons-container {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
 .module-container .info-labels-container {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 8px;
-    padding: 0;
+    padding: 0 150px 0 0;
+}
+
+.module-container .info-labels-container img {
+    flex-shrink: 0;
+}
+
+.module-container .module-number {
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.module-container .module-name {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .module-container .nav-buttons-container {
     display: flex;
     flex-direction: row;
+    justify-content: flex-end;
     gap: 8px;
 }
 
 .module-container .pill-container {
+    flex: 0 0 auto;
+    width: 54px;
     display: flex;
     flex-direction: row;
+    justify-content: center;
     gap: 10px;
     border: 1px solid #CBCAD9;
     border-radius: 100px;
-    padding: 4px 10px 4px 10px;
+    padding: 4px 10px;
+    box-sizing: border-box;
+    transform: translateX(-150px);
 }
 
 .pill-container p {
@@ -110,10 +139,12 @@ main {
 .module-info-list {
     color: var(--text-secondary);
     line-height: 1.5;
+    font-size: 14px;
 }
 
 .module-info-subtitle {
     margin: 24px 0 8px;
+    color: var(--text-main);
 }
 
 .module-info-list {
@@ -130,11 +161,11 @@ main {
 }
 
 #moduleInfoModal p {
-    color: var(--text-muted-fg);
+    color: var(--text-fg-primary);
 }
 
 #moduleInfoModal li {
-    color: var(--text-muted-fg);
+    color: var(--text-fg-primary);
 }
 
 #moduleInfoModal .closeModal {
@@ -149,4 +180,5 @@ main {
 #moduleInfoModal #moduleInfoTitle {
     padding-right: 48px;
     font-size: 18px;
+    color: var(--text-main);
 }
