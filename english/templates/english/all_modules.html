@@ -50,18 +50,17 @@ World IT
 
                                 <div class="spacer" style="width: 442px;"></div>
 
-                                <a href="#" id="notification" class="button">
+                                <a href="{% url 'english:english_module' module.id %}" class="button">
                                     <img src="{% static 'english/img/arrow-right.svg' %}" alt="arrow_right">
                                 </a>
-                                <a 
+                                <div 
                                     href="#" 
-                                    id="notification" 
                                     class="button module-info-button" 
                                     module-id="{{ module.id }}"
                                     module-name="{{ module.name }}"
                                 >
                                     <img src="{% static 'english/img/info-circled.svg' %}" alt="info">
-                                </a>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
