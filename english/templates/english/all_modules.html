@@ -24,38 +24,40 @@ World IT
             <div id="modulesContainer">
                 {% if modules %}
                     <!-- 
-                    {% if module.id == 2%} blocked {% endif %} 
-                    временная часть
-                    пока не решим, как именно будет блокироваться модуль
+                        Умова module.id == 2 — тимчасова, поки не вирішимо, 
+                        як саме блокується модуль 
                     -->
                     {% for module in modules %}
-                        <div class="module-container {% if module.id == 2%} blocked {% endif %}">
+                        <div class="module-container {% if module.id == 2 %}blocked{% endif %}">
                             <div class="info-labels-container">
-                                <img src="
-                                    {% if module.id == 2%}
+                                <img 
+                                src="
+                                    {% if module.id == 2 %}
                                         {% static 'english/img/lock-closed.svg' %}
                                     {% else %}
                                         {% static 'english/img/lock-open-1.svg' %}
-                                    {% endif %}    
-                                " 
+                                    {% endif %}
+                                    "
                                 alt="lock">
-                                <p style="font-weight: 700;">Модуль №{{ module.id }}</p>
-                                <p>{{ module.name }}</p>
+                                <p class="module-title" title="Модуль №{{ module.order_number }} {{ module.name }}">
+                                    <!-- хотя вместо module.id должен быть order_number, которого нету в модели Module -->
+                                    <span class="module-number">Модуль №{{ module.id }}</span> 
+                                    <span class="module-name">{{ module.name }}</span>
+                                </p>
                             </div>
 
-                            <div class="nav-buttons-container">
+                            <div class="progress-container">
                                 <div class="pill-container">
                                     <p>0.5%</p>
                                 </div>
+                            </div>
 
-                                <div class="spacer" style="width: 442px;"></div>
-
+                            <div class="nav-buttons-container">
                                 <a href="{% url 'english:english_module' module.id %}" class="button">
                                     <img src="{% static 'english/img/arrow-right.svg' %}" alt="arrow_right">
                                 </a>
-                                <div 
-                                    href="#" 
-                                    class="button module-info-button" 
+                                <div
+                                    class="button module-info-button"
                                     module-id="{{ module.id }}"
                                     module-name="{{ module.name }}"
                                 >
@@ -70,13 +72,13 @@ World IT
                                 <h3 id="moduleInfoTitle"></h3>
                                 <img src="{% static 'english/img/close.svg' %}" class="closeModal" alt="Закрити">
                             </div>
-    
+
                             <div class="info-block">
                                 <p class="module-info-description">
                                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat
                                     a ante venenatis dapibus posuere velit aliquet.
                                 </p>
-    
+
                                 <h4 class="module-info-subtitle">Що ви вивчите:</h4>
                                 <ol class="module-info-list">
                                     <li>Lorem ipsum dolor sit amet</li>
