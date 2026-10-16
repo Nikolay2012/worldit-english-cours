@@ -1,0 +1,29 @@
+{% load static %}
+<a 
+    class="task-card"
+    {% if task.is_available == False %}
+        disabled="true"
+    {% else %}
+        href="#"
+    {% endif %}
+    task-id="{{ task.id }}"
+>
+    <div class="task-folder">
+        {% if task.is_available == False %}
+            <img class="task-folder-img" src="{% static 'english/img/tasks/folders/grayFolder.svg' %}" alt="folder">
+        {% else %}
+            <img class="task-folder-img" src="{% static 'english/img/tasks/folders/standardFolder.svg' %}" alt="folder">
+        {% endif %}
+
+        {% if task.is_available == False %}
+            <img class="task-folder-icon" src="{% static 'english/img/tasks/icons/lock.svg' %}" alt="lock">
+        {% else %}
+            <img class="task-folder-icon" src="{% static 'english/img/tasks/icons/'|add:task.icon|add:'.svg' %}" alt="{{ task.icon }}">
+        {% endif %}
+    </div>
+
+    <div class="task-pill">
+        <span class="task-pill-name">{{ task.name }}</span>
+        <span class="task-pill-percent">0%</span>
+    </div>
+</a>

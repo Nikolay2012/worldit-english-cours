@@ -48,8 +48,9 @@ World IT
                             <div class="lesson-main-part-container">
                                 <div class="tasks-wrap">
                                     {% for task in lesson_and_tasks.main_lesson_tasks %}
-                                        
-                                        <div class="task-placeholder"></div>
+                                        {% include 'english/components/task_card.html' with task=task %}
+                                    {% empty %}
+                                        <p class="page-subtitle">Завдання відсутні</p>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -58,9 +59,11 @@ World IT
                                 <div class="line-spacer"></div>
                                 <p class="page-subtitle homework-title">Домашня практика</p>
                                 <div class="tasks-wrap">
+
                                     {% for task in lesson_and_tasks.homework_tasks %}
-                                        
-                                        <div class="task-placeholder"></div>
+                                        {% include 'english/components/task_card.html' with task=task %}
+                                    {% empty %}
+                                        <p class="page-subtitle">Завдання відсутні</p>
                                     {% endfor %}
                                 </div>
                             </div>

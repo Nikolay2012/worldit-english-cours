@@ -117,12 +117,83 @@ body .create-english-task-button {
     gap: 16px 24px;
 }
 
-.task-placeholder {
+.task-card {
+    --folder-filter: none;
+    --task-icon-filter: none;
+    --task-percent-color: #F98232;
+    --task-pill-border: #CBCAD9;
     flex: 0 1 139px;
     max-width: 139px;
-    height: 91px;
-    background-color: #E5484D;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.task-folder {
+    position: relative;
+    height: 57px;
+}
+
+.task-folder-img {
+    display: block;
+    height: 57px;
+    width: 64px;
+    filter: var(--folder-filter);
+    transition: filter 0.2s ease;
+}
+
+.task-folder-icon {
+    position: absolute;
+    top: 58%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translate(-50%, -50%);
+    filter: var(--task-icon-filter);
+}
+
+.task-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 24px;
+    max-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 1px solid var(--task-pill-border);
+    border-radius: 100px;
+    font-size: 0.875rem;
+}
+
+.task-pill-name {
+    min-width: 0;
+    font-size: 0.875rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+.task-pill-percent {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    color: var(--task-percent-color);
+}
+
+.task-card:hover .task-folder-img {
+    filter: var(--folder-filter) brightness(0.97);
+}
+
+.task-card-completed {
+    --folder-filter: hue-rotate(110deg) saturate(1.4) brightness(0.75);
+    --task-percent-color: #30A46C;
+}
+
+.dark-body .task-card {
+    --task-pill-border: #FAF8FF;
 }
 
 .line-spacer {
@@ -132,7 +203,7 @@ body .create-english-task-button {
 }
 
 .dark-body .line-spacer {
-    background-color: #27272A;
+    background-color: #252A5266;
 }
 
 .card .homework-title {
@@ -155,7 +226,7 @@ body .create-english-task-button {
         gap: 12px 16px;
     }
 
-    .task-placeholder {
+    .task-card {
         flex: 0 1 calc(50% - 8px);
     }
 }
