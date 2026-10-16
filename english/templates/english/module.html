@@ -11,9 +11,78 @@ World IT
 {% endblock %}
 
 {% block main %}
-    <p>Module</p>
+    {% if module %}
+        <h2 class="page-title">
+            <!-- Замість module.id має бути module.order_number  -->
+            <!-- але поле order_number відсутнє на момент написання цієї частини  -->
+            Модуль №{{ module.id }}
+        </h2>
+        <p class="page-subtitle">{{ module.name }}</p>
+    {% else %}
+        <h2 class="page-title">Модуль</h2>
+    {% endif %}
+    <div class="card-container">
+        {% if lessons %}
+            {% for lesson in lessons %}
+                <div class="card lesson-card">
+                    <div class="lesson-setting-container">
+                        <h2 class="card-header">№{{ lesson.order_number }}. {{ lesson.name }}</h2>
+                        <div class="actions-container">
+                            <button type="button" class="button icon-button">
+                                <img src="{% static 'english/img/edit-3.svg' %}" alt="">
+                            </button>
+
+                            <button type="button" class="button create-english-task-button">
+                                <img src="{% static 'english/img/plus.svg' %}" alt="">
+                                Додати завдання
+                            </button>
+
+                            <button type="button" class="button collapse-button">
+                                <img src="{% static 'english/img/chevron-up.svg' %}" alt="">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lesson-body" lesson-id="{{ lesson.id }}">
+                        <div class="lesson-body-inner">
+                            <div class="lesson-main-part-container">
+                                <div class="tasks-wrap">
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                </div>
+                            </div>
+
+                            <div class="lesson-homework-part-container">
+                                <div class="line-spacer"></div>
+                                <p class="page-subtitle homework-title">Домашня практика</p>
+                                <div class="tasks-wrap">
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                    <div class="task-placeholder"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Уроки відсутні</p>
+        {% endif %}
+    </div>
 {% endblock %}
 
 {% block scripts %}
 {{ block.super }}
+    <script src="{% static 'english/js/module.js'%}"></script>
 {% endblock %}

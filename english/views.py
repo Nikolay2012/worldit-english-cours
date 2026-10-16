@@ -5,7 +5,7 @@ from django.views.decorators.http import require_GET
 from WorldIT import settings
 from WorldIT.decorators import required_type
 from WorldIT.settings import ENGLISH_COURSE_ID
-from courses.models import Course, Module
+from courses.models import Course, Lesson, Module
 
 # Create your views here.
 @require_GET
@@ -43,11 +43,18 @@ def render_module(request: HttpRequest, pk: int):
         course_id=settings.ENGLISH_COURSE_ID
     )
     
+    lessons = Lesson.objects.filter(
+        module_id=module.id
+    )
+    
+    print(lessons)
+    
     return render(
         request=request, 
         template_name="english/module.html",
         context={
             "module": module,
+            "lessons": lessons,
             "header_links": [
                 ("Курси", "all_courses"),
                 ("English", "english:all_english_modules"),
