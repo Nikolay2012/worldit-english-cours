@@ -6,6 +6,7 @@ from WorldIT import settings
 from WorldIT.decorators import required_type
 from WorldIT.settings import ENGLISH_COURSE_ID
 from courses.models import Course, Lesson, Module
+from english.models.english_task import EnglishTask
 
 # Create your views here.
 @require_GET
@@ -47,14 +48,38 @@ def render_module(request: HttpRequest, pk: int):
         module_id=module.id
     )
     
-    print(lessons)
+    lessons_and_tasks = []
+    
+    for lesson in lessons:
+        lesson: Lesson
+        
+        tasks = EnglishTask.objects.filter(
+            lesson_id=lesson.id
+        )
+        
+        main_lesson_tasks = []
+        homework_tasks = []
+        
+        for task in tasks:
+            task: EnglishTask
+            
+            if task.block == "lesson":
+                main_lesson_tasks.append(task)
+            elif task.block == "homework":
+                homework_tasks.append(task)
+        
+        lessons_and_tasks.append({
+            "lesson": lesson,
+            "main_lesson_tasks": main_lesson_tasks,
+            "homework_tasks": homework_tasks
+        })
     
     return render(
         request=request, 
         template_name="english/module.html",
         context={
             "module": module,
-            "lessons": lessons,
+            "lessons_and_tasks": lessons_and_tasks,
             "header_links": [
                 ("Курси", "all_courses"),
                 ("English", "english:all_english_modules"),

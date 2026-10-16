@@ -22,23 +22,23 @@ World IT
         <h2 class="page-title">Модуль</h2>
     {% endif %}
     <div class="card-container">
-        {% if lessons %}
-            {% for lesson in lessons %}
+        {% if lessons_and_tasks %}
+            {% for lesson_and_tasks in lessons_and_tasks %}
                 <div class="card lesson-card">
                     <div class="lesson-setting-container">
-                        <h2 class="card-header">№{{ lesson.order_number }}. {{ lesson.name }}</h2>
+                        <h2 class="card-header">№{{ lesson_and_tasks.lesson.order_number }}. {{ lesson_and_tasks.lesson.name }}</h2>
                         <div class="actions-container">
                             <button type="button" class="button icon-button">
-                                <img src="{% static 'english/img/edit-3.svg' %}" alt="">
+                                <img src="{% static 'english/img/action_icons/edit-3.svg' %}" alt="">
                             </button>
 
                             <button type="button" class="button create-english-task-button">
-                                <img src="{% static 'english/img/plus.svg' %}" alt="">
+                                <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
                                 Додати завдання
                             </button>
 
                             <button type="button" class="button collapse-button">
-                                <img src="{% static 'english/img/chevron-up.svg' %}" alt="">
+                                <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="">
                             </button>
                         </div>
                     </div>
@@ -47,16 +47,10 @@ World IT
                         <div class="lesson-body-inner">
                             <div class="lesson-main-part-container">
                                 <div class="tasks-wrap">
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
+                                    {% for task in lesson_and_tasks.main_lesson_tasks %}
+                                        
+                                        <div class="task-placeholder"></div>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -64,12 +58,10 @@ World IT
                                 <div class="line-spacer"></div>
                                 <p class="page-subtitle homework-title">Домашня практика</p>
                                 <div class="tasks-wrap">
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
-                                    <div class="task-placeholder"></div>
+                                    {% for task in lesson_and_tasks.homework_tasks %}
+                                        
+                                        <div class="task-placeholder"></div>
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>

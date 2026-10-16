@@ -33,9 +33,9 @@ World IT
                                 <img 
                                 src="
                                     {% if module.id == 2 %}
-                                        {% static 'english/img/lock-closed.svg' %}
+                                        {% static 'english/img/info_icons/lock-closed.svg' %}
                                     {% else %}
-                                        {% static 'english/img/lock-open-1.svg' %}
+                                        {% static 'english/img/info_icons/lock-open-1.svg' %}
                                     {% endif %}
                                     "
                                 alt="lock">
@@ -54,14 +54,14 @@ World IT
 
                             <div class="nav-buttons-container">
                                 <a href="{% url 'english:english_module' module.id %}" class="button">
-                                    <img src="{% static 'english/img/arrow-right.svg' %}" alt="arrow_right">
+                                    <img src="{% static 'english/img/action_icons/arrow-right.svg' %}" alt="arrow_right">
                                 </a>
                                 <div
                                     class="button module-info-button"
                                     module-id="{{ module.id }}"
                                     module-name="{{ module.name }}"
                                 >
-                                    <img src="{% static 'english/img/info-circled.svg' %}" alt="info">
+                                    <img src="{% static 'english/img/action_icons/info-circled.svg' %}" alt="info">
                                 </div>
                             </div>
                         </div>
@@ -70,7 +70,7 @@ World IT
                         <div class="modal" id="moduleInfoModal">
                             <div class="row">
                                 <h3 id="moduleInfoTitle"></h3>
-                                <img src="{% static 'english/img/close.svg' %}" class="closeModal" alt="Закрити">
+                                <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="Закрити">
                             </div>
 
                             <div class="info-block">
