@@ -50,7 +50,14 @@
     flex-shrink: 0;
 }
 
+.button.change-lesson-button, .button.collapse-button {
+    width: 36px;
+    height: 36px;
+}
+
 .create-english-task-button {
+    width: fit-content;
+    height: 40px;
     padding: 8px 16px 8px 16px;
     gap: 8px;
     color: #FFF;
@@ -215,11 +222,31 @@ body .create-english-task-button {
 @media (max-width: 500px) {
     .lesson-setting-container {
         flex-wrap: wrap;
+        align-items: flex-start; 
+        gap: 16px;
     }
 
     .lesson-setting-container .actions-container {
-        width: 100%;
-        justify-content: flex-end;
+        display: contents;
+    }
+
+    .lesson-setting-container .card-header {
+        order: 1;
+        flex: 1 1 calc(100% - 36px - 16px);
+    }
+
+    .lesson-setting-container .collapse-button {
+        order: 2;
+        flex-shrink: 0;
+    }
+
+    .lesson-setting-container .change-lesson-button {
+        order: 3;
+        margin-left: auto;
+    }
+
+    .lesson-setting-container .create-english-task-button {
+        order: 4;
     }
 
     .tasks-wrap {
