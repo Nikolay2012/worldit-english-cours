@@ -26,7 +26,7 @@ World IT
     <div class="card-container">
         {% if lessons_and_tasks %}
             {% for lesson_and_tasks in lessons_and_tasks %}
-                <div class="card lesson-card">
+                <div class="card lesson-card collapsed">
                     <div class="lesson-setting-container">
                         <h2 class="card-header">№{{ lesson_and_tasks.lesson.order_number }}. {{ lesson_and_tasks.lesson.name }}</h2>
                         <div class="actions-container">
