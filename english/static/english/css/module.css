@@ -147,6 +147,14 @@ body .create-english-task-button {
     margin: 0 0 16px;
 }
 
+.tasks-empty {
+    display: none;
+}
+
+.tasks-wrap:not(:has(.task-card:not(.is-deleted))) .tasks-empty {
+    display: block;
+}
+
 @media (max-width: 500px) {
     .lesson-setting-container {
         flex-wrap: wrap;

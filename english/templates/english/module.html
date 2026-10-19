@@ -57,9 +57,8 @@ World IT
                                 <div class="tasks-wrap">
                                     {% for task in lesson_and_tasks.main_lesson_tasks %}
                                         {% include 'english/components/task_card.html' with task=task %}
-                                    {% empty %}
-                                        <p class="page-subtitle">Завдання відсутні</p>
                                     {% endfor %}
+                                    <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>
                             </div>
 
@@ -70,9 +69,8 @@ World IT
 
                                     {% for task in lesson_and_tasks.homework_tasks %}
                                         {% include 'english/components/task_card.html' with task=task %}
-                                    {% empty %}
-                                        <p class="page-subtitle">Завдання відсутні</p>
                                     {% endfor %}
+                                    <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>
                             </div>
                         </div>
@@ -87,8 +85,8 @@ World IT
 
 {% block scripts %}
 {{ block.super }}
-    <script src="{% static 'english/js/module/collapse.js'%}"></script>
-    <script src="{% static 'english/js/module/delete.js'%}"></script>
-    <script src="{% static 'english/js/module/edit.js'%}"></script>
-    <script src="{% static 'english/js/module/save.js'%}"></script>
+    <script src="{% static 'english/js/module/lesson_collapse.js' %}"></script>
+    <script src="{% static 'english/js/module/lesson_tasks_delete.js' %}"></script>
+    <script src="{% static 'english/js/module/lesson_edit.js' %}"></script>
+    <script src="{% static 'english/js/module/lesson_save.js' %}"></script>
 {% endblock %}

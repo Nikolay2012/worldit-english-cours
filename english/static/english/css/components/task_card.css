@@ -154,6 +154,10 @@
     width: 100%;
 }
 
+.lesson-card.is-editing .task-pill.validation-error {
+    border-color: red;
+}
+
 .task-card.is-deleted {
     display: none;
 }
