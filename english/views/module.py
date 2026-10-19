@@ -12,8 +12,6 @@ from english.models.english_task import EnglishTask
 @required_type(["student", "mentor", "manager", "admin"])
 def render_module(request: HttpRequest, pk: int):
     
-    print(request.user.account_types)
-    
     can_edit = False
     can_add = False
     

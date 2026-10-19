@@ -42,8 +42,6 @@ saveLessonButtons.forEach((button) => {
                 isEmptyName
             );
 
-            console.log(isEmptyName);
-
             if (isEmptyName) {
                 hasErrors = true;
                 return;
@@ -61,15 +59,29 @@ saveLessonButtons.forEach((button) => {
             }
         });
         
-        // переводим фокус на первое из полей, в которых возникла ошибка
+        // Переводим фокус на первое из полей, в которых возникла ошибка
         if (hasErrors) {
             lessonCard.querySelector(".validation-error .task-name-input").focus();
             return;
         }
+
+        // Если данные урока (задания) не были изменены
+        // То по нажатию кнопки "Зберегти" запрос отправлен НЕ БУДЕТ
+        // Очевидно, потому что это бессмысленно
+        if (
+            editedData.renamed.length === 0 && 
+            editedData.deleted.length === 0) {
+                lessonCard.classList.toggle("is-editing");
+                return;
+        }
         
         // Снимаем режим редактирования и отправляем запрос на редактироваие
         // только после успешного прохождения всех проверок
-        // -отправка запроса-
-        lessonCard.classList.toggle("is-editing");
+        try {
+            lessonSaveRequest(editedData);
+            lessonCard.classList.toggle("is-editing");
+        } catch (error) {
+            console.error(error);
+        }
     });
 });

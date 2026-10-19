@@ -109,6 +109,14 @@
     box-shadow: none;
 }
 
+.dark-body .task-name-input,
+.dark-body .task-name-input:focus,
+.dark-body .task-name-input:focus-visible {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
 .save-lesson-button {
     display: none;
 }

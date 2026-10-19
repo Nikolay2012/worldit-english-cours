@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from django.views.generic import RedirectView
 from english.views import render_all_modules, render_module
 
@@ -20,4 +20,5 @@ urlpatterns = [
     #     render_task,
     #     name="english_task"
     # ),
+    path("api/", include("english.endpoints.urls")),
 ]

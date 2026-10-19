@@ -12,6 +12,7 @@ World IT
 {% endblock %}
 
 {% block main %}
+    {% csrf_token %}
     {% if module %}
         <h2 class="page-title">
             <!-- Замість module.id має бути module.order_number  -->
@@ -85,6 +86,7 @@ World IT
 
 {% block scripts %}
 {{ block.super }}
+    <script src="{% static 'english/js/module/lesson_save_request.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_collapse.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_tasks_delete.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_edit.js' %}"></script>
