@@ -1,4 +1,3 @@
-
 const collapseButtons = document.querySelectorAll(".collapse-button");
 
 collapseButtons.forEach((button) => {
@@ -6,5 +5,4 @@ collapseButtons.forEach((button) => {
         const lessonCard = button.closest(".lesson-card");
         lessonCard.classList.toggle("collapsed");
     });
-})
-
+});

@@ -4,37 +4,25 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_GET
 from WorldIT import settings
 from WorldIT.decorators import required_type
-from WorldIT.settings import ENGLISH_COURSE_ID
-from courses.models import Course, Lesson, Module
+from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask
 
-# Create your views here.
-@require_GET
-@required_type(["student", "mentor", "manager", "admin"])
-def render_all_modules(request: HttpRequest):
-    
-    english_course = get_object_or_404(Course, pk=ENGLISH_COURSE_ID)
-    # Отдельно, если нужно будет фильтровать модули из архива
-    modules = Module.objects.filter(
-        course=english_course
-    )
-    
-    return render(
-        request=request, 
-        template_name="english/all_modules.html",
-        context={
-            "course": english_course,
-            "modules": modules,
-            "header_links": [
-                ("Курси", "all_courses"),
-                ("English", "english:all_english_modules")
-            ]
-        }
-    )
 
 @require_GET
 @required_type(["student", "mentor", "manager", "admin"])
 def render_module(request: HttpRequest, pk: int):
+    
+    print(request.user.account_types)
+    
+    can_edit = False
+    can_add = False
+    
+    if 'admin' in request.user.account_types:
+        can_edit = True
+        can_add = True
+    
+    if 'mentor' in request.user.account_types:
+        can_add = True
     
     module = get_object_or_404(
         Module, 
@@ -84,6 +72,9 @@ def render_module(request: HttpRequest, pk: int):
                 ("Курси", "all_courses"),
                 ("English", "english:all_english_modules"),
                 (f"Модуль №{module.pk}", reverse("english:english_module", args=[module.pk])) # вместо module_pk должен быть order_number. Но его, на данный момент, нету в модели Module
-            ]
+            ],
+            "can_edit": can_edit,
+            "can_add": can_add
         }
     )
+

@@ -1,0 +1,163 @@
+.task-card {
+    --folder-filter: none;
+    --task-icon-filter: none;
+    --task-percent-color: #F98232;
+    --task-pill-border: #CBCAD9;
+    flex: 0 1 139px;
+    max-width: 139px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+}
+
+.task-folder {
+    position: relative;
+    height: 57px;
+}
+
+.task-folder-img {
+    display: block;
+    height: 57px;
+    width: 64px;
+    filter: var(--folder-filter);
+    transition: filter 0.2s ease;
+}
+
+.task-folder-icon {
+    position: absolute;
+    top: 58%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translate(-50%, -50%);
+    filter: var(--task-icon-filter);
+}
+
+.task-card:hover .task-folder-img {
+    filter: var(--folder-filter) brightness(0.97);
+}
+
+.task-card-completed {
+    --folder-filter: hue-rotate(110deg) saturate(1.4) brightness(0.75);
+    --task-percent-color: #30A46C;
+}
+
+.dark-body .task-card {
+    --task-pill-border: #FAF8FF;
+}
+
+.task-pill-percent {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    color: var(--task-percent-color);
+}
+
+.task-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 24px;
+    max-width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 1px solid var(--task-pill-border);
+    border-radius: 100px;
+    font-size: 0.875rem;
+}
+
+.task-pill-name {
+    min-width: 0;
+    font-size: 0.875rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
+
+@media (max-width: 500px) {
+    .task-card {
+        flex: 0 1 calc(50% - 8px);
+    }
+}
+
+.task-card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.task-name-input {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: var(--text-main);
+    display: none;
+}
+
+.task-name-input,
+.task-name-input:focus,
+.task-name-input:focus-visible {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
+.save-lesson-button {
+    display: none;
+}
+
+.task-delete-button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.lesson-card.is-editing .task-card-link { 
+    display: none; 
+}
+
+.lesson-card.is-editing .task-pill-name { 
+    display: none; 
+}
+
+.lesson-card.is-editing .task-name-input { 
+    display: block; 
+}
+
+.lesson-card.is-editing .task-delete-button { 
+    display: flex; 
+}
+
+.lesson-card.is-editing .change-lesson-button { 
+    display: none; 
+}
+
+.lesson-card.is-editing .save-lesson-button { 
+    display: flex; 
+}
+
+.lesson-card.is-editing .task-pill {
+    width: 100%;
+}
+
+.task-card.is-deleted {
+    display: none;
+}
+
+.lesson-card.is-editing .task-pill-percent {
+    display: none; 
+}

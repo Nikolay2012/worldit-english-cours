@@ -8,6 +8,7 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/module.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/task_card.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -28,17 +29,24 @@ World IT
                     <div class="lesson-setting-container">
                         <h2 class="card-header">№{{ lesson_and_tasks.lesson.order_number }}. {{ lesson_and_tasks.lesson.name }}</h2>
                         <div class="actions-container">
-                            <button type="button" class="button change-lesson-button">
-                                <img src="{% static 'english/img/action_icons/edit-3.svg' %}" alt="">
-                            </button>
+                            {% if can_edit %}
+                                <button type="button" class="button change-lesson-button" lesson-id="{{ lesson_and_tasks.lesson.id }}">
+                                    <img src="{% static 'english/img/action_icons/edit-3.svg' %}" alt="edit">
+                                </button>
+                                <button type="button" class="button save-lesson-button" lesson-id="{{ lesson_and_tasks.lesson.id }}">
+                                    Зберегти
+                                </button>
+                            {% endif %}
 
-                            <button type="button" class="button create-english-task-button">
-                                <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
-                                Додати завдання
-                            </button>
+                            {% if can_add %}
+                                <button type="button" class="button create-english-task-button">
+                                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
+                                    Додати завдання
+                                </button>
+                            {% endif %}
 
                             <button type="button" class="button collapse-button">
-                                <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="">
+                                <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="chevron-up">
                             </button>
                         </div>
                     </div>
@@ -79,5 +87,8 @@ World IT
 
 {% block scripts %}
 {{ block.super }}
-    <script src="{% static 'english/js/module.js'%}"></script>
+    <script src="{% static 'english/js/module/collapse.js'%}"></script>
+    <script src="{% static 'english/js/module/delete.js'%}"></script>
+    <script src="{% static 'english/js/module/edit.js'%}"></script>
+    <script src="{% static 'english/js/module/save.js'%}"></script>
 {% endblock %}

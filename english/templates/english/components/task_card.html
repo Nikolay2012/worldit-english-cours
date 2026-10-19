@@ -1,13 +1,18 @@
 {% load static %}
-<a 
-    class="task-card"
+<div 
+class="task-card"
+data-task-id="{{ task.id }}"
+data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
+>
+    <a 
+    class="task-card-link"
     {% if task.is_available == False %}
         disabled="true"
     {% else %}
         href="#"
     {% endif %}
-    task-id="{{ task.id }}"
->
+    ></a>
+
     <div class="task-folder">
         {% if task.is_available == False %}
             <img class="task-folder-img" src="{% static 'english/img/tasks/folders/grayFolder.svg' %}" alt="folder">
@@ -24,6 +29,21 @@
 
     <div class="task-pill">
         <span class="task-pill-name">{{ task.name }}</span>
+        {% if can_edit %}
+            <input 
+                type="text" 
+                maxlength="100"
+                class="task-name-input" 
+                value="{{ task.name }}" 
+                task-id="{{ task.id }}"
+            >
+        {% endif %}
         <span class="task-pill-percent">0%</span>
     </div>
-</a>
+
+    {% if can_edit %}
+        <button type="button" class="button task-delete-button">
+            <img src="{% static 'english/img/action_icons/trash-2.svg' %}" alt="trash-2">
+        </button>
+    {% endif %}
+</div>
