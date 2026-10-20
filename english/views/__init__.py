@@ -1,2 +1,2 @@
-from .all_modules import render_all_modules
+from .all_modules import AllModulesView
 from .module import render_module

@@ -22,6 +22,7 @@ World IT
         <div class="card">
             <h2 class="card-header">Модулі</h2>
             <div id="modulesContainer">
+                
                 {% if modules %}
                     <!-- 
                         Умова module.id == 2 — тимчасова, поки не вирішимо, 
@@ -92,6 +93,9 @@ World IT
                     </div>
                 {% endif %}
             </div>
+            {% if page_obj %}
+                {% include 'english/components/pagination_container.html' with page_obj=page_obj %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

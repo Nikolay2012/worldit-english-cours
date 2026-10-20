@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.views.generic import RedirectView
-from english.views import render_all_modules, render_module
+from english.views import AllModulesView, render_module
 
 # Для редиректа на страницу modules/
 app_name = "english"
@@ -13,7 +13,7 @@ urlpatterns = [
             permanent=False
         )
     ),
-    path("modules/", render_all_modules, name="all_english_modules"),
+    path("modules/", AllModulesView.as_view(), name="all_english_modules"),
     path("modules/<int:pk>/", render_module, name="english_module"),
     # path(
     #     "modules/<int:pk>/lessons/<int:lesson_id>/tasks/<int:task_id>/",
