@@ -48,7 +48,7 @@ class EnglishTask(models.Model):
     def __str__(self):
         return f"<EnglishTask: {self.order}. {self.name}>"
     
-    def get_absoulute_url(self):
+    def get_absolute_url(self):
         return reverse(
             "english:english_task", 
             kwargs={

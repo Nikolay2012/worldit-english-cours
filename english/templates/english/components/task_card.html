@@ -9,7 +9,7 @@ data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
     {% if task.is_available == False %}
         disabled="true"
     {% else %}
-        href="{{ task.get_absoulute_url }}"
+        href="{{ task.get_absolute_url }}"
     {% endif %}
     ></a>
 

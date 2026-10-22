@@ -5,6 +5,7 @@ from django.views.generic import DetailView
 
 from WorldIT.decorators import required_type
 from WorldIT.settings import ENGLISH_COURSE_ID
+from courses.models import Lesson, Module
 from english.models import EnglishTask
 from english.services.task import EnglishTaskService
 
@@ -33,23 +34,57 @@ class EnglishTaskView(DetailView):
     
     def get_object(self, queryset=None):
         
-        task = super().get_object(queryset)
+        self.object: EnglishTask = super().get_object(queryset)
         
         if self._is_staff():
-            return task
+            return self.object
         
         student = self._get_student()
         
         if student is None or \
-            not EnglishTaskService(task).can_access(student):
+            not EnglishTaskService(self.object).can_access(student):
             raise Http404
         
-        return task
+        return self.object
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        has_steps = EnglishTaskService(self.object).has_steps()
+        
+        context.update(
+            content_component=self._get_content_component(has_steps=has_steps),
+            header_links=self._get_header_links(),
+        )
+        
         return context
+    
+    def _get_header_links(self) -> list[tuple]:
+        
+        lesson: Lesson = self.object.lesson
+        module: Module = lesson.module
+        
+        return [
+            ("Курси", "all_courses"),
+            ("English", "english:all_english_modules"),
+            (
+                f"Модуль №{module.pk}", 
+                reverse("english:english_module", args=[module.pk])
+            ), # вместо module_pk должен быть order_number. Но его, на данный момент, нету в модели Module
+            (
+                f"Урок №{lesson.pk}",
+                self.object.get_absolute_url()
+            )
+        ]
+    
+    def _get_content_component(self, has_steps: bool) -> str:
+        
+        if self._is_staff():
+            component = "staff_preview" if has_steps else "import_csv"
+        else:
+            component = "student_run" if has_steps else "empty"
+
+        return f"components/{component}.html"
     
     def _is_staff(self) -> bool:
         
