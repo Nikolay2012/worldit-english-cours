@@ -1,0 +1,27 @@
+{% load static %}
+
+<div class="modal" id="deleteTaskModal">
+    <div class="row">
+        <h3 id="deleteTaskTitle">
+            Видалити завдання «<span id="deleteTaskName"></span>»?
+        </h3>
+        <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="close">
+    </div>
+
+    <div class="info-block">
+        <p class="delete-task-description">
+            Чи впевнені ви у тому, що бажаєте видалити це завдання?
+            Після видалення, неможливо буде відновити завдання,
+            можливе лише його перестворення.
+        </p>
+
+        <div class="delete-task-actions">
+            <button type="button" class="button delete-task-cancel" id="cancelDeleteTaskButton">
+                Скасувати
+            </button>
+            <button type="button" class="button delete-task-confirm" id="confirmDeleteTaskButton">
+                Продовжити
+            </button>
+        </div>
+    </div>
+</div>

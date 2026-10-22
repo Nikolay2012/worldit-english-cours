@@ -9,6 +9,7 @@ World IT
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/module.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task_card.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/delete_task_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -78,6 +79,9 @@ World IT
                     </div>
                 </div>
             {% endfor %}
+            <div id="modalCover">
+                {% include 'english/components/delete_task_modal.html' %}
+            </div>
         {% else %}
             <p>Уроки відсутні</p>
         {% endif %}
@@ -86,6 +90,7 @@ World IT
 
 {% block scripts %}
 {{ block.super }}
+    <script src="{% static 'js/openModal.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_save_request.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_collapse.js' %}"></script>
     <script src="{% static 'english/js/module/lesson_tasks_delete.js' %}"></script>

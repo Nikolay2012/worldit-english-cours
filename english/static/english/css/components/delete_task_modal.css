@@ -1,0 +1,104 @@
+#deleteTaskModal {
+    width: 555px;
+    height: auto;
+    position: relative;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+#deleteTaskModal .closeModal {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+#deleteTaskModal #deleteTaskTitle {
+    margin: 0;
+    padding-right: 48px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+#deleteTaskModal .delete-task-description {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+#deleteTaskModal .delete-task-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 80px;
+}
+
+#deleteTaskModal .delete-task-actions .button {
+    width: fit-content;
+    height: 44px;
+    padding: 8px 20px;
+    font-size: 0.875rem;
+    border-radius: 6px;
+}
+
+#deleteTaskModal .delete-task-cancel {
+    background-color: transparent;
+    border: 1px solid #E4E4E7;
+    color: var(--text-main);
+}
+
+#deleteTaskModal .delete-task-cancel:hover {
+    background-color: rgba(35, 35, 55, 0.05);
+}
+
+#deleteTaskModal .delete-task-confirm {
+    background-color: #18181B;
+    border: none;
+    color: #FFF;
+}
+
+#deleteTaskModal .delete-task-confirm:hover {
+    background-color: #27272A;
+}
+
+.dark-body #deleteTaskModal .closeModal {
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
+}
+
+.dark-body #deleteTaskModal .delete-task-cancel {
+    border-color: #3F3F46;
+}
+
+.dark-body #deleteTaskModal .delete-task-cancel:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark-body #deleteTaskModal .delete-task-confirm {
+    background-color: transparent;
+    border: 1px solid #3F3F46;
+}
+
+.dark-body #deleteTaskModal .delete-task-confirm:hover {
+    background-color: var(--bg-acent);
+}
+
+@media (max-width: 750px) {
+    #deleteTaskModal {
+        width: calc(100% - 40px);
+    }
+}
+
+@media (max-width: 500px) {
+    #deleteTaskModal {
+        width: 343px;
+        max-width: calc(100% - 32px);
+    }
+
+    #deleteTaskModal .delete-task-actions {
+        margin-top: 32px;
+    }
+}
