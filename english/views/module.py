@@ -8,6 +8,7 @@ from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask
 
 
+# Нужен ли доступ для "manager"?
 @require_GET
 @required_type(["student", "mentor", "manager", "admin"])
 def render_module(request: HttpRequest, pk: int):

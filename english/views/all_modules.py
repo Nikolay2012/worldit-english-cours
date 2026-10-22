@@ -6,6 +6,7 @@ from courses.models import Course, Module
 from django.views.generic import ListView
 
 
+# Нужен ли доступ для "manager"?
 @method_decorator(
     required_type(["student", "mentor", "manager", "admin"]),
     name="get"
@@ -22,7 +23,6 @@ class AllModulesView(ListView):
         modules = Module.objects.filter(
             course_id=ENGLISH_COURSE_ID
         ).order_by("id")
-        # order by для пагинации
         
         return modules
     

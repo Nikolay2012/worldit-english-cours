@@ -1,0 +1,30 @@
+{% extends 'base_cabinet.html' %}
+{% load static %}
+
+{% block title %}
+World IT
+{% endblock %}
+
+{% block links %}
+{{ block.super }}
+    <link rel="stylesheet" href="{% static 'english/css/task.css' %}">
+{% endblock %}
+
+{% block main %}
+    {% csrf_token %}
+
+    {% if task %}
+        <p>{{ task.name }}</p>
+    {% endif %}
+    <h2 class="page-title">
+
+    </h2>
+    
+    <div class="card-container">
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+{% endblock %}

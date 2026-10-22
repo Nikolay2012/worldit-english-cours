@@ -1,5 +1,6 @@
 from django.db import models
 from django.templatetags.static import static
+from django.urls import reverse
 
 
 class EnglishTask(models.Model):
@@ -42,10 +43,20 @@ class EnglishTask(models.Model):
     
     @property
     def icon_url(self):
-        return static(f"english/img/icons/tasks_icons/{self.icon}.svg")
+        return static(f"english/img/icons/tasks/icons/{self.icon}.svg")
     
     def __str__(self):
         return f"<EnglishTask: {self.order}. {self.name}>"
+    
+    def get_absoulute_url(self):
+        return reverse(
+            "english:english_task", 
+            kwargs={
+                "module_id": self.lesson.module_id,
+                "lesson_id": self.lesson_id,
+                "pk": self.pk
+            }
+        )
     
     class Meta:
         constraints = [
