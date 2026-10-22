@@ -8,21 +8,33 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/task.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/import_csv.css' %}">
 {% endblock %}
 
 {% block main %}
-    {% csrf_token %}
+    <div class="task-page-header page-title">
+        <h2>
+            {% if task %}
+                {{ task.get_type_display }}
+            {% else %}
+                Завдання
+            {% endif %}
+        </h2>
 
-    {% if task %}
-        <p>{{ task.name }}</p>
-    {% endif %}
-    <h2 class="page-title">
-
-    </h2>
-    
-    <div class="card-container">
-
+        {% if can_import %}
+            <button type="button" class="button upload-button">
+                <img src="{% static 'english/img/action_icons/download.svg' %}" alt="download">
+                Завантажити
+            </button>
+        {% endif %}
     </div>
+
+    <div class="card-container">
+        <div class="card">
+            {% include content_component %}
+        </div>
+    </div>
+    {% csrf_token %}
 {% endblock %}
 
 {% block scripts %}

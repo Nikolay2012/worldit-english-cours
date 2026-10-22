@@ -1,4 +1,5 @@
-from django.http import Http404
+from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
@@ -32,20 +33,22 @@ class EnglishTaskView(DetailView):
             lesson_id=self.kwargs["lesson_id"]
         ).select_related("lesson__module")
     
-    def get_object(self, queryset=None):
+    def get(self, request, *args, **kwargs):
         
-        self.object: EnglishTask = super().get_object(queryset)
+        self.object = self.get_object()
         
-        if self._is_staff():
-            return self.object
+        if not self._is_staff() and not self._student_can_acess():
+            messages.info(request, "Це завдання ще не відкрите.")
+            return redirect(self._get_module_url())
+        
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+    
+    def _student_can_acess(self) -> bool:
         
         student = self._get_student()
         
-        if student is None or \
-            not EnglishTaskService(self.object).can_access(student):
-            raise Http404
-        
-        return self.object
+        return student is not None and EnglishTaskService(self.object).can_access(student)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -53,11 +56,15 @@ class EnglishTaskView(DetailView):
         has_steps = EnglishTaskService(self.object).has_steps()
         
         context.update(
+            can_import=True,
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
         )
         
         return context
+    
+    def _get_module_url(self) -> str:
+        return reverse("english:english_module", args=[self.object.lesson.module_id])
     
     def _get_header_links(self) -> list[tuple]:
         
@@ -84,7 +91,7 @@ class EnglishTaskView(DetailView):
         else:
             component = "student_run" if has_steps else "empty"
 
-        return f"components/{component}.html"
+        return f"english/components/{component}.html"
     
     def _is_staff(self) -> bool:
         
@@ -97,4 +104,4 @@ class EnglishTaskView(DetailView):
         return False
     
     def _get_student(self):
-        return getattr(self.request.user, "student", None)
+        return getattr(self.request.user, "profile_student", None)

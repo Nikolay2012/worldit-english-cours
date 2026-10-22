@@ -1,0 +1,24 @@
+.task-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.task-empty-state .task-empty-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.task-empty-state .task-empty-text {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-fg-primary);
+}
+
+.task-empty-state .upload-button {
+    margin-top: 4px;
+}
