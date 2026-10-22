@@ -156,69 +156,11 @@ main {
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
-.module-info-description,
-.module-info-list {
-    color: var(--text-secondary);
-    line-height: 1.5;
-    font-size: 0.875rem;
-}
-
-.module-info-subtitle {
-    margin: 24px 0 8px;
-    color: var(--text-main);
-    font-size: 1rem;
-}
-
-.module-info-list {
-    margin: 0;
-    padding-left: 24px;
-}
-
-#moduleInfoModal {
-    width: 555px;
-    height: auto;
-    position: relative;
-    padding: 24px;
-    box-sizing: border-box;
-}
-
-#moduleInfoModal p {
-    color: var(--text-fg-primary);
-}
-
-#moduleInfoModal li {
-    color: var(--text-fg-primary);
-    font-size: 0.875rem;
-}
-
-#moduleInfoModal .closeModal {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-}
-
-#moduleInfoModal #moduleInfoTitle {
-    padding-right: 48px;
-    font-size: 1.125rem;
-    color: var(--text-main);
-}
-
 @media (max-width: 750px) {
 
     .module-container {
         --pill-shift: 0px;
     }
-
-    #moduleInfoModal {
-        width: calc(100% - 40px);
-    }
-}
-
-.card p, .modal p {
-    font-size: 0.875rem;
 }
 
 @media (max-width: 500px) {
@@ -273,11 +215,6 @@ main {
         transform: translateY(-50%);
         flex-direction: column;
         flex: none;
-    }
-
-    #moduleInfoModal {
-        width: 343px;
-        max-width: calc(100% - 32px);
     }
 }
 

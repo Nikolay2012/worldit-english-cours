@@ -8,6 +8,7 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/all_modules.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/module_info_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -68,28 +69,7 @@ World IT
                         </div>
                     {% endfor %}
                     <div id="modalCover">
-                        <div class="modal" id="moduleInfoModal">
-                            <div class="row">
-                                <h3 id="moduleInfoTitle"></h3>
-                                <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="Закрити">
-                            </div>
-
-                            <div class="info-block">
-                                <p class="module-info-description">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat
-                                    a ante venenatis dapibus posuere velit aliquet.
-                                </p>
-
-                                <h4 class="module-info-subtitle">Що ви вивчите:</h4>
-                                <ol class="module-info-list">
-                                    <li>Lorem ipsum dolor sit amet</li>
-                                    <li>Consectetur adipiscing elit</li>
-                                    <li>Integer posuere erat a ante</li>
-                                    <li>Venenatis dapibus posuere velit</li>
-                                    <li>Aliquet sed do eiusmod tempor</li>
-                                </ol>
-                            </div>
-                        </div>
+                        {% include 'english/components/module_info_modal.html' %}
                     </div>
                 {% endif %}
             </div>

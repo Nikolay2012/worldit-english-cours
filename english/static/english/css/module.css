@@ -177,7 +177,8 @@ body .create-english-task-button {
         flex-shrink: 0;
     }
 
-    .lesson-setting-container .change-lesson-button {
+    .lesson-setting-container .change-lesson-button,
+    .lesson-setting-container .save-lesson-button {
         order: 3;
         margin-left: auto;
     }

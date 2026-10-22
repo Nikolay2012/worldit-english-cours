@@ -27,7 +27,7 @@
     margin: 8px 0 0;
     font-size: 0.875rem;
     line-height: 1.5;
-    color: var(--text-secondary);
+    color: var(--text-fg-primary);
 }
 
 #deleteTaskModal .delete-task-actions {
@@ -56,13 +56,13 @@
 }
 
 #deleteTaskModal .delete-task-confirm {
-    background-color: #18181B;
+    background-color: #0D133F;
     border: none;
     color: #FFF;
 }
 
 #deleteTaskModal .delete-task-confirm:hover {
-    background-color: #27272A;
+    background-color: #192051;
 }
 
 .dark-body #deleteTaskModal .closeModal {
@@ -70,7 +70,7 @@
 }
 
 .dark-body #deleteTaskModal .delete-task-cancel {
-    border-color: #3F3F46;
+    border-color: #FAF8FF;
 }
 
 .dark-body #deleteTaskModal .delete-task-cancel:hover {
@@ -78,12 +78,13 @@
 }
 
 .dark-body #deleteTaskModal .delete-task-confirm {
-    background-color: transparent;
-    border: 1px solid #3F3F46;
+    background-color: var(--bg-primary);
+    color: var(--text-fog);
+    border: 1px solid #FAF8FF;
 }
 
 .dark-body #deleteTaskModal .delete-task-confirm:hover {
-    background-color: var(--bg-acent);
+    background-color: white;
 }
 
 @media (max-width: 750px) {

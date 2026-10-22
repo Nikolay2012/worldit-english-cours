@@ -1,22 +1,43 @@
-// Before modal part
+// Кнопка из контейнера самого задания
 const taskDeleteButtons = document.querySelectorAll(".task-delete-button");
 
-// Modal part
+// Модальное окно подтверждения удаления задания и кнопки модалки
 const deleteTaskModal = document.getElementById("deleteTaskModal");
 const cancelDeleteTaskButton = document.getElementById("cancelDeleteTaskButton");
 const confirmDeleteTaskButton = document.getElementById("confirmDeleteTaskButton");
 
-cancelDeleteTaskButton.addEventListener("click", closeModal);
+let taskCardToDelete = null;
 
 taskDeleteButtons.forEach((button) => {
     button.addEventListener("click", () => {
         const taskCard = button.closest(".task-card");
 
-        openModal(deleteTaskModal);
+        taskCardToDelete = taskCard;
+        
+        // Указываем название
+        const taskName = taskCard.querySelector(".task-pill-name");
+        const deleteTaskNameSpan = document.getElementById("deleteTaskName");
+        deleteTaskNameSpan.textContent = taskName.textContent
 
-        confirmDeleteTaskButton.addEventListener("click", () => {
-            taskCard.classList.add("is-deleted");
-            closeModal();
-        });
+        openModal(deleteTaskModal);
     });
+});
+
+// Кнопка "Скасувати"
+cancelDeleteTaskButton.addEventListener("click", () => {
+    taskCardToDelete = null;
+    closeModal();
+});
+
+// Кнопка "Видалити"
+confirmDeleteTaskButton.addEventListener("click", () => {
+    
+    if (!taskCardToDelete) {
+        return;
+    }
+
+    taskCardToDelete.classList.add("is-deleted");
+    taskCardToDelete = null;
+
+    closeModal();
 });
