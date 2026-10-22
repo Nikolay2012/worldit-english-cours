@@ -6,7 +6,7 @@ from django.views.generic import DetailView
 from WorldIT.decorators import required_type
 from WorldIT.settings import ENGLISH_COURSE_ID
 from english.models import EnglishTask
-from english.services.task import EnglishTaskServices
+from english.services.task import EnglishTaskService
 
 
 ACCESS_TYPES = ["admin", "mentor", "student"]
@@ -41,7 +41,7 @@ class EnglishTaskView(DetailView):
         student = self._get_student()
         
         if student is None or \
-            not EnglishTaskServices.can_access_english_task(student, task):
+            not EnglishTaskService(task).can_access(student):
             raise Http404
         
         return task

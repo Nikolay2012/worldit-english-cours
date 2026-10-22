@@ -3,7 +3,7 @@ import json
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.http import require_http_methods
 from WorldIT.decorators import required_type
-from english.services.lesson_tasks import update_lesson_tasks
+from english.services.lesson_tasks import LessonTasksService
 from english.services.exceptions import ValidationError, NotFoundError
 
 
@@ -32,11 +32,11 @@ def update_lesson_tasks_endpoint(
     deleted_tasks = data.get("deleted", [])
     
     try: 
-        update_lesson_tasks(
+        LessonTasksService(
             lesson_id=lesson_id,
             renamed=renamed_tasks,
             deleted=deleted_tasks
-        )
+        ).update()
     except ValidationError as error:
         return JsonResponse(
             {"ok": False, "error": error.message}, 
