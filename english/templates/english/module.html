@@ -28,13 +28,13 @@ World IT
             {% for lesson_and_tasks in lessons_and_tasks %}
                 <div class="card lesson-card collapsed">
                     <div class="lesson-setting-container">
-                        <h2 class="card-header">№{{ lesson_and_tasks.lesson.order_number }}. {{ lesson_and_tasks.lesson.name }}</h2>
+                        <h2 class="card-header">№{{ lesson_and_tasks.order_number }}. {{ lesson_and_tasks.name }}</h2>
                         <div class="actions-container">
                             {% if can_edit %}
-                                <button type="button" class="button change-lesson-button" lesson-id="{{ lesson_and_tasks.lesson.id }}">
+                                <button type="button" class="button change-lesson-button" lesson-id="{{ lesson_and_tasks.id }}">
                                     <img src="{% static 'english/img/action_icons/edit-3.svg' %}" alt="edit">
                                 </button>
-                                <button type="button" class="button save-lesson-button" lesson-id="{{ lesson_and_tasks.lesson.id }}">
+                                <button type="button" class="button save-lesson-button" lesson-id="{{ lesson_and_tasks.id }}">
                                     Зберегти
                                 </button>
                             {% endif %}
