@@ -9,6 +9,7 @@ World IT
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/task.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/import_csv.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/upload_csv_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -33,10 +34,15 @@ World IT
         <div class="card">
             {% include content_component %}
         </div>
+        <div id="modalCover">
+            {% include 'english/components/upload_csv_modal.html' %}
+        </div>
     </div>
     {% csrf_token %}
 {% endblock %}
 
 {% block scripts %}
-{{ block.super }}
+    {{ block.super }}
+    <script src="{% static 'js/openModal.js' %}"></script>
+    <script src="{% static 'english/js/task/upload_csv.js' %}"></script>
 {% endblock %}

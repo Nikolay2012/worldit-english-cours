@@ -1,0 +1,49 @@
+{% load static %}
+
+<div class="modal" id="uploadCsvModal"
+     data-import-url="">
+
+    <div class="row">
+        <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
+        <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="Закрити">
+    </div>
+
+    <div class="info-block">
+
+        <div class="upload-csv-select">
+            <p class="upload-csv-description">
+                Завантажте документ зі списком слів для цього уроку.
+            </p>
+
+            <button type="button" class="upload-csv-dropzone" id="uploadCsvDropzone">
+                <span class="upload-csv-dropzone-title">
+                    Натисніть, щоб <strong>обрати файл</strong>
+                </span>
+                <span class="upload-csv-dropzone-hint" id="uploadCsvFileName">
+                    Підтримується: .csv
+                </span>
+            </button>
+
+            <input type="file" id="uploadCsvInput" accept=".csv,text/csv" hidden>
+
+            <p class="upload-csv-error" id="uploadCsvError" aria-live="polite"></p>
+        </div>
+
+        <div class="upload-csv-loading">
+            <p class="upload-csv-description">Триває завантаження документа...</p>
+
+            <div class="upload-csv-progress" role="progressbar" aria-label="Завантаження документа">
+                <div class="upload-csv-progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="upload-csv-actions">
+            <button type="button" class="button upload-csv-cancel" id="cancelUploadCsvButton">
+                Скасувати
+            </button>
+            <button type="button" class="button upload-csv-confirm" id="confirmUploadCsvButton" disabled>
+                Продовжити
+            </button>
+        </div>
+    </div>
+</div>
