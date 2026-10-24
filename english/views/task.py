@@ -1,5 +1,33 @@
 """
+Страница задания английского курса.
 
+Маршрут:
+    GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
+    (name="english:english_task", адрес собирает EnglishTask.get_absolute_url)
+
+Доступ:
+    admin, mentor, student.
+
+Поиск задания:
+    задание ищется только внутри указанного урока, модуля
+    и курса English. Несогласованный адрес даёт 404.
+
+Поведение по ролям:
+    Персонал (admin, mentor) видит любое задание.
+    Студент видит задание, только если оно открыто для него
+    (EnglishTaskService.can_access). Иначе — редирект на страницу
+    модуля с сообщением «Це завдання ще не відкрите.»
+
+Содержимое страницы (content_component):
+                    есть шаги          шагов нет
+    персонал         staff_preview      import_csv
+    студент          student_run        empty
+
+Контекст шаблона english/task.html:
+    task               — задание
+    content_component  — путь к шаблону компонента
+    can_import         — показывать ли кнопку «Завантажити»
+    header_links       — хлебные крошки
 """
 
 from django.contrib import messages

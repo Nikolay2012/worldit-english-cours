@@ -1,5 +1,37 @@
 """
+Страница конкретного модуля курса English: уроки и их задания.
 
+Маршрут:
+    GET /courses/english/modules/<pk>/        (name="english:english_module")
+
+Доступ:
+    student, mentor, manager, admin
+    (доступ для manager — уточнить в команде).
+
+Что показывает:
+    уроки модуля по order_number; у каждого урока задания
+    разделены на два блока по полю block:
+        lesson.main_lesson_tasks  — основной урок   (block="lesson")
+        lesson.homework_tasks     — домашняя практика (block="homework")
+    Задания внутри блока идут по order.
+
+Запросы к базе:
+    модуль + уроки + два prefetch заданий = 4 запроса
+    независимо от количества уроков.
+
+Модуль из другого курса по этому адресу не найдётся (404):
+    поиск ограничен settings.ENGLISH_COURSE_ID.
+
+Контекст шаблона english/module.html:
+    lessons_and_tasks — уроки модуля с заданиями по блокам
+    module            — текущий модуль
+    header_links      — хлебные крошки
+    can_edit          — может редактировать уроки (admin)
+    can_add           — может добавлять задания (admin, mentor)
+
+Пагинация уроков пока не включена. Чтобы включить,
+достаточно добавить paginate_by: задания загрузятся
+только для уроков текущей страницы.
 """
 
 from django.db.models import Prefetch

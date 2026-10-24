@@ -1,5 +1,25 @@
 """
+Сторінка списку модулів курсу English.
 
+Маршрут:
+    GET /courses/english/modules/            (name="english:all_english_modules")
+    GET /courses/english/modules/?page=2     пагінація
+
+Доступ:
+    student, mentor, manager, admin
+    (доступ для manager — уточнити в команди).
+
+Що показує:
+    модулі курсу English (settings.ENGLISH_COURSE_ID) по 10 на сторінці,
+    у порядку id — поки в моделі Module немає order_number.
+
+Контекст шаблону english/all_modules.html:
+    modules       — модулі поточної сторінки
+    page_obj      — поточна сторінка (номер, сусідні сторінки)
+    paginator     — уся вибірка (кількість сторінок)
+    is_paginated  — чи більше однієї сторінки
+    course        — курс English (назва в заголовку)
+    header_links  — хлібні крихти
 """
 
 from django.shortcuts import get_object_or_404
