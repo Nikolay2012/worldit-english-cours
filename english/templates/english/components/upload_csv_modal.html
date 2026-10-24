@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="modal" id="uploadCsvModal">
+<div class="modal" id="uploadCsvModal" data-import-url="{% url 'english:api:api_import_task_data' task_id=task.id%}">
     <div class="row">
         <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
         <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="close">

@@ -1,3 +1,7 @@
+"""
+
+"""
+
 import json
 
 from django.http import HttpRequest, JsonResponse
@@ -8,6 +12,7 @@ from english.services.lesson_tasks import LessonTasksService
 from english.services.exceptions import ValidationError, NotFoundError
 
 
+# Изменять (изменять/удалять) задания может только администратор платформы
 @method_decorator(
     required_type(['admin']), 
     name="dispatch"

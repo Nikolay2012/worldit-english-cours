@@ -35,7 +35,7 @@ World IT
             {% include content_component %}
         </div>
         <div id="modalCover">
-            {% include 'english/components/upload_csv_modal.html' %}
+            {% include 'english/components/upload_csv_modal.html' with task=task %}
         </div>
     </div>
     {% csrf_token %}

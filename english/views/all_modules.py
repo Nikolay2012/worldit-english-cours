@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from django.shortcuts import get_object_or_404
 from WorldIT.decorators import required_type
 from django.utils.decorators import method_decorator

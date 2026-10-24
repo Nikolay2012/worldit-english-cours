@@ -50,16 +50,20 @@ confirmUploadCsvButton.addEventListener("click", async () => {
     const formData = new FormData();
     formData.append("file", file);
 
-    const importUrl = uploadCsvModal.dataset.importUrl;
-    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-
     setUploadCsvLoading(true);
 
-    // const response = await fetch(importUrl, {
-    //     method: "POST",
-    //     headers: { "X-CSRFToken": csrfToken },
-    //     body: formData,
-    // });
+    const importUrl = uploadCsvModal.dataset.importUrl;
+
+    const response = await fetch(
+        importUrl, 
+        {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value
+            },
+            body: formData,
+        }
+    );
 });
 
 function isValidCsvFile(file) {

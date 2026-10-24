@@ -1,3 +1,7 @@
+"""
+
+"""
+
 from WorldIT import settings
 from courses.models import Lesson
 from english.models.english_task import EnglishTask

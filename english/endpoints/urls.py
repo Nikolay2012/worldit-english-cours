@@ -4,12 +4,19 @@
 
 from django.urls import path
 from english.endpoints.lesson_tasks import LessonTasksEndpoint
+from english.endpoints.task_import import TaskImportEndpoint
 
+app_name = "api"
 
 urlpatterns = [
     path(
         "lessons/<int:lesson_id>/tasks/", 
         LessonTasksEndpoint.as_view(), 
         name="api_update_lesson_tasks"
+    ),
+    path(
+        "tasks/<int:task_id>/import/", 
+        TaskImportEndpoint.as_view(), 
+        name="api_import_task_data"
     ),
 ]
