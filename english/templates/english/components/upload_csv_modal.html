@@ -1,6 +1,8 @@
 {% load static %}
 
-<div class="modal" id="uploadCsvModal" data-import-url="{% url 'english:api:api_import_task_data' task_id=task.id%}">
+<div class="modal" id="uploadCsvModal"
+     data-import-url="{% url 'english:api:api_import_task_data' task.id %}">
+
     <div class="row">
         <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
         <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="close">
@@ -33,12 +35,173 @@
             </div>
         </div>
 
+        <div class="upload-csv-list" id="uploadCsvList">
+
+            <section class="words-category">
+                <h4 class="words-category-title">Займенники</h4>
+
+                <ul class="words-list">
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">I</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Я</span>
+                        </button>
+                    </li>
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">You</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Ти, Ви</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <button type="button" class="button add-words-button" data-category="Займенники">
+                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
+                    Додати слова
+                </button>
+            </section>
+
+            <section class="words-category">
+                <h4 class="words-category-title">Дієслова</h4>
+
+                <ul class="words-list">
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Ask</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Запитати</span>
+                        </button>
+                    </li>
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Buy</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Купити</span>
+                        </button>
+                    </li>
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Eat</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Їсти</span>
+                        </button>
+                    </li>
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Feel</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Відчувати</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <button type="button" class="button add-words-button" data-category="Дієслова">
+                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
+                    Додати слова
+                </button>
+            </section>
+
+            <section class="words-category">
+                <h4 class="words-category-title">Іменники</h4>
+
+                <ul class="words-list">
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Door</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Двері</span>
+                        </button>
+                    </li>
+                    <li class="words-list-item">
+                        <button type="button" class="word-row" data-step-id="">
+                            <span class="word-text">Window</span>
+                            <span class="word-progress">
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                                <span class="word-progress-dot"></span>
+                            </span>
+                            <span class="word-translation">Вікно</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <button type="button" class="button add-words-button" data-category="Іменники">
+                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
+                    Додати слова
+                </button>
+            </section>
+        </div>
+
         <div class="upload-csv-actions">
             <button type="button" class="button upload-csv-cancel" id="cancelUploadCsvButton">
                 Скасувати
             </button>
             <button type="button" class="button upload-csv-confirm" id="confirmUploadCsvButton" disabled>
                 Продовжити
+            </button>
+        </div>
+
+        <div class="upload-csv-actions upload-csv-list-actions">
+            <button type="button" class="button upload-csv-cancel" id="deleteWordsListButton">
+                <img src="{% static 'english/img/action_icons/trash-2.svg' %}" alt="">
+                Видалити список
+            </button>
+            <button type="button" class="button upload-csv-confirm" id="closeWordsListButton">
+                Закрити
             </button>
         </div>
     </div>

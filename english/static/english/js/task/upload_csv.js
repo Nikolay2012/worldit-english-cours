@@ -1,12 +1,13 @@
 const uploadCsvModal = document.getElementById("uploadCsvModal");
+const uploadCsvTitle = document.getElementById("uploadCsvTitle");
 const uploadCsvInput = document.getElementById("uploadCsvInput");
 const uploadCsvDropzone = document.getElementById("uploadCsvDropzone");
 const uploadCsvFileName = document.getElementById("uploadCsvFileName");
 const cancelUploadCsvButton = document.getElementById("cancelUploadCsvButton");
 const confirmUploadCsvButton = document.getElementById("confirmUploadCsvButton");
+const closeWordsListButton = document.getElementById("closeWordsListButton");
 
 document.addEventListener("click", (event) => {
-
     if (!event.target.closest(".upload-button")) {
         return;
     }
@@ -40,9 +41,7 @@ cancelUploadCsvButton.addEventListener("click", () => {
 });
 
 confirmUploadCsvButton.addEventListener("click", async () => {
-    
     const file = uploadCsvInput.files[0];
-
     if (!file) {
         return;
     }
@@ -55,14 +54,24 @@ confirmUploadCsvButton.addEventListener("click", async () => {
     const importUrl = uploadCsvModal.dataset.importUrl;
 
     try {
-        taskImportRequest(importUrl, formData);
+        await taskImportRequest(importUrl, formData);
+        setUploadCsvList(true);
     } catch (error) {
         console.error(error);
+        setUploadCsvLoading(false);
     }
 });
 
-function isValidCsvFile(file) {
+// Кнопка "Закрыть" в списке слов (модалка списка слов)
+closeWordsListButton.addEventListener("click", () => {
+    closeModal();
+    // После успешной загрузки данных задания оно, очевидно, уже не пустое
+    // Потому обновляем страницу для отображения нового контента админу/ментора
+    window.location.reload();
+});
 
+function isValidCsvFile(file) {
+    
     if (!file.name.toLowerCase().endsWith(".csv")) {
         return false;
     }
@@ -78,13 +87,9 @@ function isValidCsvFile(file) {
     return true;
 }
 
-// Отображение выбранного файла в модалке
 function setSelectedFile(file) {
     uploadCsvDropzone.classList.toggle("has-file", Boolean(file));
-    // Установка названия файла или стандартного текста
-    // Стандартного текста - чтобы при следующем открытии модалки, 
-    // она не имела следов предыдущей загрузки
-    uploadCsvFileName.textContent = file ? `Файл: ${file.name}` : "Підтримується: .csv";
+    uploadCsvFileName.textContent = file ? `Файл: ${file.name}` : uploadCsvFileName.textContent.trim();
     confirmUploadCsvButton.disabled = !file;
 }
 
@@ -93,9 +98,15 @@ function setUploadCsvLoading(isLoading) {
     confirmUploadCsvButton.disabled = isLoading || !uploadCsvInput.files[0];
 }
 
+function setUploadCsvList(isList) {
+    uploadCsvModal.classList.toggle("is-list", isList);
+    uploadCsvModal.classList.remove("is-loading");
+    uploadCsvTitle.textContent = isList ? "Список слів" : uploadCsvTitle.textContent.trim();
+}
+
 function resetUploadCsvModal() {
-    
     uploadCsvInput.value = "";
     setSelectedFile(null);
     setUploadCsvLoading(false);
+    setUploadCsvList(false);
 }

@@ -3,6 +3,7 @@
 """
 
 import json
+import time
 
 from django.http import HttpRequest, JsonResponse
 from django.views import View
@@ -28,6 +29,8 @@ class TaskImportEndpoint(View):
         # print(request.POST)
         # print(request.FILES)
         # print(task_id)
+        
+        # time.sleep(5)
         
         return JsonResponse({"ok": True}, status=200)
 

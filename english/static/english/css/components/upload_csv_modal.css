@@ -1,9 +1,24 @@
 #uploadCsvModal {
     width: 555px;
     height: auto;
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
     position: relative;
     padding: 24px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+#uploadCsvModal .row {
+    flex-shrink: 0;
+}
+
+#uploadCsvModal .info-block {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 #uploadCsvModal .closeModal {
@@ -26,12 +41,12 @@
 #uploadCsvModal .upload-csv-description {
     margin: 4px 0 0;
     font-size: 0.875rem;
-    color: var(--text-secondary);
     color: var(--text-fg-primary);
 }
 
 .upload-csv-dropzone {
     width: 100%;
+    height: 96px;
     margin-top: 16px;
     padding: 17px 12px;
     display: flex;
@@ -45,7 +60,12 @@
     box-sizing: border-box;
     cursor: pointer;
     font: inherit;
-    height: 96px;
+}
+
+.upload-csv-dropzone-title,
+.upload-csv-dropzone-hint {
+    font-size: 0.875rem;
+    color: var(--text-fg-primary);
 }
 
 .upload-csv-dropzone-title strong {
@@ -60,28 +80,12 @@
     background-color: #E4E4E7;
 }
 
-.upload-csv-dropzone-title {
-    font-size: 0.875rem;
-    color: var(--text-fg-primary);
-}
-.upload-csv-dropzone-hint {
-    font-size: 0.875rem;
-    color: var(--text-fg-primary);
-}
-
 .upload-csv-dropzone.has-file .upload-csv-dropzone-title {
     display: none;
-    font-size: 0.875rem;
 }
 
 .upload-csv-dropzone.has-file .upload-csv-dropzone-hint {
     color: #0D133F;
-    font-size: 0.875rem;
-}
-
-.dark-body .upload-csv-dropzone.has-file {
-    background-color: #F5F5F8;
-    border-color: transparent;
 }
 
 .upload-csv-progress {
@@ -105,7 +109,9 @@
     to   { transform: translateX(250%); }
 }
 
-#uploadCsvModal .upload-csv-loading {
+#uploadCsvModal .upload-csv-loading,
+#uploadCsvModal .upload-csv-list,
+#uploadCsvModal .upload-csv-list-actions {
     display: none;
 }
 
@@ -115,6 +121,109 @@
 
 #uploadCsvModal.is-loading .upload-csv-loading {
     display: block;
+}
+
+#uploadCsvModal.is-list .upload-csv-select,
+#uploadCsvModal.is-list .upload-csv-loading,
+#uploadCsvModal.is-list .upload-csv-actions:not(.upload-csv-list-actions) {
+    display: none;
+}
+
+#uploadCsvModal.is-list .upload-csv-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin-top: 16px;
+}
+
+#uploadCsvModal.is-list .upload-csv-list-actions {
+    display: flex;
+    flex-shrink: 0;
+}
+
+.words-category {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.words-category-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text-main);
+}
+
+.words-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.words-list-item {
+    border-top: 1px solid #EDEDF2;
+}
+
+.words-list-item:last-child {
+    border-bottom: 1px solid #EDEDF2;
+}
+
+.word-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border: none;
+    background-color: transparent;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.word-row:hover {
+    background-color: rgba(35, 35, 55, 0.05);
+}
+
+.word-row:focus-visible {
+    outline: 2px solid var(--text-main);
+    outline-offset: -2px;
+}
+
+.word-text,
+.word-translation {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.word-translation {
+    text-align: right;
+}
+
+.word-progress {
+    display: flex;
+    gap: 8px;
+}
+
+.word-progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #E4E4E7;
+    flex-shrink: 0;
+}
+
+.word-progress-dot.is-filled {
+    background-color: #F98232;
 }
 
 .upload-csv-actions {
@@ -128,6 +237,9 @@
     width: fit-content;
     height: 44px;
     padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 0.875rem;
     border-radius: 6px;
 }
@@ -157,12 +269,41 @@
     cursor: not-allowed;
 }
 
+.add-words-button {
+    width: fit-content;
+    height: 36px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    background-color: transparent;
+    border: 1px solid #E4E4E7;
+    border-radius: 6px;
+}
+
+.add-words-button:hover {
+    background-color: rgba(35, 35, 55, 0.05);
+}
+
+.add-words-button img,
+.upload-csv-list-actions img {
+    width: 16px;
+    height: 16px;
+}
+
 .dark-body #uploadCsvModal .closeModal {
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
 .dark-body .upload-csv-dropzone {
     border-color: white;
+}
+
+.dark-body .upload-csv-dropzone.has-file {
+    background-color: #F5F5F8;
+    border-color: transparent;
 }
 
 .dark-body .upload-csv-progress {
@@ -173,11 +314,30 @@
     background-color: #767B9C;
 }
 
-.dark-body .upload-csv-cancel {
+.dark-body .words-list-item,
+.dark-body .words-list-item:last-child {
+    border-color: #252A5266;
+}
+
+.dark-body .word-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark-body .word-progress-dot {
+    background-color: #545879;
+}
+
+.dark-body .word-progress-dot.is-filled {
+    background-color: #F98232;
+}
+
+.dark-body .upload-csv-cancel,
+.dark-body .add-words-button {
     border-color: #FAF8FF;
 }
 
-.dark-body .upload-csv-cancel:hover {
+.dark-body .upload-csv-cancel:hover,
+.dark-body .add-words-button:hover {
     background-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -198,6 +358,11 @@
     opacity: 0.5;
 }
 
+.dark-body .add-words-button img,
+.dark-body .upload-csv-list-actions img {
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
+}
+
 @media (max-width: 750px) {
     #uploadCsvModal {
         width: calc(100% - 40px);
@@ -212,5 +377,9 @@
 
     .upload-csv-dropzone {
         padding: 32px 16px;
+    }
+
+    .word-progress {
+        gap: 6px;
     }
 }
