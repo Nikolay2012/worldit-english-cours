@@ -60,7 +60,7 @@ class EnglishTaskView(DetailView):
         has_steps = EnglishTaskService(self.object).has_steps()
         
         context.update(
-            can_import=True,
+            can_import=False if not self._is_staff() else True,
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
         )

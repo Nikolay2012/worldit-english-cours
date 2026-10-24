@@ -54,16 +54,11 @@ confirmUploadCsvButton.addEventListener("click", async () => {
 
     const importUrl = uploadCsvModal.dataset.importUrl;
 
-    const response = await fetch(
-        importUrl, 
-        {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": document.getElementsByName("csrfmiddlewaretoken")[0].value
-            },
-            body: formData,
-        }
-    );
+    try {
+        taskImportRequest(importUrl, formData);
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 function isValidCsvFile(file) {

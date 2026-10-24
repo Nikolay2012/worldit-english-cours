@@ -6,7 +6,7 @@ const saveLessonButtons = document.querySelectorAll(".save-lesson-button");
 let hasErrors = false;
 
 saveLessonButtons.forEach((button) => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
         hasErrors = false;
 
         // Контейнер текущего урока, задания которого редактируются
@@ -78,7 +78,7 @@ saveLessonButtons.forEach((button) => {
         // Снимаем режим редактирования и отправляем запрос на редактироваие
         // только после успешного прохождения всех проверок
         try {
-            lessonSaveRequest(editedData);
+            await lessonSaveRequest(editedData);
             lessonCard.classList.toggle("is-editing");
         } catch (error) {
             console.error(error);
