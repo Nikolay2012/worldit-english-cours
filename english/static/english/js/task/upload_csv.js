@@ -2,16 +2,17 @@ const uploadCsvModal = document.getElementById("uploadCsvModal");
 const uploadCsvInput = document.getElementById("uploadCsvInput");
 const uploadCsvDropzone = document.getElementById("uploadCsvDropzone");
 const uploadCsvFileName = document.getElementById("uploadCsvFileName");
-const uploadCsvError = document.getElementById("uploadCsvError");
 const cancelUploadCsvButton = document.getElementById("cancelUploadCsvButton");
 const confirmUploadCsvButton = document.getElementById("confirmUploadCsvButton");
-const uploadButtons = document.querySelectorAll(".upload-button");
 
-uploadButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-        resetUploadCsvModal();
-        openModal(uploadCsvModal);
-    });
+document.addEventListener("click", (event) => {
+
+    if (!event.target.closest(".upload-button")) {
+        return;
+    }
+
+    resetUploadCsvModal();
+    openModal(uploadCsvModal);
 });
 
 uploadCsvDropzone.addEventListener("click", () => {
@@ -20,23 +21,16 @@ uploadCsvDropzone.addEventListener("click", () => {
 
 uploadCsvInput.addEventListener("change", () => {
     const file = uploadCsvInput.files[0];
-
     if (!file) {
         return;
     }
 
-    const error = validateCsvFile(file);
-
-    if (error) {
-        showUploadCsvError(error);
-
+    if (!isValidCsvFile(file)) {
         uploadCsvInput.value = "";
         setSelectedFile(null);
-
         return;
     }
 
-    showUploadCsvError("");
     setSelectedFile(file);
 });
 
@@ -46,6 +40,7 @@ cancelUploadCsvButton.addEventListener("click", () => {
 });
 
 confirmUploadCsvButton.addEventListener("click", async () => {
+    
     const file = uploadCsvInput.files[0];
 
     if (!file) {
@@ -53,15 +48,12 @@ confirmUploadCsvButton.addEventListener("click", async () => {
     }
 
     const formData = new FormData();
-
     formData.append("file", file);
 
     const importUrl = uploadCsvModal.dataset.importUrl;
     const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
     setUploadCsvLoading(true);
-
-    console.log(formData);
 
     // const response = await fetch(importUrl, {
     //     method: "POST",
@@ -70,32 +62,31 @@ confirmUploadCsvButton.addEventListener("click", async () => {
     // });
 });
 
-function validateCsvFile(file) {
+function isValidCsvFile(file) {
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
-        return "Оберіть файл у форматі .csv";
+        return false;
     }
 
     if (file.size > 1 * 1024 * 1024) {
-        return "Файл завеликий. Максимум — 1 МБ";
+        return false;
     }
 
     if (file.size === 0) {
-        return "Файл порожній";
+        return false;
     }
 
-    return "";
+    return true;
 }
 
 // Отображение выбранного файла в модалке
 function setSelectedFile(file) {
     uploadCsvDropzone.classList.toggle("has-file", Boolean(file));
-    uploadCsvFileName.textContent = file ? file.name : uploadCsvFileName.textContent.trim();
+    // Установка названия файла или стандартного текста
+    // Стандартного текста - чтобы при следующем открытии модалки, 
+    // она не имела следов предыдущей загрузки
+    uploadCsvFileName.textContent = file ? `Файл: ${file.name}` : "Підтримується: .csv";
     confirmUploadCsvButton.disabled = !file;
-}
-
-function showUploadCsvError(message) {
-    uploadCsvError.textContent = message;
 }
 
 function setUploadCsvLoading(isLoading) {
@@ -104,9 +95,8 @@ function setUploadCsvLoading(isLoading) {
 }
 
 function resetUploadCsvModal() {
+    
     uploadCsvInput.value = "";
-
     setSelectedFile(null);
-    showUploadCsvError("");
     setUploadCsvLoading(false);
 }

@@ -1,11 +1,9 @@
 {% load static %}
 
-<div class="modal" id="uploadCsvModal"
-     data-import-url="">
-
+<div class="modal" id="uploadCsvModal">
     <div class="row">
         <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
-        <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="Закрити">
+        <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="close">
     </div>
 
     <div class="info-block">
@@ -25,14 +23,12 @@
             </button>
 
             <input type="file" id="uploadCsvInput" accept=".csv,text/csv" hidden>
-
-            <p class="upload-csv-error" id="uploadCsvError" aria-live="polite"></p>
         </div>
 
         <div class="upload-csv-loading">
             <p class="upload-csv-description">Триває завантаження документа...</p>
 
-            <div class="upload-csv-progress" role="progressbar" aria-label="Завантаження документа">
+            <div class="upload-csv-progress" role="progressbar">
                 <div class="upload-csv-progress-bar"></div>
             </div>
         </div>
