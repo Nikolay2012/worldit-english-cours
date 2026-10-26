@@ -20,7 +20,5 @@ async function taskImportRequest(importUrl, formData) {
         throw new Error(responseData.error ?? "Помилка під час завантаження даних завдання");
     }
 
-    console.log(responseData);
-
     return responseData;
 }

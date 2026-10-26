@@ -6,6 +6,9 @@ const uploadCsvFileName = document.getElementById("uploadCsvFileName");
 const cancelUploadCsvButton = document.getElementById("cancelUploadCsvButton");
 const confirmUploadCsvButton = document.getElementById("confirmUploadCsvButton");
 const closeWordsListButton = document.getElementById("closeWordsListButton");
+const uploadCsvList = document.getElementById("uploadCsvList");
+const wordsCategoryTemplate = document.getElementById("wordsCategoryTemplate");
+const wordRowTemplate = document.getElementById("wordRowTemplate");
 
 document.addEventListener("click", (event) => {
     if (!event.target.closest(".upload-button")) {
@@ -54,8 +57,8 @@ confirmUploadCsvButton.addEventListener("click", async () => {
     const importUrl = uploadCsvModal.dataset.importUrl;
 
     try {
-        await taskImportRequest(importUrl, formData);
-        setUploadCsvList(true);
+        const responseData = await taskImportRequest(importUrl, formData);
+        setUploadCsvList(true, responseData);
     } catch (error) {
         console.error(error);
         setUploadCsvLoading(false);
@@ -76,6 +79,7 @@ function isValidCsvFile(file) {
         return false;
     }
 
+    // Если размер файла не превышает мегабайта
     if (file.size > 1 * 1024 * 1024) {
         return false;
     }
@@ -98,10 +102,49 @@ function setUploadCsvLoading(isLoading) {
     confirmUploadCsvButton.disabled = isLoading || !uploadCsvInput.files[0];
 }
 
-function setUploadCsvList(isList) {
+function setUploadCsvList(isList, responseData) {
     uploadCsvModal.classList.toggle("is-list", isList);
     uploadCsvModal.classList.remove("is-loading");
     uploadCsvTitle.textContent = isList ? "Список слів" : uploadCsvTitle.textContent.trim();
+
+    if (responseData) {
+        console.log(responseData["data"]);
+        renderWordsList(responseData.data);
+    }
+}
+
+function renderWordsList(categories) {
+    uploadCsvList.replaceChildren();
+
+    for (const category of categories) {
+        uploadCsvList.append(createCategory(category));
+    }
+}
+
+function createCategory(category) {
+    const section = wordsCategoryTemplate.content.firstElementChild.cloneNode(true);
+
+    // в значении, аналог capitalize
+    section.querySelector(".words-category-title").textContent = category.category.charAt(0).toUpperCase() + category.category.slice(1)
+    section.querySelector(".add-words-button").dataset.category = category.category;
+
+    const list = section.querySelector(".words-list");
+    for (const word of category.words) {
+        list.append(createWordRow(word));
+    }
+
+    return section;
+}
+
+function createWordRow(word) {
+    const item = wordRowTemplate.content.firstElementChild.cloneNode(true);
+    const row = item.querySelector(".word-row");
+
+    row.dataset.stepId = word.stepId;
+    row.querySelector(".word-text").textContent = word.question.text;
+    row.querySelector(".word-translation").textContent = word.translation;
+
+    return item;
 }
 
 function resetUploadCsvModal() {

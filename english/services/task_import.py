@@ -182,7 +182,6 @@ class TaskImportServices:
         -Изображения (QuestionImage) - метод ._create_question_images()
         """
         
-        
         step = EnglishTaskStep.objects.create(
             task=task,
             kind="question",

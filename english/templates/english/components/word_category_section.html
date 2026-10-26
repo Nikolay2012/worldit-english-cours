@@ -1,0 +1,42 @@
+{% load static %}
+
+<section class="words-category">
+    <h4 class="words-category-title">{{ word.category }}</h4>
+
+    <ul class="words-list">
+        <li class="words-list-item">
+            <button type="button" class="word-row" data-step-id="">
+                <span class="word-text">Door</span>
+                <span class="word-progress">
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                </span>
+                <span class="word-translation">Двері</span>
+            </button>
+        </li>
+
+        <li class="words-list-item">
+            <button type="button" class="word-row" data-step-id="">
+                <span class="word-text">Window</span>
+                <span class="word-progress">
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                    <span class="word-progress-dot"></span>
+                </span>
+                <span class="word-translation">Вікно</span>
+            </button>
+        </li>
+    </ul>
+
+    <button type="button" class="button add-words-button" data-category="Іменники">
+        <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
+        Додати слова
+    </button>
+</section>
