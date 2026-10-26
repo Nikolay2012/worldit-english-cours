@@ -1,10 +1,17 @@
 import csv
 import io
+import random
 
 from django.core.files.uploadedfile import UploadedFile
+from django.db import transaction
 
 from WorldIT import settings
+from english.models.answer_option import AnswerOption
 from english.models.english_task import EnglishTask
+from english.models.english_task_step import EnglishTaskStep
+from english.models.question import Question
+from english.models.question_image import QuestionImage
+from english.models.word_category import WordCategory
 from english.services.exceptions import NotFoundError, ConflictError, ValidationError
 from english.services.image_downloader import ImageDownloader
 
@@ -38,6 +45,15 @@ class TaskImportServices:
         task = self._get_empty_task(task_id=task_id)
         rows = self._parse_csv(file=file)
         
+        # Переводы уникальные (set())
+        all_translations = set()
+        
+        for row in rows:
+            all_translations.add(row["translation"])
+        
+        if len(all_translations) < self.ANSWER_OPTIONS_COUNT:
+            raise ValidationError(f"У файлі має бути щонайменше {self.ANSWER_OPTIONS_COUNT} різних перекладів")
+        
         # Изображения
         urls = {}
 
@@ -49,13 +65,136 @@ class TaskImportServices:
             urls=urls
         )
         
-        print(images_data)
+        # Последующие действия с записью данных задания выполняем внутри транзакции
+        # По разным причинам, если не удалось, например, 
+        # записать один из вопросов задания - тогда вся запись задания некорректна
+        # По понятным причинам это решение лучше чем оставлять частично записанное задание
+        with transaction.atomic():
+            # Категории
+            categories = self._get_or_create_categories(rows=rows)
+            
+            # Создание шагов, вопросов, изображений вопросов и вариантов ответа
+            for order, row in enumerate(rows):
+                self._create_word_step(
+                    task=task,
+                    order=order,
+                    row=row,
+                    category=categories[row["category"]],
+                    all_translations=all_translations,
+                    image_files=(
+                        images_data[(order, 0)], # зображення 1
+                        images_data[(order, 1)] # Та зображення 2 соответственно
+                    )
+                )
+    
+    def _create_word_step(
+            self,
+            task: EnglishTask,
+            order: int,
+            row: dict[str, str],
+            category: WordCategory,
+            all_translations: set[str],
+            image_files: tuple
+        ):
+        """
+        Метод создания шага задания, и всех связанных записей:
+        -Вопроса (модель Question) - здесь, в этом методе
+        -Варианта ответа (AnswerOption) - метод ._create_answer_options()
+        -Изображения (QuestionImage) - метод ._create_question_images()
+        """
         
-        # Категории
         
-        # Создание шагов
+        step = EnglishTaskStep.objects.create(
+            task=task,
+            kind="question",
+            order=order,
+            category=category
+        )
         
-        # Создание вопросов и вариантов ответа
+        question = Question.objects.create(
+            step=step,
+            text=row["word"],
+            allows_multiple=False # пока что, будет только False
+        )
+        
+        self._create_answer_options(
+            question=question,
+            correct=row["translation"],
+            all_translations=all_translations
+        )
+        
+        self._create_question_images(
+            question=question,
+            row=row,
+            image_files=image_files
+        )
+    
+    def _create_answer_options(
+            self,
+            question: Question,
+            correct: str,
+            all_translations: set[str]
+        ):
+        
+        # {correct} - специально оборачиваем правильный вариант ответа в множество
+        # для возможности удаления правильного варианта ответа из выборки
+        wrong_options = list(all_translations - {correct})
+        
+        wrong_options_after_sample = random.sample(
+            wrong_options,
+            self.ANSWER_OPTIONS_COUNT -1 # -1 - один правильный ответ, оставшиеся 5 - неправильные
+        )
+        
+        
+        options = [
+            (correct, True)
+        ]
+        
+        for text in wrong_options_after_sample:
+            options.append(
+                (text, False)
+            )
+        
+        # Сервер перемешивает неправильный варианты ответа
+        # Именно сервер, чтобы нельзя было корректировать порядок вопросов
+        # путём вмешательства в работу JS клиента со стороны пользователя
+        random.shuffle(options)
+        
+        for option_order, (text, is_correct) in enumerate(options):
+            AnswerOption.objects.create(
+                question=question,
+                is_correct=is_correct,
+                text=text,
+                order=option_order
+            )
+    
+    def _create_question_images(
+            self,
+            question: Question,
+            row: dict[str, str],
+            image_files: tuple
+        ):
+        
+        for img_index, file in enumerate(image_files):
+            # Отдельно запишем файла
+            # с еще одной проверкой
+            question_image = QuestionImage(
+                source_url=row[f"image_{img_index +1}"],
+                order=img_index,
+                is_placeholder=True if file is None else False,
+                question=question,
+            )
+            
+            if file is not None:
+                question_image.image.save(
+                    f"{question.text}_{img_index}.png",
+                    file,
+                    # Отдельно сохраним через save
+                    # всю инфу сразу
+                    save=False
+                )
+            
+            question_image.save()
         
     
     # Получение задания, 
@@ -76,7 +215,7 @@ class TaskImportServices:
         
         return task
     
-    def _parse_csv(self, file: UploadedFile):
+    def _parse_csv(self, file: UploadedFile) -> list[dict[str, str]]:
         """
         Ключевой метод, выполняющий парсинг csv со словами
         
@@ -176,3 +315,24 @@ class TaskImportServices:
         data["category"] = data["category"].lower()
         
         return data
+    
+    def _get_or_create_categories(
+        self, 
+        rows: list[dict[str, str]]
+    ) -> dict[str, WordCategory]:
+        
+        # set, нужны уникальные имена категорий без повторов
+        categories_names = set()
+        
+        for row in rows:
+            categories_names.add(row["category"])
+        
+        categories = {}
+        
+        for name in categories_names:
+            category, _ = WordCategory.objects.get_or_create(
+                name=name
+            )
+            categories[name] = category
+        
+        return categories
