@@ -32,6 +32,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from WorldIT.decorators import required_type
 from english.services.task_import import TaskImportServices
+from english.services.exceptions import NotFoundError, ConflictError, ValidationError
 
 
 # Создавать задание и указывать его содержимое может либо админ, 
@@ -49,10 +50,6 @@ class TaskImportEndpoint(View):
         task_id: int
     ) -> JsonResponse:
         
-        print(
-            request.FILES.get("file")
-        )
-        
         uploaded_file = request.FILES.get("file")
         
         if uploaded_file is None:
@@ -64,10 +61,32 @@ class TaskImportEndpoint(View):
                 status=400
             )
         
-        TaskImportServices().import_file(
-            task_id=task_id,
-            file=uploaded_file
-        )
+        try:
+            words_list = TaskImportServices().import_file(
+                task_id=task_id,
+                file=uploaded_file
+            )
+        except NotFoundError as error:
+            return JsonResponse(
+                {"ok": False, "error": error.message}, 
+                status=404
+            )
         
-        return JsonResponse({"ok": True}, status=200)
-
+        except ConflictError as error:
+            return JsonResponse(
+                {"ok": False, "error": error.message}, 
+                status=409
+            )
+        
+        except ValidationError as error:
+            return JsonResponse(
+                {"ok": False, "error": error.message}, 
+                status=400
+            )
+        
+        print(words_list)
+        
+        return JsonResponse(
+            {"ok": True, "data": words_list}, 
+            status=200
+        )

@@ -4,6 +4,8 @@ import random
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
+from django.db.models import Prefetch
+from django.templatetags.static import static
 
 from WorldIT import settings
 from english.models.answer_option import AnswerOption
@@ -35,6 +37,8 @@ class TaskImportServices:
         # Количество вариантов ответа в задании типа "Слова"
         # Взято из дизайн-проекта
         self.ANSWER_OPTIONS_COUNT = 6
+        
+        self.PLACEHOLDER_IMAGE = "english/questions_placeholder/question_placeholder.png"
     
     def import_file(
             self, 
@@ -86,6 +90,81 @@ class TaskImportServices:
                         images_data[(order, 1)] # Та зображення 2 соответственно
                     )
                 )
+        
+        return self._get_words_list(task=task)
+    
+    def _get_words_list(self, task: EnglishTask) -> list[dict]:
+        """
+        Метод, возвращающий все данные необходимые 
+        клиенту после парсинга csv со словами
+        """
+        
+        steps = task.steps.select_related(
+            "category", 
+            "question"
+        ).prefetch_related(
+            Prefetch("question__options", queryset=AnswerOption.objects.order_by("order")),
+            Prefetch("question__images", queryset=QuestionImage.objects.order_by("order"))
+        ).order_by("order")
+        
+        # категории групп, на в дизайне: «Диеслова», «Займенники», «Именники» и др.
+        categories_groups = {}
+        
+        for step in steps:
+            category_name = step.category.name
+            
+            if category_name not in categories_groups.keys():
+                categories_groups[category_name] = []
+            
+            categories_groups[category_name].append(
+                self._serialize_word(step=step)
+            )
+        
+        result = []
+        
+        for category_name, words in categories_groups.items():
+            result.append({
+                "category": category_name,
+                "words": words
+            })
+        
+        return result
+    
+    def _serialize_word(self, step: EnglishTaskStep) -> dict:
+        
+        question = step.question
+        options = list(question.options.all())
+        correct = next((option for option in options if option.is_correct), None)
+
+        return {
+            "step_id": step.id,
+            "category": step.category.name,
+            "question": {
+                "id": question.id,
+                "text": question.text,
+                "allows_multiple": question.allows_multiple,
+            },
+            "translation": correct.text if correct else "",
+            "options": [self._serialize_option(option) for option in options],
+            "images": [self._serialize_image(image) for image in question.images.all()],
+        }
+    
+    def _serialize_option(self, option: AnswerOption) -> dict:
+        return {
+            "id": option.id,
+            "text": option.text,
+            "is_correct": option.is_correct,
+            "order": option.order,
+        }
+
+    def _serialize_image(self, image: QuestionImage) -> dict:
+        return {
+            "id": image.id,
+            "order": image.order,
+            "url": image.image.url if image.image else static(self.PLACEHOLDER_IMAGE),
+            "is_placeholder": image.is_placeholder,
+            "source_url": image.source_url,
+        }
     
     def _create_word_step(
             self,

@@ -1,6 +1,7 @@
 
 
 async function taskImportRequest(importUrl, formData) {
+    console.log(123);
     
     const response = await fetch(
         importUrl, 
@@ -18,6 +19,8 @@ async function taskImportRequest(importUrl, formData) {
     if (!response.ok) {
         throw new Error(responseData.error ?? "Помилка під час завантаження даних завдання");
     }
+
+    console.log(responseData);
 
     return responseData;
 }
