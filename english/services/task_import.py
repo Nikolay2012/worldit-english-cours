@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import UploadedFile
 from WorldIT import settings
 from english.models.english_task import EnglishTask
 from english.services.exceptions import NotFoundError, ConflictError, ValidationError
+from english.services.image_downloader import ImageDownloader
 
 
 class TaskImportServices:
@@ -35,8 +36,26 @@ class TaskImportServices:
         ) -> list[dict[str, str]]:
         
         task = self._get_empty_task(task_id=task_id)
+        rows = self._parse_csv(file=file)
         
-        self._parse_csv(file=file)
+        # Изображения
+        urls = {}
+
+        for order, row in enumerate(rows):
+            urls[(order, 0)] = row["image_1"]
+            urls[(order, 1)] = row["image_2"]
+        
+        images_data = ImageDownloader().download_images(
+            urls=urls
+        )
+        
+        print(images_data)
+        
+        # Категории
+        
+        # Создание шагов
+        
+        # Создание вопросов и вариантов ответа
         
     
     # Получение задания, 
@@ -92,9 +111,7 @@ class TaskImportServices:
         if not rows:
             raise ValidationError("У файлі немає жодного слова")
         
-        print(rows)
-        
-        # return rows
+        return rows
     
     def _read_text(self, file: UploadedFile) -> io.StringIO:
         """
