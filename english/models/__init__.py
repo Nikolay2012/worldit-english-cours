@@ -11,3 +11,4 @@ from .student_progress import StudentProgress
 from .theory import Theory
 from .video import Video
 from .word_category import WordCategory
+from .question_image import QuestionImage

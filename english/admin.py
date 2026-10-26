@@ -16,4 +16,5 @@ admin.site.register([
     Theory,
     Video,
     WordCategory,
+    QuestionImage
 ])

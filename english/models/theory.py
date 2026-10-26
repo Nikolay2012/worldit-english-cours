@@ -13,7 +13,7 @@ class Theory(models.Model):
     text = models.TextField()
     order = models.IntegerField()
     image = models.ImageField(
-        upload_to="courses/english/theory/",
+        upload_to="english/theory/",
         blank=True
     )
     

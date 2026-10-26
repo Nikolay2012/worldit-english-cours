@@ -9,10 +9,6 @@ class Question(models.Model):
         related_name="question"
     )
     text = models.CharField(max_length=255, blank=True)
-    image = models.ImageField(
-        upload_to="courses/english/questions/",
-        blank=True
-    )
     allows_multiple = models.BooleanField(default=False)
     
     def __str__(self):

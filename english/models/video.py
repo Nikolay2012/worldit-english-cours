@@ -11,7 +11,7 @@ class Video(models.Model):
     )
     
     file = models.FileField(
-        upload_to="courses/english/videos/",
+        upload_to="english/videos/",
         validators=[
             # пока что только эти форматы
             FileExtensionValidator(allowed_extensions=["mp4", "webm"])
@@ -20,7 +20,7 @@ class Video(models.Model):
     title = models.CharField(max_length=255)
     subtitle = models.CharField(max_length=255, blank=True, null=True)
     preview = models.ImageField(
-        upload_to="courses/english/videos/previews/",
+        upload_to="english/videos/previews/",
         blank=True,
         null=True
     )
