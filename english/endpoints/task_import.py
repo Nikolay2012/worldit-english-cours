@@ -27,13 +27,11 @@
 сейчас эндпоинт — заглушка, всегда возвращает {"ok": true}.
 """
 
-import json
-import time
-
 from django.http import HttpRequest, JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from WorldIT.decorators import required_type
+from english.services.task_import import TaskImportServices
 
 
 # Создавать задание и указывать его содержимое может либо админ, 
@@ -51,11 +49,25 @@ class TaskImportEndpoint(View):
         task_id: int
     ) -> JsonResponse:
         
-        # print(request.POST)
-        # print(request.FILES)
-        # print(task_id)
+        print(
+            request.FILES.get("file")
+        )
         
-        # time.sleep(5)
+        uploaded_file = request.FILES.get("file")
+        
+        if uploaded_file is None:
+            return JsonResponse(
+                {
+                    "ok": False,
+                    "message": "Файл не передано"
+                }, 
+                status=400
+            )
+        
+        TaskImportServices().import_file(
+            task_id=task_id,
+            file=uploaded_file
+        )
         
         return JsonResponse({"ok": True}, status=200)
 

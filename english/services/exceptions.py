@@ -32,3 +32,16 @@ class NotFoundError(Exception):
         super().__init__(message)
         
         self.message = message
+
+class ConflictError(Exception):
+    """
+        Помилка конфлікту
+        Може бути використана під час виокремлення конфлікту у запису даних до БД
+        Наприклад: при спробі додати кроки для завдання, 
+        у випадку, коли вони вже існують - ConflictError
+    """
+    
+    def __init__(self, message: str):
+        super().__init__(message)
+        
+        self.message = message
