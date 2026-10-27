@@ -1,25 +1,27 @@
 """
-Сторінка списку модулів курсу English.
+Страница списка модулей курса английского
 
 Маршрут:
-    GET /courses/english/modules/            (name="english:all_english_modules")
-    GET /courses/english/modules/?page=2     пагінація
+GET /courses/english/modules/ (name="english:all_english_modules")
+GET /courses/english/modules/?page=2 - пагинация
 
-Доступ:
-    student, mentor, manager, admin
-    (доступ для manager — уточнити в команди).
+Доступ - student, mentor, manager, admin
+(нужен ли доступ для manager - уточнить у команды)
 
-Що показує:
-    модулі курсу English (settings.ENGLISH_COURSE_ID) по 10 на сторінці,
-    у порядку id — поки в моделі Module немає order_number.
+Что показывает страница:
+-модули курса английского (settings.ENGLISH_COURSE_ID), по 10 на странице
+-модули идут по id, пока в модели Module нет order_number
 
-Контекст шаблону english/all_modules.html:
-    modules       — модулі поточної сторінки
-    page_obj      — поточна сторінка (номер, сусідні сторінки)
-    paginator     — уся вибірка (кількість сторінок)
-    is_paginated  — чи більше однієї сторінки
-    course        — курс English (назва в заголовку)
-    header_links  — хлібні крихти
+Если курса английского нет в БД, или номер страницы больше,
+чем страниц всего, будет 404
+
+Что передаётся в шаблон english/all_modules.html:
+-modules - модули текущей страницы
+-page_obj - текущая страница (номер, соседние страницы)
+-paginator - вся выборка (сколько всего страниц)
+-is_paginated - больше ли одной страницы
+-course - курс английского (название в заголовке)
+-header_links - хлебные крошки
 """
 
 from django.shortcuts import get_object_or_404

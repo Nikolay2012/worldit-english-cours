@@ -1,33 +1,33 @@
 """
-Страница задания английского курса.
+Страница задания курса английского
 
 Маршрут:
-    GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
-    (name="english:english_task", адрес собирает EnglishTask.get_absolute_url)
+GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
+(name="english:english_task", адрес собирает EnglishTask.get_absolute_url)
 
-Доступ:
-    admin, mentor, student.
+Доступ - admin, mentor, student
 
-Поиск задания:
-    задание ищется только внутри указанного урока, модуля
-    и курса English. Несогласованный адрес даёт 404.
+Задание ищется только внутри указанного урока, модуля и курса английского
+Если задание не найдено (например, его удалили):
+-модуль существует - переадресация на страницу модуля
+-модуля тоже нет - 404
 
-Поведение по ролям:
-    Персонал (admin, mentor) видит любое задание.
-    Студент видит задание, только если оно открыто для него
-    (EnglishTaskService.can_access). Иначе — редирект на страницу
-    модуля с сообщением «Це завдання ще не відкрите.»
+Кто что видит:
+-персонал (admin, mentor) видит любое задание
+-студент видит задание, только если оно ему открыто (EnglishTaskService.can_access)
+иначе - переадресация на страницу модуля с сообщением «Це завдання ще не відкрите.»
 
-Содержимое страницы (content_component):
-                    есть шаги          шагов нет
-    персонал         staff_preview      import_csv
-    студент          student_run        empty
+Что показывается на странице (content_component):
+-персонал, у задания есть шаги - staff_preview
+-персонал, шагов нет - import_csv
+-студент, у задания есть шаги - student_run
+-студент, шагов нет - empty
 
-Контекст шаблона english/task.html:
-    task               — задание
-    content_component  — путь к шаблону компонента
-    can_import         — показывать ли кнопку «Завантажити»
-    header_links       — хлебные крошки
+Что передаётся в шаблон english/task.html:
+-task - задание
+-content_component - путь к шаблону компонента
+-can_import - показывать ли кнопку «Завантажити» (персонал и шагов нет)
+-header_links - хлебные крошки
 """
 
 from django.contrib import messages
