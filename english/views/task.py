@@ -33,6 +33,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
 
@@ -67,7 +68,10 @@ class EnglishTaskView(DetailView):
     
     def get(self, request, *args, **kwargs):
         
-        self.object = self.get_object()
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return self._redirect_to_module_or_404()
         
         if not self._is_staff() and not self._student_can_acess():
             messages.info(request, "Це завдання ще не відкрите.")
@@ -75,6 +79,29 @@ class EnglishTaskView(DetailView):
         
         context = self.get_context_data(object=self.object)
         return self.render_to_response(context)
+    
+    def _redirect_to_module_or_404(self):
+        """
+        В случае, если задание не было найдено, 
+        а пользователь попытался попасть на страницу этого задания
+        
+        Его либо переадресует на страницу модуля (если модуль существует)
+        Либо выбросит 404
+        """
+        
+        module_id = self.kwargs["module_id"]
+        
+        module_exists = Module.objects.filter(
+            pk=module_id,
+            course_id=ENGLISH_COURSE_ID,
+        ).exists()
+        
+        if not module_exists:
+            raise Http404
+        
+        return redirect(
+            reverse("english:english_module", args=[module_id])
+        )
     
     def _student_can_acess(self) -> bool:
         
