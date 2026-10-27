@@ -8,7 +8,7 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/all_modules.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/module_info_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/all_modules/module_info_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -69,12 +69,12 @@ World IT
                         </div>
                     {% endfor %}
                     <div id="modalCover">
-                        {% include 'english/components/module_info_modal.html' %}
+                        {% include 'english/components/all_modules/module_info_modal.html' %}
                     </div>
                 {% endif %}
             </div>
             {% if page_obj %}
-                {% include 'english/components/pagination_container.html' with page_obj=page_obj %}
+                {% include 'english/components/all_modules/pagination_container.html' with page_obj=page_obj %}
             {% endif %}
         </div>
     </div>

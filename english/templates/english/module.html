@@ -8,8 +8,8 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/module.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/task_card.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/delete_task_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/module/task_card.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/module/delete_task_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -58,7 +58,7 @@ World IT
                             <div class="lesson-main-part-container">
                                 <div class="tasks-wrap">
                                     {% for task in lesson_and_tasks.main_lesson_tasks %}
-                                        {% include 'english/components/task_card.html' with task=task %}
+                                        {% include 'english/components/module/task_card.html' with task=task %}
                                     {% endfor %}
                                     <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>
@@ -70,7 +70,7 @@ World IT
                                 <div class="tasks-wrap">
 
                                     {% for task in lesson_and_tasks.homework_tasks %}
-                                        {% include 'english/components/task_card.html' with task=task %}
+                                        {% include 'english/components/module/task_card.html' with task=task %}
                                     {% endfor %}
                                     <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>
@@ -80,7 +80,7 @@ World IT
                 </div>
             {% endfor %}
             <div id="modalCover">
-                {% include 'english/components/delete_task_modal.html' %}
+                {% include 'english/components/module/delete_task_modal.html' %}
             </div>
         {% else %}
             <p>Уроки відсутні</p>

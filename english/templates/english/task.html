@@ -8,9 +8,9 @@ World IT
 {% block links %}
 {{ block.super }}
     <link rel="stylesheet" href="{% static 'english/css/task.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/import_csv.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/upload_csv_modal.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/message_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/task/import_csv.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/task/upload_csv_modal.css' %}">
 {% endblock %}
 
 {% block main %}
@@ -36,7 +36,7 @@ World IT
             {% include content_component %}
         </div>
         <div id="modalCover">
-            {% include 'english/components/upload_csv_modal.html' with task=task %}
+            {% include 'english/components/task/upload_csv_modal.html' with task=task %}
         </div>
     </div>
 

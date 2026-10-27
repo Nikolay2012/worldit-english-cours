@@ -150,7 +150,7 @@ class EnglishTaskView(DetailView):
         else:
             component = "student_run" if has_steps else "empty"
 
-        return f"english/components/{component}.html"
+        return f"english/components/task/{component}.html"
     
     def _is_staff(self) -> bool:
         
