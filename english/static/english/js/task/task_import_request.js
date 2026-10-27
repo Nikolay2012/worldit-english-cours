@@ -1,7 +1,6 @@
 
 
 async function taskImportRequest(importUrl, formData) {
-    console.log(123);
     
     const response = await fetch(
         importUrl, 

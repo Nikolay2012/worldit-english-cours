@@ -1,0 +1,39 @@
+#messageModal {
+    position: absolute;
+    padding-left: 16px;
+    padding-right: 16px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 1000;
+    display: flex;
+    width: max-content;
+    max-width: 512px;
+    box-sizing: border-box;
+    border: 3px solid var(--bg-muted-50);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s 0.2s;
+}
+
+#messageModal.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.2s;
+}
+
+#messageModal h3 {
+    margin: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-weight: 500;
+    font-size: 1.125rem;
+}
+
+@media (max-width: 500px) {
+    #messageModal {
+        right: 16px;
+        left: 16px;
+        width: auto;
+        max-width: none;
+    }
+}

@@ -225,7 +225,6 @@ input:focus, textarea:focus{
     background-color: var(--text-fg-primary);
 }
 
-
 .loader{
     border: 10px solid var(--text-fg-primary);
     border-top: 10px solid var(--white);

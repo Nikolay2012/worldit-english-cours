@@ -76,15 +76,21 @@ closeWordsListButton.addEventListener("click", () => {
 function isValidCsvFile(file) {
     
     if (!file.name.toLowerCase().endsWith(".csv")) {
+        uploadCsvFileName.textContent = "Підтримується: .csv";
+        showMessage("Файл має бути у форматі .csv");
         return false;
     }
 
     // Если размер файла не превышает мегабайта
     if (file.size > 1 * 1024 * 1024) {
+        uploadCsvFileName.textContent = "Підтримується: .csv";
+        showMessage("Файл не може перевищувати 1 МБ");
         return false;
     }
 
     if (file.size === 0) {
+        uploadCsvFileName.textContent = "Підтримується: .csv";
+        showMessage("Неможливо завантажити порожній файл");
         return false;
     }
 
