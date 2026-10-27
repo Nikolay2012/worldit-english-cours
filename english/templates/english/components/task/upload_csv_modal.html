@@ -1,7 +1,8 @@
 {% load static %}
 
 <div class="modal" id="uploadCsvModal"
-    data-import-url="{% url 'english:api:api_import_task_data' task.id %}">
+    data-import-url="{% url 'english:api:api_import_task_data' task.id %}"
+    data-delete-url="{% url 'english:api:api_delete_task_steps' task.id %}">
 
     <div class="row">
         <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
@@ -42,7 +43,8 @@
                 <div class="words-category-header">
                     <h4 class="words-category-title"></h4>
                     <button type="button"
-                            class="button collapse-button">
+                            class="button collapse-button"
+                            aria-expanded="true">
                         <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="chevron-up">
                     </button>
                 </div>
@@ -76,7 +78,14 @@
             </li>
         </template>
 
-        <div class="upload-csv-actions">
+        <div class="upload-csv-confirm-delete">
+            <p class="upload-csv-confirm-text">
+                Усі слова, переклади та зображення цього завдання буде видалено.
+                Цю дію не можна скасувати.
+            </p>
+        </div>
+
+        <div class="upload-csv-actions upload-csv-file-actions">
             <button type="button" class="button upload-csv-cancel" id="cancelUploadCsvButton">
                 Скасувати
             </button>
@@ -92,6 +101,15 @@
             </button>
             <button type="button" class="button upload-csv-confirm" id="closeWordsListButton">
                 Закрити
+            </button>
+        </div>
+
+        <div class="upload-csv-actions upload-csv-delete-actions">
+            <button type="button" class="button upload-csv-cancel" id="cancelDeleteListButton">
+                Скасувати
+            </button>
+            <button type="button" class="button upload-csv-confirm" id="confirmDeleteListButton">
+                Видалити
             </button>
         </div>
     </div>

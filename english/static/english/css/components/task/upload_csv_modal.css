@@ -109,12 +109,18 @@
     to   { transform: translateX(250%); }
 }
 
+/* ===== Режими модалки ===== */
+
+/* За замовчуванням видно лише вибір файлу та його кнопки */
 #uploadCsvModal .upload-csv-loading,
 #uploadCsvModal .upload-csv-list,
-#uploadCsvModal .upload-csv-list-actions {
+#uploadCsvModal .upload-csv-confirm-delete,
+#uploadCsvModal .upload-csv-list-actions,
+#uploadCsvModal .upload-csv-delete-actions {
     display: none;
 }
 
+/* Завантаження */
 #uploadCsvModal.is-loading .upload-csv-select {
     display: none;
 }
@@ -123,9 +129,10 @@
     display: block;
 }
 
+/* Список слів */
 #uploadCsvModal.is-list .upload-csv-select,
 #uploadCsvModal.is-list .upload-csv-loading,
-#uploadCsvModal.is-list .upload-csv-actions:not(.upload-csv-list-actions) {
+#uploadCsvModal.is-list .upload-csv-file-actions {
     display: none;
 }
 
@@ -133,21 +140,40 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
-    margin-top: 16px;
 }
 
 #uploadCsvModal.is-list .upload-csv-list-actions {
     display: flex;
-    flex-shrink: 0;
 }
+
+/* Підтвердження видалення накладається поверх is-list,
+   тому ці правила мають стояти нижче */
+#uploadCsvModal.is-confirm-delete .upload-csv-list,
+#uploadCsvModal.is-confirm-delete .upload-csv-list-actions {
+    display: none;
+}
+
+#uploadCsvModal.is-confirm-delete .upload-csv-confirm-delete {
+    display: block;
+}
+
+#uploadCsvModal.is-confirm-delete .upload-csv-delete-actions {
+    display: flex;
+}
+
+.upload-csv-confirm-text {
+    margin: 0;
+    color: var(--text-fg-primary);
+    text-align: center;
+}
+
+/* ===== Категорія слів ===== */
 
 .words-category {
     display: flex;
     flex-direction: column;
-    gap: 16px;
 }
 
 .words-category-header {
@@ -380,11 +406,7 @@
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
-.words-category {
-    display: flex;
-    flex-direction: column;
-}
-
+/* Згортання категорії: як у картки уроку */
 .words-category-body {
     display: grid;
     grid-template-rows: 1fr;

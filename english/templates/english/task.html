@@ -37,16 +37,16 @@ World IT
         </div>
         <div id="modalCover">
             {% include 'english/components/task/upload_csv_modal.html' with task=task %}
+            
+            <div class="modal" id="messageModal" role="status">
+                <div class="row">
+                    <h3 id="messageModalText"></h3>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="modal" id="messageModal" role="status">
-        <div class="row">
-            <h3 id="messageModalText"></h3>
-        </div>
-    </div>
-
     {% csrf_token %}
+
 {% endblock %}
 
 {% block scripts %}

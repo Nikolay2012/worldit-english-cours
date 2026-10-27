@@ -5,6 +5,7 @@
 from django.urls import path
 from english.endpoints.lesson_tasks import LessonTasksEndpoint
 from english.endpoints.task_import import TaskImportEndpoint
+from english.endpoints.task_steps import TaskStepsEndpoint
 
 app_name = "api"
 
@@ -18,5 +19,10 @@ urlpatterns = [
         "tasks/<int:task_id>/import/", 
         TaskImportEndpoint.as_view(), 
         name="api_import_task_data"
+    ),
+    path(
+        "tasks/<int:task_id>/steps/", 
+        TaskStepsEndpoint.as_view(), 
+        name="api_delete_task_steps"
     ),
 ]
