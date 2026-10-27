@@ -31,7 +31,7 @@ from django.http import HttpRequest, JsonResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from WorldIT.decorators import required_type
-from english.services.task_import import TaskImportServices
+from english.services.task_importers.word import WordImporter
 from english.services.exceptions import NotFoundError, ConflictError, ValidationError
 
 
@@ -62,7 +62,7 @@ class TaskImportEndpoint(View):
             )
         
         try:
-            words_list = TaskImportServices().import_file(
+            words_list = WordImporter().import_file(
                 task_id=task_id,
                 file=uploaded_file
             )
