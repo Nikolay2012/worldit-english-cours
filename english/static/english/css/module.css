@@ -156,6 +156,19 @@ body .create-english-task-button {
     display: block;
 }
 
+.create-english-task-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.create-english-task-button:disabled:hover {
+    background-color: #0D133F;
+}
+
+.dark-body .create-english-task-button:disabled:hover {
+    background-color: transparent;
+}
+
 @media (max-width: 500px) {
     .lesson-setting-container {
         flex-wrap: wrap;

@@ -65,13 +65,15 @@ saveLessonButtons.forEach((button) => {
             return;
         }
 
+        console.log(editedData)
+
         // Если данные урока (задания) не были изменены
         // То по нажатию кнопки "Зберегти" запрос отправлен НЕ БУДЕТ
         // Очевидно, потому что это бессмысленно
         if (
             editedData.renamed.length === 0 && 
             editedData.deleted.length === 0) {
-                lessonCard.classList.toggle("is-editing");
+                setLessonEditing(lessonCard, false);
                 return;
         }
         
@@ -80,8 +82,29 @@ saveLessonButtons.forEach((button) => {
         try {
             await lessonSaveRequest(editedData);
             lessonCard.classList.toggle("is-editing");
+
+            applySavedEdits(lessonCard);
+            setLessonEditing(lessonCard, false);
+
         } catch (error) {
             console.error(error);
         }
     });
 });
+
+function applySavedEdits(lessonCard) {
+    // Видалені на сервері — прибираємо з DOM
+    lessonCard.querySelectorAll(".task-card.is-deleted").forEach((card) => {
+        card.remove();
+    });
+
+    // Збережені назви стають «вихідними»
+    lessonCard.querySelectorAll(".task-card").forEach((card) => {
+        const input = card.querySelector(".task-name-input");
+        const name = input.value.trim();
+
+        input.value = name;
+        input.defaultValue = name;
+        card.querySelector(".task-pill-name").textContent = name;
+    });
+}

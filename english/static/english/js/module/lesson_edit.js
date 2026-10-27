@@ -19,15 +19,20 @@ changeLessonButtons.forEach((button) => {
         // Урок, кототрый редактровался до этого момента
         const editedLessonCard = document.querySelector(".lesson-card.is-editing");
         
-
-        // Урок, который редактировался до этого, 
-        // выходит из режима редактирования без сохранения изменений
-        if (editedLessonCard && editedLessonCard != lessonCard) {
-            resetLessonEdits(editedLessonCard);
-
-            editedLessonCard.classList.remove("is-editing");
+        if (editedLessonCard) {
+            setLessonEditing(editedLessonCard, false);
         }
-        
-        lessonCard.classList.toggle("is-editing");
+
+        setLessonEditing(lessonCard, true);
     });
 });
+
+function setLessonEditing(lessonCard, isEditing) {
+    lessonCard.classList.toggle("is-editing", isEditing);
+
+    const createTaskButton = lessonCard.querySelector(".create-english-task-button");
+    
+    if (createTaskButton) {
+        createTaskButton.disabled = isEditing;
+    }
+}
