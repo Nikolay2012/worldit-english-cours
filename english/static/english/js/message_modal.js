@@ -8,7 +8,8 @@ let messageTimer = null;
 function showMessage(text) {
     clearTimeout(messageTimer);
 
-    messageModalText.textContent = text
+    messageModal.style.removeProperty("display");
+    messageModalText.textContent = text;
     messageModal.classList.add("is-visible");
 
     messageTimer = setTimeout(() => {

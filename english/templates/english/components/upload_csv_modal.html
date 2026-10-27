@@ -1,7 +1,7 @@
 {% load static %}
 
 <div class="modal" id="uploadCsvModal"
-     data-import-url="{% url 'english:api:api_import_task_data' task.id %}">
+    data-import-url="{% url 'english:api:api_import_task_data' task.id %}">
 
     <div class="row">
         <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
@@ -39,12 +39,17 @@
 
         <template id="wordsCategoryTemplate">
             <section class="words-category">
-                <h4 class="words-category-title"></h4>
-
+                <div class="words-category-header">
+                    <h4 class="words-category-title"></h4>
+                    <button type="button"
+                            class="button collapse-button">
+                        <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="chevron-up">
+                    </button>
+                </div>
                 <ul class="words-list"></ul>
 
                 <button type="button" class="button add-words-button">
-                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="">
+                    <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
                     Додати слова
                 </button>
             </section>

@@ -114,7 +114,6 @@ function setUploadCsvList(isList, responseData) {
     uploadCsvTitle.textContent = isList ? "Список слів" : uploadCsvTitle.textContent.trim();
 
     if (responseData) {
-        console.log(responseData["data"]);
         renderWordsList(responseData.data);
     }
 }
