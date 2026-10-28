@@ -12,8 +12,17 @@ const confirmDeleteListButton = document.getElementById("confirmDeleteListButton
 const uploadCsvList = document.getElementById("uploadCsvList");
 const wordsCategoryTemplate = document.getElementById("wordsCategoryTemplate");
 const wordRowTemplate = document.getElementById("wordRowTemplate");
+const uploadCsvWordForm = document.getElementById("uploadCsvWordForm");
+const wordInput = document.getElementById("wordInput");
+const translationInput = document.getElementById("translationInput");
+const cancelWordButton = document.getElementById("cancelWordButton");
+const saveWordButton = document.getElementById("saveWordButton");
+const imageSlots = uploadCsvWordForm.querySelectorAll(".upload-csv-image");
+
 
 // Заголовки и подсказки
+const CREATE_WORD_TITLE = "Додати нове слово";
+const EDIT_WORD_TITLE = "Редагувати слово";
 const DEFAULT_TITLE = "Завантаження списку слів";
 const LIST_TITLE = "Список слів";
 const DELETE_LIST_TITLE = "Видалити список слів?";
@@ -21,6 +30,20 @@ const DEFAULT_FILE_HINT = "Підтримується: .csv";
 
 // Макс. размер csv - мегабайт, как MAX_CSV_SIZE на сервере
 const MAX_CSV_SIZE = 1 * 1024 * 1024;
+// Для загрузки картинок к словам
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"];
+const PLACEHOLDER_IMAGE_URL = uploadCsvModal.dataset.placeholderUrl;
+
+const wordsByStepId = new Map();
+
+let wordFormState = {
+    mode: null, 
+    stepId: null, 
+    category: null
+};
+let imageStates = [];
+
 
 // Кнопка "Завантажити"
 document.addEventListener("click", (event) => {
@@ -110,6 +133,102 @@ confirmDeleteListButton.addEventListener("click", async () => {
     }
 });
 
+uploadCsvList.addEventListener("click", (event) => {
+    const button = event.target.closest(".add-words-button");
+    
+    if (!button) {
+        return;
+    }
+
+    openWordForm(
+        "create", 
+        {
+            category: button.dataset.category
+        }
+    );
+});
+
+uploadCsvList.addEventListener("click", (event) => {
+    const row = event.target.closest(".word-row");
+
+    if (!row) {
+        return;
+    }
+
+    const word = wordsByStepId.get(Number(row.dataset.stepId));
+
+    if (!word) {
+        return;
+    }
+
+    openWordForm("edit", word);
+});
+
+uploadCsvWordForm.addEventListener("click", (event) => {
+    const slot = event.target.closest(".upload-csv-image");
+    
+    if (!slot) {
+        return;
+    }
+
+    if (event.target.closest(".upload-csv-image-delete")) {
+        removeImage(Number(slot.dataset.order));
+
+        return;
+    }
+
+    if (event.target.closest(".upload-csv-image-box")) {
+        slot.querySelector(".upload-csv-image-input").click();
+    }
+});
+
+uploadCsvWordForm.addEventListener("change", (event) => {
+    const input = event.target.closest(".upload-csv-image-input");
+
+    if (!input) {
+        return;
+    }
+
+    const file = input.files[0];
+    const order = Number(input.closest(".upload-csv-image").dataset.order);
+
+    input.value = "";
+
+    if (!file || !isValidImageFile(file)) {
+        return;
+    }
+
+    replaceImage(order, file);
+});
+
+cancelWordButton.addEventListener("click", () => {
+    closeWordForm();
+});
+
+saveWordButton.addEventListener("click", async () => {
+
+    if (!isValidWordForm()) {
+        return;
+    }
+
+    const wordsUrl = uploadCsvModal.dataset.wordsUrl;
+    const url = wordFormState.mode === "create"
+        ? wordsUrl
+        : `${wordsUrl}${wordFormState.stepId}/`;
+
+    saveWordButton.disabled = true;
+
+    try {
+        const responseData = await wordSaveRequest(url, collectWordFormData());
+        renderWordsList(responseData.data);
+        closeWordForm();
+    } catch (error) {
+        showMessage(error.message);
+    } finally {
+        saveWordButton.disabled = false;
+    }
+});
+
 function isValidCsvFile(file) {
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
@@ -161,12 +280,16 @@ function resetUploadCsvModal() {
     setSelectedFile(null);
     setUploadCsvLoading(false);
     setUploadCsvList(false);
-    uploadCsvModal.classList.remove("is-confirm-delete");
+
+    uploadCsvModal.classList.remove("is-confirm-delete", "is-create-word", "is-edit-word");
     confirmDeleteListButton.disabled = false;
+
+    resetWordForm();
 }
 
 function renderWordsList(categories) {
     uploadCsvList.replaceChildren();
+    wordsByStepId.clear();
 
     for (const category of categories) {
         uploadCsvList.append(createCategory(category));
@@ -193,11 +316,169 @@ function createWordRow(word) {
     const item = wordRowTemplate.content.firstElementChild.cloneNode(true);
     const row = item.querySelector(".word-row");
 
-    row.dataset.stepId = word.stepId;
+    row.dataset.stepId = word.step_id;
     row.querySelector(".word-text").textContent = word.question.text;
     row.querySelector(".word-translation").textContent = word.translation;
 
+    wordsByStepId.set(word.step_id, word);
+    
     return item;
+}
+
+function openWordForm(mode, word) {
+    resetWordForm();
+
+    wordFormState.mode = mode;
+
+    if (mode === "create") {
+        wordFormState.category = word.category;
+    } else {
+        wordFormState.stepId = word.step_id;
+        wordInput.value = word.question.text;
+        translationInput.value = word.translation;
+
+        for (const image of word.images) {
+            if (!image.is_placeholder) {
+                imageStates[image.order].previewUrl = image.url;
+            }
+        }
+    }
+
+    imageSlots.forEach((slot, order) => renderImageSlot(order));
+
+    uploadCsvModal.classList.add(mode === "create" ? "is-create-word" : "is-edit-word");
+    uploadCsvTitle.textContent = mode === "create" ? CREATE_WORD_TITLE : EDIT_WORD_TITLE;
+}
+
+function closeWordForm() {
+    uploadCsvModal.classList.remove("is-create-word", "is-edit-word");
+    uploadCsvTitle.textContent = LIST_TITLE;
+    resetWordForm();
+}
+
+function resetWordForm() {
+    for (const state of imageStates) {
+        revokePreview(state.previewUrl);
+    }
+
+    wordFormState = {
+        mode: null,
+        stepId: null, 
+        category: null
+    };
+
+    wordInput.value = "";
+    translationInput.value = "";
+
+    imageStates = [];
+    imageSlots.forEach((slot, order) => {
+        imageStates.push({
+            action: "keep", 
+            file: null, 
+            previewUrl: null
+        });
+        renderImageSlot(order);
+    });
+}
+
+function replaceImage(order, file) {
+    revokePreview(imageStates[order].previewUrl);
+
+    imageStates[order] = {
+        action: "replace",
+        file: file,
+        previewUrl: URL.createObjectURL(file)
+    };
+
+    renderImageSlot(order);
+}
+
+function removeImage(order) {
+    revokePreview(imageStates[order].previewUrl);
+
+    imageStates[order] = {
+        action: "remove",
+        file: null,
+        previewUrl: null
+    };
+
+    renderImageSlot(order);
+}
+
+function renderImageSlot(order) {
+    const slot = imageSlots[order];
+    const state = imageStates[order];
+
+    slot.querySelector(".upload-csv-image-preview").src = state.previewUrl || PLACEHOLDER_IMAGE_URL;
+    slot.classList.toggle("has-image", Boolean(state.previewUrl));
+}
+
+function revokePreview(url) {
+
+    if (url && url.startsWith("blob:")) {
+        URL.revokeObjectURL(url);
+    }
+}
+
+function isValidImageFile(file) {
+    const name = file.name.toLowerCase();
+
+    if (!IMAGE_EXTENSIONS.some((extension) => name.endsWith(extension))) {
+        showMessage("Зображення має бути у форматі .png, .jpg або .jpeg");
+
+        return false;
+    }
+
+    if (file.size === 0) {
+        showMessage("Неможливо завантажити порожній файл");
+
+        return false;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+        showMessage("Зображення не може перевищувати 2 МБ");
+        return false;
+    }
+
+    return true;
+}
+
+function isValidWordForm() {
+
+    if (!wordInput.value.trim()) {
+        showMessage("Введіть слово");
+        return false;
+    }
+
+    if (!translationInput.value.trim()) {
+        showMessage("Введіть переклад");
+        return false;
+    }
+
+    return true;
+}
+
+function collectWordFormData() {
+    const formData = new FormData();
+
+    formData.append("word", wordInput.value.trim());
+    formData.append("translation", translationInput.value.trim());
+
+    if (wordFormState.mode === "create") {
+        formData.append("category", wordFormState.category);
+    }
+
+    imageStates.forEach((state, order) => {
+        if (state.action === "replace") {
+            formData.append(`image_${order}`, state.file);
+        }
+
+        if (state.action === "remove" && wordFormState.mode === "edit") {
+            formData.append(`remove_image_${order}`, "1");
+        }
+    });
+
+    return formData;
 }
 
 async function deleteTaskStepsRequest(url) {
@@ -213,4 +494,25 @@ async function deleteTaskStepsRequest(url) {
     if (!response.ok || !responseData.ok) {
         throw new Error(responseData.error || "Не вдалося видалити список");
     }
+}
+
+async function wordSaveRequest(url, formData) {
+
+    console.log(formData);
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: formData
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok || !responseData.ok) {
+        throw new Error(responseData.error || "Не вдалося зберегти слово");
+    }
+
+    return responseData;
 }

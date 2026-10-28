@@ -109,9 +109,6 @@
     to   { transform: translateX(250%); }
 }
 
-/* ===== Режими модалки ===== */
-
-/* За замовчуванням видно лише вибір файлу та його кнопки */
 #uploadCsvModal .upload-csv-loading,
 #uploadCsvModal .upload-csv-list,
 #uploadCsvModal .upload-csv-confirm-delete,
@@ -120,7 +117,6 @@
     display: none;
 }
 
-/* Завантаження */
 #uploadCsvModal.is-loading .upload-csv-select {
     display: none;
 }
@@ -129,7 +125,6 @@
     display: block;
 }
 
-/* Список слів */
 #uploadCsvModal.is-list .upload-csv-select,
 #uploadCsvModal.is-list .upload-csv-loading,
 #uploadCsvModal.is-list .upload-csv-file-actions {
@@ -148,8 +143,6 @@
     display: flex;
 }
 
-/* Підтвердження видалення накладається поверх is-list,
-   тому ці правила мають стояти нижче */
 #uploadCsvModal.is-confirm-delete .upload-csv-list,
 #uploadCsvModal.is-confirm-delete .upload-csv-list-actions {
     display: none;
@@ -163,13 +156,33 @@
     display: flex;
 }
 
+#uploadCsvModal .upload-csv-word-form,
+#uploadCsvModal .upload-csv-word-actions {
+    display: none;
+}
+
+#uploadCsvModal.is-create-word .upload-csv-list,
+#uploadCsvModal.is-create-word .upload-csv-list-actions,
+#uploadCsvModal.is-edit-word .upload-csv-list,
+#uploadCsvModal.is-edit-word .upload-csv-list-actions {
+    display: none;
+}
+
+#uploadCsvModal.is-create-word .upload-csv-word-form,
+#uploadCsvModal.is-edit-word .upload-csv-word-form {
+    display: flex;
+}
+
+#uploadCsvModal.is-create-word .upload-csv-word-actions,
+#uploadCsvModal.is-edit-word .upload-csv-word-actions {
+    display: flex;
+}
+
 .upload-csv-confirm-text {
     margin: 0;
     color: var(--text-fg-primary);
-    text-align: center;
+    text-align: left;
 }
-
-/* ===== Категорія слів ===== */
 
 .words-category {
     display: flex;
@@ -336,6 +349,111 @@
     height: 16px;
 }
 
+.upload-csv-word-form {
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.upload-csv-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.upload-csv-field-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.upload-csv-field-input {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    border: 1px solid #E4E4E7;
+    border-radius: 6px;
+    background-color: transparent;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text-main);
+}
+
+.upload-csv-field-input::placeholder {
+    color: var(--text-fg-primary);
+}
+
+.upload-csv-field-input:focus {
+    outline: none;
+    border-color: #0D133F;
+}
+
+.upload-csv-images {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 236px));
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.upload-csv-image {
+    position: relative;
+    padding: 22px 24px 0 0;
+}
+
+.upload-csv-image-box {
+    width: 100%;
+    aspect-ratio: 212 / 242;
+    padding: 0;
+    display: flex;
+    border: 1px dashed #18181B;
+    border-radius: 8px;
+    background-color: transparent;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.upload-csv-image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.dark-body #uploadCsvModal .upload-csv-image-preview {
+    filter: none;
+}
+
+.upload-csv-image-delete {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #E4E4E7;
+    border-radius: 6px;
+    background-color: #FFF;
+    cursor: pointer;
+}
+
+.upload-csv-image-delete img {
+    width: 16px;
+    height: 16px;
+}
+
+.upload-csv-image.has-image .upload-csv-image-delete {
+    display: flex;
+}
+
+.upload-csv-image-delete:hover {
+    background-color: rgba(35, 35, 55, 0.05);
+}
+
 .dark-body #uploadCsvModal .closeModal {
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
@@ -406,7 +524,31 @@
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
-/* Згортання категорії: як у картки уроку */
+.dark-body .upload-csv-field-input {
+    border-color: #FAF8FF;
+}
+
+.dark-body .upload-csv-field-input:focus {
+    border-color: white;
+}
+
+.dark-body .upload-csv-image-box {
+    border-color: white;
+}
+
+.dark-body .upload-csv-image-delete {
+    background-color: var(--bg-primary);
+    border-color: #FAF8FF;
+}
+
+.dark-body .upload-csv-image-delete:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark-body .upload-csv-image-delete img {
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
+}
+
 .words-category-body {
     display: grid;
     grid-template-rows: 1fr;
@@ -452,5 +594,18 @@
 
     .word-progress {
         gap: 6px;
+    }
+
+    .upload-csv-images {
+        gap: 12px;
+    }
+
+    .upload-csv-image {
+        padding: 18px 18px 0 0;
+    }
+
+    .upload-csv-image-delete {
+        width: 36px;
+        height: 36px;
     }
 }

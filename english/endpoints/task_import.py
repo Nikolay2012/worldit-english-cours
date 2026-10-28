@@ -81,8 +81,6 @@ class TaskImportEndpoint(View):
                 status=400
             )
         
-        print(words_list)
-        
         return JsonResponse(
             {"ok": True, "data": words_list}, 
             status=200

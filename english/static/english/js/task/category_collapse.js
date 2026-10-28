@@ -9,5 +9,4 @@ uploadCsvList.addEventListener("click", (event) => {
 
     const category = button.closest(".words-category");
     const isCollapsed = category.classList.toggle("collapsed");
-    console.log("после toggle:", isCollapsed, category);
 });
