@@ -77,7 +77,7 @@ class WordImporter(BaseEnglishTaskImporter):
         
         # Изображения
         urls = {}
-
+        
         for order, row in enumerate(rows):
             urls[(order, 0)] = row["image_1"]
             urls[(order, 1)] = row["image_2"]

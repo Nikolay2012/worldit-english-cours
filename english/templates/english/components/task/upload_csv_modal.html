@@ -3,7 +3,8 @@
 <div class="modal" id="uploadCsvModal"
     data-import-url="{% url 'english:api:api_import_task_data' task.id %}"
     data-delete-url="{% url 'english:api:api_delete_task_steps' task.id %}"
-    data-words-url="{% url 'english:api:api_create_word' task.id %}"
+    data-create-word-url="{% url 'english:api:api_create_word' task.id %}"
+    data-update-word-url="{% url 'english:api:api_update_word' task.id 0 %}"
     data-placeholder-url="{% static 'english/img/questions_placeholder/questions_placeholder.png' %}">
 
     <div class="row">

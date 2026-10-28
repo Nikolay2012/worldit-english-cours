@@ -211,10 +211,9 @@ saveWordButton.addEventListener("click", async () => {
         return;
     }
 
-    const wordsUrl = uploadCsvModal.dataset.wordsUrl;
     const url = wordFormState.mode === "create"
-        ? wordsUrl
-        : `${wordsUrl}${wordFormState.stepId}/`;
+        ? uploadCsvModal.dataset.createWordUrl
+        : uploadCsvModal.dataset.updateWordUrl.replace(/0\/$/, `${wordFormState.stepId}/`);
 
     saveWordButton.disabled = true;
 
@@ -497,8 +496,6 @@ async function deleteTaskStepsRequest(url) {
 }
 
 async function wordSaveRequest(url, formData) {
-
-    console.log(formData);
 
     const response = await fetch(url, {
         method: "POST",
