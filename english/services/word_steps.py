@@ -8,6 +8,7 @@ from PIL import Image
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
+from django.db.models import Max
 
 from WorldIT import settings
 from english.models.answer_option import AnswerOption
@@ -33,8 +34,59 @@ class WordStepService(WordImporter):
         # Всего две картинки (QuestionImage) для одного вопроса
         self.IMAGES_COUNT = 2
     
-    def create(self, task_id: int, data, files):
-        pass
+    def create(self, task_id: int, data, files) -> list[dict]:
+        
+        task = self._get_task(task_id=task_id)
+        category = self._get_category(name=data.get("category", ""))
+        word, translation = self._parse_word(data=data)
+        
+        images = self._parse_images(files=files)
+        
+        self._validate_unique_translation(
+            task=task, 
+            translation=translation
+        )
+        
+        # К уже имеющимся переводам добавляем новый
+        all_translations = self._get_task_translations(task=task)
+        all_translations.add(translation)
+        
+        if len(all_translations - {translation}) < self.ANSWER_OPTIONS_COUNT - 1:
+            raise ValidationError(
+                f"У завданні має бути щонайменше {self.ANSWER_OPTIONS_COUNT - 1} інших перекладів"
+            )
+        
+        # Получаем порядковый номер последнего шага
+        max_order = task.steps.aggregate(Max("order"))["order__max"]
+        # Создаём порядковый номер для нового шага
+        # Если шагов не было - то 0
+        # Если были, то к полученному выше max_order прибавляем 1
+        order = 0 if max_order is None else max_order + 1
+        
+        with transaction.atomic():
+            # Внутри транзакции запускаем создание EnglishTaskStep
+            # Метод ._create_word_step() унаследован из WordImporter
+            # А в самом же методе ._create_word_step(), 
+            # выполняется создание группы записей моделей Question, QuestionImage, AnswerOption
+            # По этому внутри транзакции
+            self._create_word_step(
+                task=task,
+                order=order,
+                row={
+                    "word": word,
+                    "translation": translation,
+                    "image_1": "",
+                    "image_2": ""
+                },
+                category=category,
+                all_translations=all_translations,
+                image_files=(images.get(0), images.get(1))
+            )
+        
+        # Возвращаем полный список слов задания
+        # Ипользуется метод ._get_words_list(), 
+        # который создан в родительском WordImporter
+        return self._get_words_list(task=task)
     
     def update(
             self, 
@@ -47,7 +99,6 @@ class WordStepService(WordImporter):
         task = self._get_task(task_id=task_id)
         step = self._get_step(task=task, step_id=step_id)
         word, translation = self._parse_word(data=data)
-        
         
         images = self._parse_images(files=files)
         
