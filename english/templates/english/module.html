@@ -58,7 +58,7 @@ World IT
                             <div class="lesson-main-part-container">
                                 <div class="tasks-wrap">
                                     {% for task in lesson_and_tasks.main_lesson_tasks %}
-                                        {% include 'english/components/module/task_card.html' with task=task %}
+                                        {% include 'english/components/module/task_card.html' with task=task is_staff=is_staff opened_task_ids=opened_task_ids only %}
                                     {% endfor %}
                                     <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>
@@ -70,7 +70,7 @@ World IT
                                 <div class="tasks-wrap">
 
                                     {% for task in lesson_and_tasks.homework_tasks %}
-                                        {% include 'english/components/module/task_card.html' with task=task %}
+                                        {% include 'english/components/module/task_card.html' with task=task is_staff=is_staff opened_task_ids=opened_task_ids only %}
                                     {% endfor %}
                                     <p class="page-subtitle tasks-empty">Завдання відсутні</p>
                                 </div>

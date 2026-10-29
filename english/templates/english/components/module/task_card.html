@@ -6,7 +6,7 @@ data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
 >
     <a 
     class="task-card-link"
-    {% if task.is_available == False %}
+    {% if not is_staff and task.id not in opened_task_ids %}
         disabled="true"
     {% else %}
         href="{{ task.get_absolute_url }}"
@@ -14,13 +14,13 @@ data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
     ></a>
 
     <div class="task-folder">
-        {% if task.is_available == False %}
+        {% if not is_staff and task.id not in opened_task_ids %}
             <img class="task-folder-img" src="{% static 'english/img/tasks/folders/grayFolder.svg' %}" alt="folder">
         {% else %}
             <img class="task-folder-img" src="{% static 'english/img/tasks/folders/standardFolder.svg' %}" alt="folder">
         {% endif %}
 
-        {% if task.is_available == False %}
+        {% if not is_staff and task.id not in opened_task_ids %}
             <img class="task-folder-icon" src="{% static 'english/img/tasks/icons/lock.svg' %}" alt="lock">
         {% else %}
             <img class="task-folder-icon" src="{% static 'english/img/tasks/icons/'|add:task.icon|add:'.svg' %}" alt="{{ task.icon }}">

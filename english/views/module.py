@@ -41,6 +41,7 @@ from WorldIT import settings
 from WorldIT.decorators import required_type
 from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask
+from english.models.open_english_task import OpenEnglishTask
 
 
 @method_decorator(
@@ -84,14 +85,15 @@ class ModuleView(ListView):
                 to_attr="homework_tasks"
             )
         )
-        
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
         context.update(
             module=self.module,
+            is_staff=self._is_staff(),
             header_links=self._get_header_links(),
+            opened_task_ids=self._get_opened_task_ids(),
             **self._get_permissions()
         )
         
@@ -117,3 +119,32 @@ class ModuleView(ListView):
             "can_edit": is_admin,
             "can_add": is_admin or is_mentor
         }
+    
+    def _is_staff(self) -> bool:
+        
+        account_types = self.request.user.account_types
+        
+        for staff_type in ["admin", "mentor"]:
+            if staff_type in account_types:
+                return True
+        
+        return False
+    
+    def _get_student(self):
+        return getattr(self.request.user, "profile_student", None)
+    
+    def _get_opened_task_ids(self) -> set[int]:
+        
+        student = self._get_student()
+        
+        if student is None:
+            return set()
+        
+        return set(
+            OpenEnglishTask.objects.filter(
+                student=student,
+                task__lesson__module=self.module,
+                task__is_available=True
+            # flat=True, чтобы возвращались чисто значения, а не кортежи
+            ).values_list("task_id", flat=True)
+        )
