@@ -36,11 +36,11 @@ from django.core.files.base import ContentFile
 class ImageDownloader:
     def __init__(self):
         
-        self.MAX_IMAGES_PARALLEL_DOWNLOAD = 6
+        self.MAX_IMAGES_PARALLEL_DOWNLOAD = 3
         self.MAX_IMAGE_SIZE = 2 * 1024 * 1024
         self.TIMEOUT = aiohttp.ClientTimeout(
-            total=8,
-            connect=2
+            total=15,
+            connect=5
         )
     
     def download_images(self, urls: dict) -> dict:
@@ -100,21 +100,20 @@ class ImageDownloader:
             try:
                 
                 async with session.get(url) as response:
+                    
                     if response.status != 200:
                         return None
                     
-                    if not response.headers.get("Content-Type", ""):
+                    if not response.headers.get("Content-Type", "").startswith("image/"):
                         return None
                     
-                    # Пытаемся прочесть на один байт больше максимального размера
-                    # Если файл больше self.MAX_IMAGE_SIZE, 
-                    # то добавленный байт будет свидетельством о том, что файл действительно больше разрешенного
-                    content = await response.content.read(
-                        self.MAX_IMAGE_SIZE + 1
-                    )
+                    content = bytearray()
                     
-                    if len(content) > self.MAX_IMAGE_SIZE:
-                        return None
+                    async for chunk in response.content.iter_chunked(64 * 1024):
+                        content.extend(chunk)
+                        
+                        if len(content) > self.MAX_IMAGE_SIZE:
+                            return None
                 
                 # Проверка на то, что сказанные байты являются изображением
                 # через pil удобнее
@@ -125,4 +124,4 @@ class ImageDownloader:
             except Exception:
                 return None
         
-        return ContentFile(content=content)
+        return ContentFile(content=bytes(content))

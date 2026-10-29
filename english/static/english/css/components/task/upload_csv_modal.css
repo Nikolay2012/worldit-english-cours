@@ -448,6 +448,11 @@
 
 .upload-csv-image.has-image .upload-csv-image-delete {
     display: flex;
+    background-color: white;
+}
+
+.upload-csv-image.has-image .upload-csv-image-delete:hover {
+    background-color: var(--bg-acent);
 }
 
 .upload-csv-image-delete:hover {
