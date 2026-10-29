@@ -30,6 +30,10 @@ changeLessonButtons.forEach((button) => {
 function setLessonEditing(lessonCard, isEditing) {
     lessonCard.classList.toggle("is-editing", isEditing);
 
+    if (isEditing) {
+        lessonCard.classList.remove("collapsed");
+    }
+
     const createTaskButton = lessonCard.querySelector(".create-english-task-button");
     
     if (createTaskButton) {

@@ -18,6 +18,8 @@ const translationInput = document.getElementById("translationInput");
 const cancelWordButton = document.getElementById("cancelWordButton");
 const saveWordButton = document.getElementById("saveWordButton");
 const imageSlots = uploadCsvWordForm.querySelectorAll(".upload-csv-image");
+const uploadCsvCloseIcon = uploadCsvModal.querySelector(".closeModal");
+const modalCover = document.getElementById("modalCover");
 
 
 // Заголовки и подсказки
@@ -226,6 +228,19 @@ saveWordButton.addEventListener("click", async () => {
     } finally {
         saveWordButton.disabled = false;
     }
+});
+
+uploadCsvCloseIcon.addEventListener("click", () => {
+    reloadIfListLoaded();
+});
+
+modalCover.addEventListener("mousedown", (event) => {
+    
+    if (event.target !== modalCover) {
+        return;
+    }
+
+    reloadIfListLoaded();
 });
 
 function isValidCsvFile(file) {
@@ -478,6 +493,12 @@ function collectWordFormData() {
     });
 
     return formData;
+}
+
+function reloadIfListLoaded() {
+    if (uploadCsvModal.classList.contains("is-list")) {
+        window.location.reload();
+    }
 }
 
 async function deleteTaskStepsRequest(url) {
