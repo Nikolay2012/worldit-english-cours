@@ -59,3 +59,9 @@
 .dark-body .task-run-progress-track {
     background-color: #545879;
 }
+
+@media (max-width: 500px) {
+    .card .task-run-progress-title {
+        font-weight: 600;
+    }
+}

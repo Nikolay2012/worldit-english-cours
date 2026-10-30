@@ -121,10 +121,6 @@
     .question-step-word {
         font-size: 2rem;
     }
-
-    .question-step-options {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (max-width: 500px) {
@@ -137,10 +133,6 @@
     }
 
     .question-step-options {
-        gap: 8px;
-    }
-
-    .question-step-option {
-        min-height: 44px;
+        gap: 16px;
     }
 }
