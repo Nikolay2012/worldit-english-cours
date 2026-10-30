@@ -146,9 +146,9 @@ class EnglishTaskView(DetailView):
     def _get_content_component(self, has_steps: bool) -> str:
         
         if self._is_staff():
-            component = "staff_preview" if has_steps else "import_csv"
+            component = "run" if has_steps else "import_csv"
         else:
-            component = "student_run" if has_steps else "empty"
+            component = "run" if has_steps else "empty"
 
         return f"english/components/task/{component}.html"
     

@@ -1,0 +1,41 @@
+{% load static %}
+
+<div class="task-run" id="taskRun"
+    data-next-step-url="{% url 'english:api:api_next_step' task.id %}"
+    data-answer-url="{% url 'english:api:api_step_answer' task.id 0 %}"
+    data-module-url="{% url 'english:english_module' task.lesson.module_id %}">
+
+    <div class="task-run-step" id="taskRunStep">
+        <!-- temporary -->
+        <div class="question-step">
+            <div class="question-step-prompt is-text">
+                <span class="question-step-word">she</span>
+                <img class="question-step-image" src="" alt="">
+            </div>
+
+            <div class="question-step-options">
+                <button type="button" class="question-step-option">Він</button>
+                <button type="button" class="question-step-option">Ти</button>
+                <button type="button" class="question-step-option">Вона</button>
+                <button type="button" class="question-step-option">Ми</button>
+                <button type="button" class="question-step-option">Ви</button>
+                <button type="button" class="question-step-option">Вони</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="task-run-progress">
+        <p class="task-run-progress-title">Ваш прогрес</p>
+
+        <div class="task-run-progress-track">
+            <div class="task-run-progress-bar" id="taskRunProgressBar"></div>
+        </div>
+
+        <div class="task-run-progress-labels">
+            <span id="taskRunProgressValue">0%</span>
+            <span>100%</span>
+        </div>
+    </div>
+</div>
+
+{% include "english/components/task/steps/question.html" %}

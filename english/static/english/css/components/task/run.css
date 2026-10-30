@@ -1,0 +1,61 @@
+.card-container .card {
+    padding: 24px;
+}
+
+.task-run {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.task-run-step {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.task-run-progress {
+    padding-top: 16px;
+    border-top: 1px solid #EDEDF2;
+}
+
+.task-run-progress-title {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.task-run-progress-track {
+    height: 6px;
+    border-radius: 3px;
+    background-color: #FCE3CC;
+    overflow: hidden;
+}
+
+.task-run-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: 3px;
+    background-color: #F98232;
+    transition: width 0.3s ease;
+}
+
+.task-run-progress-labels {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-fg-primary);
+}
+
+.dark-body .task-run-progress {
+    border-color: #252A5266;
+}
+
+.dark-body .task-run-progress-track {
+    background-color: #545879;
+}
