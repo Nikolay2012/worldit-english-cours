@@ -30,9 +30,13 @@ LessonTasksService(lesson_id, deleted=[...], renamed=[...]).update()
 статусы ответа выставляет эндпоинт
 """
 
+from django.core.files.storage import default_storage
+from django.db import transaction
+
 from WorldIT import settings
 from courses.models import Lesson
 from english.models.english_task import EnglishTask
+from english.models.question_image import QuestionImage
 from english.services.exceptions import ValidationError, NotFoundError
 
 
@@ -169,7 +173,29 @@ class LessonTasksService:
 
     def _delete_tasks(self, deleted_ids: list[int]):
         
-        EnglishTask.objects.filter(
-            lesson=self.lesson,
-            pk__in=deleted_ids
-        ).delete()
+        image_names = list(
+            QuestionImage.objects.filter(
+                question__step__task__lesson=self.lesson,
+                question__step__task_id__in=deleted_ids
+            ).exclude(
+                image__isnull=True
+            ).exclude(
+                image=""
+            # flat=true для получения конкретно значений, а не кортежей
+            ).values_list("image", flat=True)
+        )
+        
+        with transaction.atomic():
+            EnglishTask.objects.filter(
+                lesson=self.lesson,
+                pk__in=deleted_ids
+            ).delete()
+            
+            transaction.on_commit(
+                lambda: self._delete_files(image_names=image_names)
+            )
+    
+    def _delete_files(self, image_names: list[str]):
+        
+        for name in image_names:
+            default_storage.delete(name)
