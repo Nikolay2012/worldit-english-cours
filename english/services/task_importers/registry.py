@@ -1,5 +1,23 @@
 """
+Реестр импортёров заданий из csv
 
+Выбирает импортёр по типу задания (поле type у EnglishTask)
+Используется эндпоинтом TaskImportEndpoint
+
+Использование:
+TaskImportersRegistry().get_task_importer(task_id).import_file(task_id, file)
+
+Что делает метод .get_task_importer():
+-Получает тип задания по task_id (только задания курса английского)
+-Находит класс импортёра для этого типа в TASK_IMPORTERS
+-Возвращает объект импортёра
+
+Чтобы добавить импорт для нового типа задания,
+достаточно добавить его импортёр в TASK_IMPORTERS
+
+Из ошибок, могут подниматься:
+-NotFoundError - задание не найдено или не из курса английского
+-ValidationError - для типа задания нет импортёра
 """
 
 from django.conf import settings
