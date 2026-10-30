@@ -118,6 +118,7 @@ class EnglishTaskView(DetailView):
             can_import=self._is_staff() and not has_steps,
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
+            can_open_words_list=has_steps and self.object.type == "words",
         )
         
         return context
@@ -149,7 +150,7 @@ class EnglishTaskView(DetailView):
             component = "run" if has_steps else "import_csv"
         else:
             component = "run" if has_steps else "empty"
-
+            
         return f"english/components/task/{component}.html"
     
     def _is_staff(self) -> bool:

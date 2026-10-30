@@ -31,6 +31,13 @@ World IT
                 Завантажити
             </button>
         {% endif %}
+
+        {% if can_open_words_list %}
+            <button type="button" class="button words-list-button">
+                <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="list">
+                Список слів
+            </button>
+        {% endif %}
     </div>
 
     <div class="card-container">
@@ -58,4 +65,6 @@ World IT
     <script src="{% static 'english/js/task/category_collapse.js' %}"></script>
     <script src="{% static 'english/js/task/task_import_request.js' %}"></script>
     <script src="{% static 'english/js/task/upload_csv.js' %}"></script>
+    <script src="{% static 'english/js/task/task_runner.js' %}"></script>
+    <script src="{% static 'english/js/task/renderers/question.js' %}"></script>
 {% endblock %}
