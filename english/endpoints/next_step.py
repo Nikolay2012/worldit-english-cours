@@ -24,6 +24,7 @@ class NextStepEndpoint(View):
             task_id: int
         ) -> JsonResponse:
         
+        # текущий шаг
         after = request.GET.get("after")
         
         try:

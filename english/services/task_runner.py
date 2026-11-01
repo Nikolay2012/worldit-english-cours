@@ -80,6 +80,7 @@ class TaskRunner:
         }
     
     def _student_answer(self, step_id: int, data: dict) -> dict:
+        
         return self._staff_answer(
             step_id=step_id,
             data=data

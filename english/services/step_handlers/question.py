@@ -65,7 +65,7 @@ class QuestionHandler(StepHandler):
         
         # Из вариантов записи вопроса (текстом или картинкой) 
         # случайно выбираем один из них
-        prompt_choice = random.choice(["text"] + images)
+        prompt_choice = random.choice(["text", "text"] + images)
         
         # Если попался текст, то на странице будет отображен текст вопроса
         if prompt_choice == "text":
