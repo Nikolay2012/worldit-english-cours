@@ -17,7 +17,7 @@ class QuestionHandler(StepHandler):
         
         question: Question = step.question
         
-        answer_options = list(question.objects.all())
+        answer_options = list(question.options.all())
         # КАк и было решено: сервер перемешивает варианты ответа
         # Для того чтобы исходный порядок нельзя было восстановить на клиенте
         random.shuffle(answer_options)
