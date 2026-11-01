@@ -1,8 +1,41 @@
 """
+Ядро прохождения задания
 
+Используется эндпоинтами NextStepEndpoint (получение шага)
+и StepAnswerEndpoint (ответ на шаг)
+
+Использование:
+TaskRunner(task_id, user).get_next_step(after_step_id) - следующий шаг и прогресс
+TaskRunner(task_id, user).answer(step_id, data) - проверка ответа и прогресс
+
+Ядро не знает, как устроен конкретный шаг
+Сборку данных шага и проверку ответа выполняет обработчик шага,
+который ядро получает из StepHandlerRegistry по виду шага (kind)
+
+Задание ищется сразу при создании (в __init__),
+только среди заданий курса английского
+
+Логика разделена по ролям:
+
+Персонал (admin, mentor) - без записей в БД:
+-шаги идут по порядку (order): первый, или следующий после after_step_id
+-ответ только проверяется, ничего не записывается
+-прогресс считается по позиции шага в задании
+-после обновления страницы прохождение начинается с первого шага
+
+Студент:
+-пока использует логику персонала
+-дальше: выбор шага по его ответам (StudentAnswer), запись ответов и прогресса (StudentProgress)
+
+Возвращаемые данные:
+-.get_next_step() - {"step": данные шага или None, "progress": {"percent", "is_completed"}}
+-.answer() - {"is_correct": bool, "progress": {"percent", "is_completed"}}
+Если step = None - задание пройдено до конца
+
+Из ошибок, могут подниматься:
+-NotFoundError - задание или шаг не найдены в этом задании
+-ValidationError - от обработчика шага (некорректный ответ) или реестра (неизвестный вид шага)
 """
-
-from xml.sax import handler
 
 from django.db.models import QuerySet
 
@@ -69,7 +102,7 @@ class TaskRunner:
         )
         
         total_steps_count = steps.count()
-        completed_steps_count = steps.filter(order__lt=step.order).count()
+        completed_steps_count = steps.filter(order__lte=step.order).count()
         
         return {
             "is_correct": handler.check(step=step, data=data),
@@ -99,7 +132,7 @@ class TaskRunner:
             after_step: EnglishTaskStep = steps.filter(pk=after_step_id).first()
             
             if after_step is None:
-                return NotFoundError(
+                raise NotFoundError(
                     "Крок не знайдено в цьому завданні"
                 )
             
@@ -178,7 +211,6 @@ class TaskRunner:
         ).first()
         
         if task is None:
-            print("Завдання не знайдено")
             raise NotFoundError("Завдання не знайдено")
         
         return task
