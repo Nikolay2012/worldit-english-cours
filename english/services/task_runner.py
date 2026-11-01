@@ -2,6 +2,8 @@
 
 """
 
+from xml.sax import handler
+
 from django.db.models import QuerySet
 
 from WorldIT import settings
@@ -40,6 +42,48 @@ class TaskRunner:
             "step": self._get_step_data(step=step) if step else None,
             "progress": progress
         }
+    
+    def answer(self, step_id: int, data: dict) -> dict:
+        
+        if self._is_staff():
+            return self._staff_answer(
+                step_id=step_id,
+                data=data
+            )
+        else:
+            return self._student_answer(
+                step_id=step_id,
+                data=data
+            )
+    
+    def _staff_answer(self, step_id: int, data: dict) -> dict:
+        
+        steps = self._get_steps()
+        step = self._get_task_step(
+            steps=steps,
+            step_id=step_id
+        )
+        
+        handler = StepHandlerRegistry().get_handler(
+            kind=step.kind
+        )
+        
+        total_steps_count = steps.count()
+        completed_steps_count = steps.filter(order__lt=step.order).count()
+        
+        return {
+            "is_correct": handler.check(step=step, data=data),
+            "progress": {
+                "percent": round(completed_steps_count / total_steps_count * 100),
+                "is_completed": completed_steps_count == total_steps_count
+            }
+        }
+    
+    def _student_answer(self, step_id: int, data: dict) -> dict:
+        return self._staff_answer(
+            step_id=step_id,
+            data=data
+        )
     
     def _get_staff_next_step(
             self, 
@@ -133,6 +177,20 @@ class TaskRunner:
         ).first()
         
         if task is None:
+            print("Завдання не знайдено")
             raise NotFoundError("Завдання не знайдено")
         
         return task
+    
+    def _get_task_step(
+            self, 
+            steps: QuerySet[EnglishTaskStep], 
+            step_id: int
+        ) -> EnglishTaskStep:
+        
+        step = steps.filter(pk=step_id).first()
+        
+        if step is None:
+            raise NotFoundError("Крок не знайдено в цьому завданні")
+        
+        return step

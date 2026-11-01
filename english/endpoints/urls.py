@@ -40,12 +40,12 @@ urlpatterns = [
     ),
     
     path(
-        "tasks/<int:task_id>/next-step", 
+        "tasks/<int:task_id>/next-step/", 
         NextStepEndpoint.as_view(), 
         name="api_next_step"
     ),
     path(
-        "tasks/<int:task_id>/steps/<int:step_id>/answer", 
+        "tasks/<int:task_id>/steps/<int:step_id>/answer/", 
         StepAnswerEndpoint.as_view(), 
         name="api_step_answer"
     ),
