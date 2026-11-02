@@ -26,6 +26,8 @@
 Из ошибок, может подниматься ValidationError:
 -option_id не передан или не число
 -вариант ответа не принадлежит вопросу этого шага
+
+.save_answer_details() - запись выбранного варианта в ответ студента (selected_options)
 """
 
 import random
@@ -33,6 +35,7 @@ import random
 from english.models.answer_option import AnswerOption
 from english.models.english_task_step import EnglishTaskStep
 from english.models.question import Question
+from english.models.student_answer import StudentAnswer
 from english.services.exceptions import ValidationError
 from english.services.step_handlers.base import StepHandler
 
@@ -62,13 +65,33 @@ class QuestionHandler(StepHandler):
     
     def check(self, step: EnglishTaskStep, data: dict) -> bool:
         
+        return self._get_option(
+            step=step, 
+            data=data
+        ).is_correct
+    
+    def save_answer_details(
+            self, 
+            answer: StudentAnswer, 
+            step: EnglishTaskStep, 
+            data: dict
+        ):
+        
+        answer.selected_options.set(
+            [
+                self._get_option(step=step, data=data)
+            ]
+        )
+    
+    def _get_option(self, step: EnglishTaskStep, data: dict) -> AnswerOption:
+        
         try:
             option_id = int(data.get("option_id"))
         except Exception as error:
             raise ValidationError(
                 "Некоректний варіант відповіді"
             ) from error
-        
+            
         option: AnswerOption = step.question.options.filter(
             pk=option_id
         ).first()
@@ -77,8 +100,8 @@ class QuestionHandler(StepHandler):
             raise ValidationError(
                 "Варіант відповіді не належить цьому кроку завдання"
             )
-        
-        return option.is_correct
+            
+        return option
     
     def _get_prompt(self, question: Question) -> dict:
         

@@ -21,6 +21,7 @@
 """
 
 from english.models.english_task_step import EnglishTaskStep
+from english.models.student_answer import StudentAnswer
 
 
 class StepHandler:
@@ -33,4 +34,15 @@ class StepHandler:
     # Метод анализа предоставленного пользователем (админом/студентом/ментором) ответа
     # Реализуется QuestioHandler, SentencesHandler и прочими
     def check(self, step: EnglishTaskStep, data: dict) -> bool:
+        raise NotImplementedError
+    
+    # Метод записи данных ответа студента, 
+    # а именно - с какими AnswerOption's связан StudentAnswer
+    def save_answer_details(
+            self, 
+            answer: StudentAnswer, 
+            step: EnglishTaskStep, 
+            data: dict
+        ):
+        
         raise NotImplementedError

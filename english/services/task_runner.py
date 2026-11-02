@@ -16,16 +16,24 @@ TaskRunner(task_id, user).answer(step_id, data) - проверка ответа 
 только среди заданий курса английского
 
 Логика разделена по ролям:
-
-Персонал (admin, mentor) - без записей в БД:
+Персонал (admin) - без записей в БД:
 -шаги идут по порядку (order): первый, или следующий после after_step_id
 -ответ только проверяется, ничего не записывается
 -прогресс считается по позиции шага в задании
 -после обновления страницы прохождение начинается с первого шага
 
 Студент:
--пока использует логику персонала
--дальше: выбор шага по его ответам (StudentAnswer), запись ответов и прогресса (StudentProgress)
+-шаги задания делятся по order на выборки по 6 слов (WORDS_BATCH_SIZE)
+-студент проходит выборки по очереди: следующая открывается,
+когда у всех слов текущей по 6 правильных ответов (REQUIRED_CORRECT_ANSWERS)
+-в выборке показывается случайное слово среди тех,
+у кого правильных ответов меньше всего, кроме последнего отвеченного
+-показанный, но не отвеченный шаг хранится в StudentProgress.current_step
+и возвращается снова при обновлении страницы
+-на один показ - один ответ: после ответа current_step обнуляется
+-каждый ответ записывается в StudentAnswer,
+прогресс (StudentProgress) пересчитывается после каждого ответа
+-процент - правильные ответы / (шагов × 6)
 
 Возвращаемые данные:
 -.get_next_step() - {"step": данные шага или None, "progress": {"percent", "is_completed"}}
@@ -34,20 +42,23 @@ TaskRunner(task_id, user).answer(step_id, data) - проверка ответа 
 
 Из ошибок, могут подниматься:
 -NotFoundError - задание или шаг не найдены в этом задании
--ValidationError - от обработчика шага (некорректный ответ) или реестра (неизвестный вид шага)
+-ValidationError - от обработчика шага (некорректный ответ), реестра (неизвестный вид шага)
+или повторный ответ на уже отвеченный показ
 """
 
 import random
 
+from django.db import transaction
 from django.db.models import QuerySet
 from django.db.models.aggregates import Count
+from django.utils import timezone
 
 from WorldIT import settings
 from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
 from english.models.student_answer import StudentAnswer
 from english.models.student_progress import StudentProgress
-from english.services.exceptions import NotFoundError
+from english.services.exceptions import NotFoundError, ValidationError
 from english.services.step_handlers.registry import StepHandlerRegistry
 from users.models import CustomUser
 
@@ -126,10 +137,98 @@ class TaskRunner:
     
     def _student_answer(self, step_id: int, data: dict) -> dict:
         
-        return self._staff_answer(
-            step_id=step_id,
-            data=data
+        steps = self._get_steps()
+        step = self._get_task_step(
+            steps=steps,
+            step_id=step_id
         )
+        
+        handler = StepHandlerRegistry().get_handler(
+            kind=step.kind
+        )
+        
+        is_correct = handler.check(step=step, data=data)
+        steps_count = steps.count()
+        
+        with transaction.atomic():
+            try:
+                progress = StudentProgress.objects.select_for_update().get(
+                    student=self.student,
+                    task=self.task
+                )
+            except StudentProgress.DoesNotExist as error:
+                raise ValidationError(
+                    "Цей крок вже неактуальний, оновіть сторінку"
+                ) from error
+            
+            # Часть защиты от повторного ответа
+            # То есть: если студент ответил и попытался отправить 
+            # еще один запрос ответа (пока ответ обрабатывается), 
+            # то сервер не обработает повторный запрос
+            if progress.current_step_id != step.id:
+                raise ValidationError(
+                    "Цей крок вже неактуальний, оновіть сторінку"
+                )
+            
+            answer = StudentAnswer.objects.create(
+                student=self.student,
+                step=step,
+                is_correct=is_correct
+            )
+            
+            handler.save_answer_details(
+                answer=answer,
+                step=step,
+                data=data
+            )
+            
+            self._update_progress_record(
+                progress=progress,
+                steps_count=steps_count
+            )
+        
+        return {
+            "is_correct": is_correct,
+            "progress": self._get_student_progress(
+                steps_count=steps_count,
+                progress=progress
+            )
+        }
+    
+    def _update_progress_record(
+        self,
+        progress: StudentProgress,
+        steps_count: int
+    ):
+        
+        correct_by_step = self._get_correct_by_step()
+        
+        progress.answered_count = StudentAnswer.objects.filter(
+            student=self.student,
+            step__task=self.task
+        ).count()
+        
+        correct_count = 0
+        
+        for correct in correct_by_step.values():
+            correct_count += correct
+        
+        progress.correct_count = correct_count
+        # Часть защиты от повторного ответа на вопрос, во время обработки ответа
+        # То есть: студент нажал на ответ и полетел запрос на сервер,
+        # кнопка то блокируется, но отправить повторный запрос можно через Network.
+        # Если повторный запрос будет отправлен, то записи не произойдет потому что к этому моменту
+        # progress.currect_step будет установлен как None
+        progress.current_step = None
+        
+        # Если количество правильных ответов студента более или равно максимальному 
+        # количеству правильных (steps_count * self.REQUIRED_CORRECT_ANSWER)
+        # То задание считается завершенным и в записи прогресса указываются соответствующие данные
+        if correct_count >= steps_count * self.REQUIRED_CORRECT_ANSWERS:
+            progress.status = "completed"
+            progress.completed_at = timezone.now()
+            
+        progress.save()
     
     def _get_staff_next_step(
             self, 
@@ -160,6 +259,19 @@ class TaskRunner:
         steps = list(self._get_steps())
         progress = self._get_progress_record()
         
+        # Если студент перешел на новый вопрос, 
+        # но после этого заркыл страницу и перезашел на нее, 
+        # или просто обновил страницу
+        # При следующем запросе сервер увидит, что слово было показано, 
+        # но не отвечено, и возвращает его же
+        if progress.current_step_id is not None:
+            for step in steps:
+                if step.id == progress.current_step_id:
+                    return step, self._get_student_progress(
+                        steps_count=len(steps),
+                        progress=progress
+                    )
+        
         correct_by_step = self._get_correct_by_step()
         batch = self._get_current_batch(
             steps=steps,
@@ -175,7 +287,7 @@ class TaskRunner:
         candidates = self._get_candidates(
             batch=batch,
             correct_by_step=correct_by_step,
-            last_step_id=progress.current_step_id
+            last_step_id=self._get_last_answered_step_id()
         )
         
         # Выбираем случайный шаг из уже подготовленных кандидатов 
@@ -189,6 +301,17 @@ class TaskRunner:
             steps_count=len(steps),
             progress=progress
         )
+    
+    def _get_last_answered_step_id(self) -> int | None:
+        
+        return StudentAnswer.objects.filter(
+            student=self.student,
+            step__task=self.task
+        ).order_by(
+            "-id"
+        ).values_list(
+            "step_id", flat=True
+        ).first()
     
     def _get_staff_progress(
             self, 
