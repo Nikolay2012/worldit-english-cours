@@ -5,7 +5,7 @@
 GET /courses/english/modules/ (name="english:all_english_modules")
 GET /courses/english/modules/?page=2 - пагинация
 
-Доступ - student, mentor, manager, admin
+Доступ - student, manager, admin
 (нужен ли доступ для manager - уточнить у команды)
 
 Что показывает страница:
@@ -22,6 +22,7 @@ GET /courses/english/modules/?page=2 - пагинация
 -is_paginated - больше ли одной страницы
 -course - курс английского (название в заголовке)
 -header_links - хлебные крошки
+-is_staff - персонал (admin)
 """
 
 from django.shortcuts import get_object_or_404
