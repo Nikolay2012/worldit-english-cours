@@ -15,9 +15,7 @@ class StudentAnswer(models.Model):
         # пока остаются записи student answer, не удаляем их
         # в противном случае ответы студента будут, 
         # без конкретного задания на которые были даны
-        on_delete=models.PROTECT,
-        blank=True,
-        null=True
+        on_delete=models.PROTECT
     )
     
     is_correct = models.BooleanField(default=False)

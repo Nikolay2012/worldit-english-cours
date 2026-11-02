@@ -22,8 +22,8 @@ class StudentProgress(models.Model):
         null=True
     )
     
-    answered_count = models.IntegerField()
-    correct_count = models.IntegerField()
+    answered_count = models.IntegerField(default=0)
+    correct_count = models.IntegerField(default=0)
     task = models.ForeignKey(
         "english.EnglishTask",
         related_name="progress",
@@ -31,7 +31,7 @@ class StudentProgress(models.Model):
     )
     
     status = models.CharField(max_length=20, choices=status_choices)
-    started_at = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
