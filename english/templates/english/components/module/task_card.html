@@ -1,21 +1,25 @@
 {% load static %}
 <div 
-class="task-card"
+class="task-card {% if task.is_completed %}is-completed{% endif %}"
 data-task-id="{{ task.id }}"
 data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
 >
-    <a 
-    class="task-card-link"
-    {% if not is_staff and task.id not in opened_task_ids %}
-        disabled="true"
-    {% else %}
-        href="{{ task.get_absolute_url }}"
+    {% if not task.is_completed %}
+        <a 
+        class="task-card-link"
+        {% if not is_staff and task.id not in opened_task_ids %}
+            disabled="true"
+        {% else %}
+            href="{{ task.get_absolute_url }}"
+        {% endif %}
+        ></a>
     {% endif %}
-    ></a>
 
     <div class="task-folder">
         {% if not is_staff and task.id not in opened_task_ids %}
             <img class="task-folder-img" src="{% static 'english/img/tasks/folders/grayFolder.svg' %}" alt="folder">
+        {% elif task.is_completed %}
+            <img class="task-folder-img" src="{% static 'english/img/tasks/folders/greenFolder.svg' %}" alt="folder">
         {% else %}
             <img class="task-folder-img" src="{% static 'english/img/tasks/folders/standardFolder.svg' %}" alt="folder">
         {% endif %}
@@ -39,7 +43,10 @@ data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
                 task-id="{{ task.id }}"
             >
         {% endif %}
-        <span class="task-pill-percent">0%</span>
+
+        {% if not is_staff %}
+            <span class="task-pill-percent">{{ task.progress_percent }}%</span>
+        {% endif %}
     </div>
 
     {% if can_edit %}

@@ -33,6 +33,7 @@ GET /courses/english/modules/<pk>/ (name="english:english_module")
 """
 
 from django.db.models import Prefetch
+from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -43,6 +44,7 @@ from WorldIT.decorators import required_type
 from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask
 from english.models.open_english_task import OpenEnglishTask
+from english.models.student_progress import StudentProgress
 
 
 @method_decorator(
@@ -90,6 +92,8 @@ class ModuleView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+        self._attach_tasks_progress(lessons=context["object_list"])
+        
         context.update(
             module=self.module,
             is_staff=self._is_staff(),
@@ -99,6 +103,44 @@ class ModuleView(ListView):
         )
         
         return context
+    
+    def _attach_tasks_progress(self, lessons):
+        
+        student = getattr(self.request.user, "profile_student", None)
+        
+        progress_by_task = {}
+        
+        if student is not None and not self._is_staff():
+            progress_by_task = {
+                progress.task_id: progress for progress in StudentProgress.objects.filter(
+                    student=student,
+                    task__lesson__module=self.module
+                )
+            }
+        
+        steps_count_by_task = dict(
+            EnglishTask.objects.filter(
+                lesson__module=self.module
+            ).annotate(
+                steps_count=Count("steps")
+            ).values_list("id", "steps_count")
+        )
+        
+        for lesson in lessons:
+            for task in lesson.main_lesson_tasks + lesson.homework_tasks:
+                progress = progress_by_task.get(task.id)
+                steps_count = steps_count_by_task.get(task.id, 0)
+                
+                # Временные атрибуты
+                # Всеравно будем передавать задание на шаблон
+                task.progress_percent = 0
+                task.is_completed = False
+                
+                if progress is not None and steps_count:
+                    task.progress_percent = round(
+                        progress.correct_count / (steps_count * 6) * 100
+                    )
+                    task.is_completed = True if progress.status == "completed" else False
     
     def _get_header_links(self) -> list[tuple]:
         return [

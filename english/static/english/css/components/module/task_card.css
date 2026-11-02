@@ -41,9 +41,15 @@
     filter: var(--folder-filter) brightness(0.97);
 }
 
-.task-card-completed {
-    --folder-filter: hue-rotate(110deg) saturate(1.4) brightness(0.75);
-    --task-percent-color: #30A46C;
+.task-card.is-completed {
+    --task-icon-filter: brightness(0) invert(1);
+    --task-percent-color: white;
+}
+
+.dark-body .task-card.is-completed {
+    --folder-filter: none;
+    --task-icon-filter: brightness(0) invert(1);
+    --task-percent-color: white;
 }
 
 .dark-body .task-card {
@@ -69,6 +75,11 @@
     font-size: 0.875rem;
 }
 
+.task-card.is-completed .task-pill{
+    background-color: #38A169;
+    border: 1px solid #38A169;
+}
+
 .task-pill-name {
     min-width: 0;
     font-size: 0.875rem;
@@ -76,6 +87,10 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--text-main);
+}
+
+.task-card.is-completed .task-pill-name {
+    color: white;
 }
 
 @media (max-width: 500px) {
