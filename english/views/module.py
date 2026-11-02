@@ -46,7 +46,7 @@ from english.models.open_english_task import OpenEnglishTask
 
 @method_decorator(
     # Нужен ли доступ для "manager"?
-    required_type(["student", "mentor", "manager", "admin"]),
+    required_type(["student", "manager", "admin"]),
     name="get"
 )
 class ModuleView(ListView):

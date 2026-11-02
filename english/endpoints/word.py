@@ -42,7 +42,7 @@ from english.services.word_steps import WordStepService
 
 
 @method_decorator(
-    required_type(['admin', 'mentor']), 
+    required_type(['admin']), 
     name="dispatch"
 )
 class WordEndpoint(View):

@@ -29,14 +29,13 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from WorldIT.decorators import required_type
 from english.services.task_importers.registry import TaskImportersRegistry
-from english.services.task_importers.word import WordImporter
 from english.services.exceptions import NotFoundError, ConflictError, ValidationError
 
 
 # Создавать задание и указывать его содержимое может либо админ, 
 # либо ментор
 @method_decorator(
-    required_type(['admin', 'mentor']), 
+    required_type(['admin']), 
     name="dispatch"
 )
 class TaskImportEndpoint(View):

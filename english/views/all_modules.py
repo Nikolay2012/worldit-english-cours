@@ -34,7 +34,7 @@ from django.views.generic import ListView
 
 # Нужен ли доступ для "manager"?
 @method_decorator(
-    required_type(["student", "mentor", "manager", "admin"]),
+    required_type(["student", "manager", "admin"]),
     name="get"
 )
 class AllModulesView(ListView):

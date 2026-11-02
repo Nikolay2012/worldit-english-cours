@@ -31,7 +31,7 @@ from english.services.task_steps import TaskStepsService
 
 
 @method_decorator(
-    required_type(["admin", "mentor"]), 
+    required_type(["admin"]), 
     name="dispatch"
 )
 class TaskStepsEndpoint(View):

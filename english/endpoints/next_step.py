@@ -37,7 +37,7 @@ from english.services.task_runner import TaskRunner
 
 
 @method_decorator(
-    required_type(['admin', 'mentor', 'student']), 
+    required_type(['admin', 'student']), 
     name="dispatch"
 )
 class NextStepEndpoint(View):

@@ -44,8 +44,8 @@ from english.models import EnglishTask
 from english.services.task import EnglishTaskService
 
 
-ACCESS_TYPES = ["admin", "mentor", "student"]
-STAFF_TYPES = ["admin", "mentor"]
+ACCESS_TYPES = ["admin", "student"]
+STAFF_TYPES = ["admin"]
 
 @method_decorator(
     required_type(ACCESS_TYPES),
