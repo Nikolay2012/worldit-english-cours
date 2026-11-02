@@ -41,7 +41,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 from django.db.models import Max
 
-from WorldIT import settings
+from django.conf import settings
 from english.models.answer_option import AnswerOption
 from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep

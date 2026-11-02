@@ -37,7 +37,8 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
-from WorldIT import settings
+from django.conf import settings
+
 from WorldIT.decorators import required_type
 from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask

@@ -27,7 +27,8 @@ GET /courses/english/modules/?page=2 - пагинация
 from django.shortcuts import get_object_or_404
 from WorldIT.decorators import required_type
 from django.utils.decorators import method_decorator
-from WorldIT.settings import ENGLISH_COURSE_ID
+from django.conf import settings
+
 from courses.models import Course, Module
 from django.views.generic import ListView
 
@@ -47,14 +48,14 @@ class AllModulesView(ListView):
     
     def get_queryset(self):
         modules = Module.objects.filter(
-            course_id=ENGLISH_COURSE_ID
+            course_id=settings.ENGLISH_COURSE_ID
         ).order_by("id")
         
         return modules
     
     def get_context_data(self, **kwargs):
         
-        english_course = get_object_or_404(Course, pk=ENGLISH_COURSE_ID)
+        english_course = get_object_or_404(Course, pk=settings.ENGLISH_COURSE_ID)
         
         
         context = super().get_context_data(**kwargs)

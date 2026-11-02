@@ -53,7 +53,7 @@ from django.db.models import QuerySet
 from django.db.models.aggregates import Count
 from django.utils import timezone
 
-from WorldIT import settings
+from django.conf import settings
 from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
 from english.models.student_answer import StudentAnswer

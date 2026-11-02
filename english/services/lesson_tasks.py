@@ -33,7 +33,7 @@ LessonTasksService(lesson_id, deleted=[...], renamed=[...]).update()
 from django.core.files.storage import default_storage
 from django.db import transaction
 
-from WorldIT import settings
+from django.conf import settings
 from courses.models import Lesson
 from english.models.english_task import EnglishTask
 from english.models.question_image import QuestionImage

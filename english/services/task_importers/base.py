@@ -22,7 +22,7 @@ import io
 
 from django.core.files.uploadedfile import UploadedFile
 
-from WorldIT import settings
+from django.conf import settings
 from english.models.english_task import EnglishTask
 from english.services.exceptions import NotFoundError, ConflictError, ValidationError
 

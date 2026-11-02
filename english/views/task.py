@@ -38,7 +38,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
 
 from WorldIT.decorators import required_type
-from WorldIT.settings import ENGLISH_COURSE_ID
+from django.conf import settings
 from courses.models import Lesson, Module
 from english.models import EnglishTask
 from english.services.task import EnglishTaskService
@@ -61,7 +61,7 @@ class EnglishTaskView(DetailView):
     
     def get_queryset(self):
         return EnglishTask.objects.filter(
-            lesson__module__course_id=ENGLISH_COURSE_ID,
+            lesson__module__course_id=settings.ENGLISH_COURSE_ID,
             lesson__module_id=self.kwargs["module_id"],
             lesson_id=self.kwargs["lesson_id"]
         ).select_related("lesson__module")
@@ -93,7 +93,7 @@ class EnglishTaskView(DetailView):
         
         module_exists = Module.objects.filter(
             pk=module_id,
-            course_id=ENGLISH_COURSE_ID,
+            course_id=settings.ENGLISH_COURSE_ID,
         ).exists()
         
         if not module_exists:
