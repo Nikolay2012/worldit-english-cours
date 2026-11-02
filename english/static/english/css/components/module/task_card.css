@@ -188,3 +188,12 @@
 .lesson-card.is-editing .task-pill-percent {
     display: none; 
 }
+
+.task-pill.blocked {
+    border-color: #CBCAD9;
+    
+}
+
+.task-pill.blocked span {
+    color: #B3B3C5;
+}

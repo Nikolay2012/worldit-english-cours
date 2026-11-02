@@ -31,7 +31,7 @@ data-lesson-id="{{ lesson_and_tasks.lesson.id }}"
         {% endif %}
     </div>
 
-    <div class="task-pill">
+    <div class="task-pill {% if not is_staff and task.id not in opened_task_ids %} blocked {% endif %}">
         <span class="task-pill-name">{{ task.name }}</span>
         <!-- <p>{{ can_edit }}</p> -->
         {% if can_edit %}

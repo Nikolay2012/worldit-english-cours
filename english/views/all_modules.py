@@ -65,5 +65,16 @@ class AllModulesView(ListView):
             ("Курси", "all_courses"),
             ("English", "english:all_english_modules")
         ]
+        context["is_staff"] = self._is_staff()
         
         return context
+    
+    def _is_staff(self) -> bool:
+            
+            account_types = self.request.user.account_types
+            
+            for staff_type in ["admin", "mentor"]:
+                if staff_type in account_types:
+                    return True
+            
+            return False

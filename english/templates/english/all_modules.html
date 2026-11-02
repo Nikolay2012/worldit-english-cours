@@ -49,9 +49,11 @@ World IT
                             </div>
 
                             <div class="progress-container">
-                                <div class="pill-container">
-                                    <p>0.5%</p>
-                                </div>
+                                {% if not is_staff %}
+                                    <div class="pill-container">
+                                        <p>0.5%</p>
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="nav-buttons-container">
