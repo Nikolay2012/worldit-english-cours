@@ -12,6 +12,7 @@ World IT
     <link rel="stylesheet" href="{% static 'english/css/components/task/import_csv.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task/upload_csv_modal.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task/run.css' %}">
+    <link rel="stylesheet" href="{% static 'english/css/components/task/words_panel.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task/steps/question.css' %}">
 {% endblock %}
 
@@ -33,7 +34,7 @@ World IT
         {% endif %}
 
         {% if can_open_words_list %}
-            <button type="button" class="button words-list-button">
+            <button type="button" class="button words-list-button" id="openWordsPanelButton">
                 <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="list">
                 Список слів
             </button>
@@ -54,6 +55,11 @@ World IT
             </div>
         </div>
     </div>
+    
+    {% if can_open_words_list %}
+        {% include "english/components/task/words_panel.html" %}
+    {% endif %}
+
     {% csrf_token %}
 
 {% endblock %}
@@ -71,4 +77,6 @@ World IT
     <script src="{% static 'english/js/task/upload_csv/requests.js' %}"></script>
     <script src="{% static 'english/js/task/upload_csv/functions.js' %}"></script>
     <script src="{% static 'english/js/task/upload_csv/handlers.js' %}"></script>
+    
+    <script src="{% static 'english/js/task/words_panel.js' %}"></script>
 {% endblock %}
