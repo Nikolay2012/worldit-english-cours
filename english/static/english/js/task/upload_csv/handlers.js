@@ -193,3 +193,31 @@ modalCover.addEventListener("mousedown", (event) => {
 
     reloadIfListLoaded();
 });
+
+uploadCsvModal.addEventListener("dragover", (event) => {
+    event.preventDefault();
+});
+
+uploadCsvModal.addEventListener("drop", (event) => {
+    event.preventDefault();
+});
+
+uploadCsvDropzone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+});
+
+uploadCsvDropzone.addEventListener("drop", (event) => {
+    event.preventDefault();
+
+    const file = event.dataTransfer.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+
+    uploadCsvInput.files = dataTransfer.files;
+    uploadCsvInput.dispatchEvent(new Event("change"));
+});
