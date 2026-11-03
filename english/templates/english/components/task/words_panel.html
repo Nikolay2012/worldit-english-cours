@@ -2,7 +2,10 @@
 
 <div class="words-panel-cover" id="wordsPanelCover"></div>
 
-<div class="words-panel" id="wordsPanel">
+<div 
+    class="words-panel" 
+    id="wordsPanel" 
+    data-words-progress-url="{% url 'english:api:api_words_progress' task.id %}">
     <div class="words-panel-header">
         <h3 class="words-panel-title" id="wordsPanelTitle">Список слів</h3>
 
@@ -11,58 +14,20 @@
         </button>
     </div>
 
-    <div class="words-panel-body" id="wordsPanelBody">
-
-        <section class="words-panel-category">
-            <h4 class="words-panel-category-title">Займенники</h4>
-
-            <ul class="words-panel-list">
-                <li class="words-panel-row">
-                    <span class="words-panel-word">I</span>
-                    <span class="words-panel-progress">
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                    </span>
-                    <span class="words-panel-translation">Я</span>
-                </li>
-
-                <li class="words-panel-row">
-                    <span class="words-panel-word">You</span>
-                    <span class="words-panel-progress">
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                    </span>
-                    <span class="words-panel-translation">Ти, Ви</span>
-                </li>
-            </ul>
-        </section>
-
-        <section class="words-panel-category">
-            <h4 class="words-panel-category-title">Дієслова</h4>
-
-            <ul class="words-panel-list">
-                <li class="words-panel-row">
-                    <span class="words-panel-word">Ask</span>
-                    <span class="words-panel-progress">
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot is-filled"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                        <span class="words-panel-dot"></span>
-                    </span>
-                    <span class="words-panel-translation">Запитати</span>
-                </li>
-            </ul>
-        </section>
-
-    </div>
+    <div class="words-panel-body" id="wordsPanelBody"></div>
 </div>
+
+<template id="wordsPanelCategoryTemplate">
+    <section class="words-panel-category">
+        <h4 class="words-panel-category-title"></h4>
+        <ul class="words-panel-list"></ul>
+    </section>
+</template>
+
+<template id="wordsPanelRowTemplate">
+    <li class="words-panel-row">
+        <span class="words-panel-word"></span>
+        <span class="words-panel-progress"></span>
+        <span class="words-panel-translation"></span>
+    </li>
+</template>

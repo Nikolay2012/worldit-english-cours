@@ -83,6 +83,23 @@ class QuestionHandler(StepHandler):
             ]
         )
     
+    def get_list_item(self, step: EnglishTaskStep) -> dict:
+        
+        question: Question = step.question
+        translation = ""
+        
+        for option in question.options.all():
+            if option.is_correct:
+                translation = option.text
+                
+                break
+        
+        return {
+            "step_id": step.id,
+            "text": question.text,
+            "translation": translation
+        }
+    
     def _get_option(self, step: EnglishTaskStep, data: dict) -> AnswerOption:
         
         try:

@@ -208,3 +208,7 @@
         height: 12px;
     }
 }
+
+.words-panel-category-title::first-letter {
+    text-transform: uppercase;
+}

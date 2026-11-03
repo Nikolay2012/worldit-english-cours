@@ -390,7 +390,8 @@ class TaskRunner:
     def _get_steps(self):
         
         return self.task.steps.select_related(
-            "question"
+            "question",
+            "category" # для words progress (там прогресс по словам разделен на категории)
         ).prefetch_related(
             "question__options",
             "question__images"
@@ -506,3 +507,46 @@ class TaskRunner:
             candidates = [step for step in candidates if step.id != last_step_id]
         
         return candidates
+    
+    def get_words_progress(self):
+        
+        steps = list(self._get_steps())
+        
+        # У персонала (админ и модератор) нету сохраненного в БД прогресса
+        if self._is_staff():
+            correct_by_step = {}
+        else:
+            correct_by_step = self._get_correct_by_step()
+        
+        registry = StepHandlerRegistry()
+        categories = {}
+        
+        for step in steps:
+            item = registry.get_handler(
+                kind=step.kind
+            ).get_list_item(step=step)
+            
+            item["correct_count"] = min(
+                correct_by_step.get(step.id, 0),
+                self.REQUIRED_CORRECT_ANSWERS
+            )
+            
+            category_name = step.category.name if step.category else ""
+            
+            if category_name not in categories:
+                categories[category_name] = []
+            
+            categories[category_name].append(item)
+        
+        result = []
+        
+        for category_name, words in categories.items():
+            result.append({
+                "category": category_name,
+                "words": words
+            })
+        
+        return {
+            "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS,
+            "categories": result
+        }

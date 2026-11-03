@@ -46,3 +46,9 @@ class StepHandler:
         ):
         
         raise NotImplementedError
+    
+    # Метод получения данных элемента задания
+    # К примеру - в QuestionHandler получается пара: слово - перевод
+    # Используется при отображение прогресса в задании
+    def get_list_item(self, step: EnglishTaskStep) -> dict:
+        raise NotImplementedError
