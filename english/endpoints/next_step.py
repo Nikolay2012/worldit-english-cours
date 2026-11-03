@@ -33,7 +33,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from WorldIT.decorators import required_type
 from english.services.exceptions import NotFoundError, ValidationError
-from english.services.task_runner import TaskRunner
+from english.services.task_runner.task_runner import TaskRunner
 
 
 @method_decorator(
