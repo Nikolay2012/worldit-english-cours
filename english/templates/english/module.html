@@ -27,7 +27,7 @@ World IT
     <div class="card-container">
         {% if lessons_and_tasks %}
             {% for lesson_and_tasks in lessons_and_tasks %}
-                <div class="card lesson-card collapsed">
+                <div class="card lesson-card collapsed" data-id="{{ lesson_and_tasks.id }}">
                     <div class="lesson-setting-container">
                         <h2 class="card-header">№{{ lesson_and_tasks.order_number }}. {{ lesson_and_tasks.name }}</h2>
                         <div class="actions-container">
@@ -53,7 +53,7 @@ World IT
                         </div>
                     </div>
 
-                    <div class="lesson-body" lesson-id="{{ lesson.id }}">
+                    <div class="lesson-body" lesson-id="{{ lesson_and_tasks.id }}">
                         <div class="lesson-body-inner">
                             <div class="lesson-main-part-container">
                                 <div class="tasks-wrap">
