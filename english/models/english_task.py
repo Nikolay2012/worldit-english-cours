@@ -33,6 +33,7 @@ class EnglishTask(models.Model):
     
     order = models.IntegerField()
     is_available = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
     
     lesson = models.ForeignKey(
         "courses.Lesson",

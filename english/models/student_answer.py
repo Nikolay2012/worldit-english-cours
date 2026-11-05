@@ -12,10 +12,7 @@ class StudentAnswer(models.Model):
     step = models.ForeignKey(
         "english.EnglishTaskStep",
         related_name="answers",
-        # пока остаются записи student answer, не удаляем их
-        # в противном случае ответы студента будут, 
-        # без конкретного задания на которые были даны
-        on_delete=models.PROTECT
+        on_delete=models.CASCADE
     )
     
     is_correct = models.BooleanField(default=False)
