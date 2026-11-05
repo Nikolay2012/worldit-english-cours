@@ -11,13 +11,22 @@ const saveWordsPanelButton = document.getElementById("saveWordsPanelButton");
 
 const canEditWords = wordsPanel?.dataset.canEdit === "true";
 
-const wordsPanelWordsByStepId = new Map();
+const wordsPanelWordsByKey = new Map();
+
+const pendingWordChanges = new Map();
+
+let wordsPanelData = null;
+let editingWordKey = null;
+let newWordCounter = 0;
 
 
 if (wordsPanel && openWordsPanelButton) {
     openWordsPanelButton.addEventListener("click", () => {
         setWordsPanelOpen(true);
-        loadWordsProgress();
+
+        if (pendingWordChanges.size === 0) {
+            loadWordsProgress();
+        }
     });
 
     closeWordsPanelButton.addEventListener("click", () => {
@@ -45,22 +54,20 @@ if (wordsPanel && openWordsPanelButton) {
             const addButton = event.target.closest(".words-panel-add-button");
 
             if (addButton) {
-                openUploadCsvFromWordsPanel(
-                    "create", 
-                    {
-                        category: addButton.dataset.category
-                    }
-                );
+                newWordCounter += 1;
+                editingWordKey = `new-${newWordCounter}`;
+
+                openUploadCsvFromWordsPanel("create", { category: addButton.dataset.category });
                 return;
             }
 
             const row = event.target.closest(".words-panel-row.is-editable");
 
             if (row) {
-                openUploadCsvFromWordsPanel(
-                    "edit",
-                    wordsPanelWordsByStepId.get(Number(row.dataset.stepId))
-                );
+                editingWordKey = row.dataset.wordKey;
+
+                const mode = editingWordKey.startsWith("new-") ? "create" : "edit";
+                openUploadCsvFromWordsPanel(mode, wordsPanelWordsByKey.get(editingWordKey));
             }
         });
 
@@ -68,12 +75,32 @@ if (wordsPanel && openWordsPanelButton) {
             openUploadCsvFromWordsPanel("delete");
         });
 
-        saveWordsPanelButton.addEventListener("click", () => {
-            window.location.reload();
+        saveWordsPanelButton.addEventListener("click", async () => {
+            if (pendingWordChanges.size === 0) {
+                window.location.reload();
+                return;
+            }
+
+            saveWordsPanelButton.disabled = true;
+
+            try {
+                await wordsBatchRequest(wordsPanel.dataset.wordsBatchUrl, buildWordsBatchFormData());
+                window.location.reload();
+            } catch (error) {
+                showMessage(error.message);
+                saveWordsPanelButton.disabled = false;
+            }
         });
 
-        document.addEventListener("wordsPanelReturn", () => {
-            loadWordsProgress();
+        document.addEventListener("wordsPanelReturn", (event) => {
+            const change = event.detail?.change;
+
+            if (change && editingWordKey) {
+                pendingWordChanges.set(editingWordKey, change);
+                renderWordsProgress();
+            }
+
+            editingWordKey = null;
         });
     }
 }
@@ -86,25 +113,25 @@ function setWordsPanelOpen(isOpen) {
 
 async function loadWordsProgress() {
     try {
-        const data = await wordsProgressRequest(
+        wordsPanelData = await wordsProgressRequest(
             wordsPanel.dataset.wordsProgressUrl
         );
-        renderWordsProgress(data);
+        renderWordsProgress();
     } catch (error) {
-        showMessage(error.message)
+        showMessage(error.message);
     }
 }
 
-function renderWordsProgress(data) {
+function renderWordsProgress() {
     wordsPanelBody.replaceChildren();
-    wordsPanelWordsByStepId.clear();
+    wordsPanelWordsByKey.clear();
 
-    for (const category of data.categories) {
+    for (const category of wordsPanelData.categories) {
         const section = wordsPanelCategoryTemplate.content.firstElementChild.cloneNode(true);
         const list = section.querySelector(".words-panel-list");
-        const addButton = section.querySelector(".words-panel-add-button")
+        const addButton = section.querySelector(".words-panel-add-button");
 
-        section.querySelector(".words-panel-category-title").textContent = category.category
+        section.querySelector(".words-panel-category-title").textContent = category.category;
 
         if (canEditWords) {
             addButton.dataset.category = category.category;
@@ -113,16 +140,43 @@ function renderWordsProgress(data) {
         }
 
         for (const word of category.words) {
-            list.append(
-                createWordsPanelRow(word, data.required_correct_answers)
-            );
+            const change = pendingWordChanges.get(String(word.step_id));
+
+            list.append(createWordsPanelRow(
+                String(word.step_id),
+                {
+                    ...word,
+                    text: change ? change.word : word.text,
+                    translation: change ? change.translation : word.translation
+                },
+                change,
+                wordsPanelData.required_correct_answers
+            ));
+        }
+
+        for (const [key, change] of pendingWordChanges) {
+            if (change.mode !== "create" || change.category !== category.category) {
+                continue;
+            }
+
+            list.append(createWordsPanelRow(
+                key,
+                {
+                    text: change.word,
+                    translation: change.translation,
+                    correct_count: 0,
+                    images: []
+                },
+                change,
+                wordsPanelData.required_correct_answers
+            ));
         }
 
         wordsPanelBody.append(section);
     }
 }
 
-function createWordsPanelRow(word, requiredCorrectAnswers) {
+function createWordsPanelRow(key, word, change, requiredCorrectAnswers) {
     const row = wordsPanelRowTemplate.content.firstElementChild.cloneNode(true);
     const progress = row.querySelector(".words-panel-progress");
 
@@ -143,19 +197,53 @@ function createWordsPanelRow(word, requiredCorrectAnswers) {
 
     if (canEditWords) {
         row.classList.add("is-editable");
-        row.dataset.stepId = word.step_id;
+        row.classList.toggle("is-changed", Boolean(change));
+        row.dataset.wordKey = key;
 
-        wordsPanelWordsByStepId.set(word.step_id, {
+        wordsPanelWordsByKey.set(key, {
             step_id: word.step_id,
-            question: {
-                text: word.text
-            },
+            category: change ? change.category : null,
+            question: { text: word.text },
             translation: word.translation,
-            images: word.images
+            images: word.images,
+            pendingImageStates: change ? change.imageStates : null
         });
     }
 
     return row;
+}
+
+function buildWordsBatchFormData() {
+    const formData = new FormData();
+    const changes = [];
+
+    for (const [key, change] of pendingWordChanges) {
+        const removedImages = [];
+
+        change.imageStates.forEach((state, order) => {
+            if (state.action === "replace") {
+                formData.append(`image_${key}_${order}`, state.file);
+            }
+
+            if (state.action === "remove") {
+                removedImages.push(order);
+            }
+        });
+
+        changes.push({
+            key: key,
+            mode: change.mode,
+            step_id: change.stepId,
+            category: change.category,
+            word: change.word,
+            translation: change.translation,
+            removed_images: removedImages
+        });
+    }
+
+    formData.append("changes", JSON.stringify(changes));
+
+    return formData;
 }
 
 async function wordsProgressRequest(url) {
@@ -167,4 +255,22 @@ async function wordsProgressRequest(url) {
     }
 
     return responseData.data;
+}
+
+async function wordsBatchRequest(url, formData) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: formData
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok || !responseData.ok) {
+        throw new Error(responseData.error || "Не вдалося зберегти зміни");
+    }
+
+    return responseData;
 }

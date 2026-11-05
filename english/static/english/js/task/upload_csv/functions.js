@@ -256,8 +256,16 @@ function collectWordFormData() {
 function reloadIfListLoaded() {
     
     if (isOpenedFromWordsPanel) {
-        isOpenedFromWordsPanel = false;
-        document.dispatchEvent(new CustomEvent("wordsPanelReturn"));
+        resetUploadCsvModal();
+
+        document.dispatchEvent(
+            new CustomEvent("wordsPanelReturn",
+                {
+                    detail: {
+                        change: null
+                    }
+                }
+        ));
         return;
     }
 
@@ -274,15 +282,48 @@ function openUploadCsvFromWordsPanel(mode, word) {
 
     if (mode === "delete") {
         setUploadCsvConfirmDelete(true);
-    } else {
-        openWordForm(mode, word);
+        openModal(uploadCsvModal);
+        return;
+    }
+
+    openWordForm(mode, word);
+
+    if (word.question) {
+        wordInput.value = word.question.text;
+        translationInput.value = word.translation;
+    }
+
+    if (word.pendingImageStates) {
+        word.pendingImageStates.forEach((state, order) => {
+            if (state.action === "replace") {
+                replaceImage(order, state.file);
+            }
+
+            if (state.action === "remove") {
+                removeImage(order);
+            }
+        });
     }
 
     openModal(uploadCsvModal);
 }
 
-function returnToWordsPanel() {
-    isOpenedFromWordsPanel = false;
+function returnToWordsPanel(change = null) {
+    resetUploadCsvModal();
     closeModal();
-    document.dispatchEvent(new CustomEvent("wordsPanelReturn"));
+    document.dispatchEvent(new CustomEvent("wordsPanelReturn", { detail: { change } }));
+}
+
+function collectWordChange() {
+    return {
+        mode: wordFormState.mode,
+        stepId: wordFormState.stepId,
+        category: wordFormState.category,
+        word: wordInput.value.trim(),
+        translation: translationInput.value.trim(),
+        imageStates: imageStates.map((state) => ({
+            action: state.action,
+            file: state.file
+        }))
+    };
 }

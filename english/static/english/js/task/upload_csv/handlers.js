@@ -178,6 +178,11 @@ saveWordButton.addEventListener("click", async () => {
         return;
     }
 
+    if (isOpenedFromWordsPanel) {
+        returnToWordsPanel(collectWordChange());
+        return;
+    }
+
     const url = wordFormState.mode === "create"
         ? uploadCsvModal.dataset.createWordUrl
         : uploadCsvModal.dataset.updateWordUrl.replace(/0\/$/, `${wordFormState.stepId}/`);
@@ -186,12 +191,6 @@ saveWordButton.addEventListener("click", async () => {
 
     try {
         const responseData = await wordSaveRequest(url, collectWordFormData());
-
-        if (isOpenedFromWordsPanel) {
-            returnToWordsPanel();
-
-            return;
-        }
         
         renderWordsList(responseData.data);
         closeWordForm();

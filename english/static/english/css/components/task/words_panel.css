@@ -261,3 +261,8 @@ body.is-words-panel-open #modalCover {
 .words-panel-category-title::first-letter {
     text-transform: uppercase;
 }
+
+.words-panel-row.is-changed .words-panel-word::after {
+    content: " •";
+    color: #F98232;
+}

@@ -5,3 +5,4 @@ from .word import WordEndpoint
 from .next_step import NextStepEndpoint
 from .step_answer import StepAnswerEndpoint
 from .words_progress import WordsProgressEndpoint
+from .words_batch import WordsBatchEndpoint

@@ -9,6 +9,7 @@ from english.endpoints.step_answer import StepAnswerEndpoint
 from english.endpoints.task_import import TaskImportEndpoint
 from english.endpoints.task_steps import TaskStepsEndpoint
 from english.endpoints.word import WordEndpoint
+from english.endpoints.words_batch import WordsBatchEndpoint
 from english.endpoints.words_progress import WordsProgressEndpoint
 
 app_name = "api"
@@ -54,5 +55,10 @@ urlpatterns = [
         "tasks/<int:task_id>/words-progress/", 
         WordsProgressEndpoint.as_view(), 
         name="api_words_progress"
+    ),
+    path(
+        "tasks/<int:task_id>/words/batch/", 
+        WordsBatchEndpoint.as_view(), 
+        name="api_words_batch"
     )
 ]

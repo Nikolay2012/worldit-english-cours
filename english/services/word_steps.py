@@ -34,6 +34,7 @@
 """
 
 import io
+import json
 
 from PIL import Image
 from django.core.files.storage import default_storage
@@ -347,3 +348,51 @@ class WordStepService(WordImporter):
         
         for name in names:
             default_storage.delete(name)
+    
+    def save_batch(
+            self, 
+            task_id: int, 
+            changes_json: str, 
+            files
+        ):
+        
+        try:
+            changes = json.loads(changes_json)
+        except (TypeError, json.JSONDecodeError) as error:
+            raise ValidationError("Некоректні дані змін") from error
+        
+        with transaction.atomic():
+            for change in changes:
+                key = change.get("key")
+                
+                data = {
+                    "word": change.get("word", ""),
+                    "translation": change.get("translation", ""),
+                    "category": change.get("category") or ""
+                }
+                
+                for order in change.get("removed_images", []):
+                    data[f"remove_image_{order}"] = "1"
+                    
+                item_files = {}
+                
+                for order in range(self.IMAGES_COUNT):
+                    file = files.get(f"image_{key}_{order}")
+                    
+                    if file is not None:
+                        item_files[f"image_{order}"] = file
+                        
+                try:
+                    if change.get("mode") == "create":
+                        self.create(task_id=task_id, data=data, files=item_files)
+                    else:
+                        self.update(
+                            task_id=task_id,
+                            step_id=change.get("step_id"),
+                            data=data,
+                            files=item_files
+                        )
+                except ValidationError as error:
+                    raise ValidationError(
+                        f"«{data['word']}»: {error.message}"
+                    ) from error
