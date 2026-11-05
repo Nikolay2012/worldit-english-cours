@@ -8,7 +8,7 @@
 Маршрут:
 DELETE /courses/english/api/tasks/<task_id>/steps/
 
-Доступ - только админ или ментор (required_type(["admin", "mentor"]))
+Доступ - только админ или ментор (required_type(["admin"]))
 
 Тело запроса не нужно, задание определяется по task_id в адресе
 

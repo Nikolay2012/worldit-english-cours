@@ -5,7 +5,7 @@
 GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
 (name="english:english_task", адрес собирает EnglishTask.get_absolute_url)
 
-Доступ - admin, mentor, student
+Доступ - admin, student
 
 Задание ищется только внутри указанного урока, модуля и курса английского
 Если задание не найдено (например, его удалили):
@@ -13,7 +13,7 @@ GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
 -модуля тоже нет - 404
 
 Кто что видит:
--персонал (admin, mentor) видит любое задание
+-персонал (admin) видит любое задание
 -студент видит задание, только если оно ему открыто (EnglishTaskService.can_access)
 иначе - переадресация на страницу модуля с сообщением «Це завдання ще не відкрите.»
 

@@ -8,7 +8,7 @@
 Маршрут:
 POST /courses/english/api/tasks/<task_id>/steps/<step_id>/answer/
 
-Доступ - админ, ментор или студент (required_type(["admin", "mentor", "student"]))
+Доступ - админ, ментор или студент (required_type(["admin", "student"]))
 
 В запросе (JSON) передаётся ответ пользователя
 Для шага с вопросом (kind = "question"): {"option_id": ...}

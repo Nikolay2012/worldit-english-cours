@@ -45,7 +45,7 @@ GET /courses/english/modules/<pk>/ (name="english:english_module")
 тогда задания будут загружаться только для уроков текущей страницы
 """
 
-from django.db.models import Prefetch
+from django.db.models import Exists, OuterRef, Prefetch
 from django.db.models.aggregates import Count
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
@@ -56,6 +56,7 @@ from django.conf import settings
 from WorldIT.decorators import required_type
 from courses.models import Lesson, Module
 from english.models.english_task import EnglishTask
+from english.models.english_task_step import EnglishTaskStep
 from english.models.open_english_task import OpenEnglishTask
 from english.models.student_progress import StudentProgress
 
@@ -92,12 +93,12 @@ class ModuleView(ListView):
         ).order_by("order_number").prefetch_related(
             Prefetch(
                 lookup="english_tasks",
-                queryset=EnglishTask.objects.filter(block="lesson").order_by("order"),
+                queryset=self._get_tasks_queryset(block="lesson"),
                 to_attr="main_lesson_tasks"
             ),
             Prefetch(
                 lookup="english_tasks",
-                queryset=EnglishTask.objects.filter(block="homework").order_by("order"),
+                queryset=self._get_tasks_queryset(block="homework"),
                 to_attr="homework_tasks"
             )
         )
@@ -169,18 +170,17 @@ class ModuleView(ListView):
         
         account_types = self.request.user.account_types
         is_admin = "admin" in account_types
-        is_mentor = "mentor" in account_types
         
         return {
             "can_edit": is_admin,
-            "can_add": is_admin or is_mentor
+            "can_add": is_admin
         }
     
     def _is_staff(self) -> bool:
         
         account_types = self.request.user.account_types
         
-        for staff_type in ["admin", "mentor"]:
+        for staff_type in ["admin"]:
             if staff_type in account_types:
                 return True
         
@@ -203,4 +203,19 @@ class ModuleView(ListView):
                 task__is_available=True
             # flat=True, чтобы возвращались чисто значения, а не кортежи
             ).values_list("task_id", flat=True)
+        )
+    
+    def _get_tasks_queryset(self, block: str):
+        
+        tasks = EnglishTask.objects.filter(
+            block=block
+        ).order_by("order")
+        
+        if self._is_staff():
+            return tasks
+        
+        return tasks.filter(
+            Exists(
+                EnglishTaskStep.objects.filter(task=OuterRef("pk"))
+            )
         )

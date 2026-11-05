@@ -8,7 +8,7 @@
 Маршрут:
 POST /courses/english/api/tasks/<task_id>/import/
 
-Доступ - только админ или ментор (required_type(["admin", "mentor"]))
+Доступ - только админ или ментор (required_type(["admin"]))
 
 В запросе (multipart/form-data) передаётся:
 -file - csv файл в кодировке UTF-8, не больше 1 МБ

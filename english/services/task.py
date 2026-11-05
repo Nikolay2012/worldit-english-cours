@@ -27,6 +27,10 @@ class EnglishTaskService:
         self.task = task
     
     def can_access(self, student: Student) -> bool:
+        
+        if not self.has_steps():
+            return False
+        
         return self.task.is_available and self._is_opened_for(student)
     
     def has_steps(self):

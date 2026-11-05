@@ -9,7 +9,7 @@
 GET /courses/english/api/tasks/<task_id>/next-step/
 GET /courses/english/api/tasks/<task_id>/next-step/?after=<step_id>
 
-Доступ - админ, ментор или студент (required_type(["admin", "mentor", "student"]))
+Доступ - админ, ментор или студент (required_type(["admin", "student"]))
 
 Параметр after - id шага, на который только что ответили
 Персоналу по нему отдаётся следующий шаг по порядку

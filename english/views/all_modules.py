@@ -74,7 +74,7 @@ class AllModulesView(ListView):
             
             account_types = self.request.user.account_types
             
-            for staff_type in ["admin", "mentor"]:
+            for staff_type in ["admin"]:
                 if staff_type in account_types:
                     return True
             

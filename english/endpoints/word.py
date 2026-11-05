@@ -14,7 +14,7 @@ POST /courses/english/api/tasks/<task_id>/words/<step_id>/ - редактиро�
 потому что Django разбирает файлы (request.FILES) только для POST
 Есть step_id в адресе - редактирование, нет - создание
 
-Доступ - только админ или ментор (required_type(["admin", "mentor"]))
+Доступ - только админ или ментор (required_type(["admin"]))
 
 В запросе (multipart/form-data) передаётся:
 -word - слово
