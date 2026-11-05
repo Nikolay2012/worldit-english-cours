@@ -55,6 +55,8 @@ function resetUploadCsvModal() {
     confirmDeleteListButton.disabled = false;
 
     resetWordForm();
+
+    isOpenedFromWordsPanel = false;
 }
 
 function renderWordsList(categories) {
@@ -252,7 +254,35 @@ function collectWordFormData() {
 }
 
 function reloadIfListLoaded() {
+    
+    if (isOpenedFromWordsPanel) {
+        isOpenedFromWordsPanel = false;
+        document.dispatchEvent(new CustomEvent("wordsPanelReturn"));
+        return;
+    }
+
     if (uploadCsvModal.classList.contains("is-list")) {
         window.location.reload();
     }
+}
+
+function openUploadCsvFromWordsPanel(mode, word) {
+    resetUploadCsvModal();
+    isOpenedFromWordsPanel = true;
+
+    setUploadCsvList(true);
+
+    if (mode === "delete") {
+        setUploadCsvConfirmDelete(true);
+    } else {
+        openWordForm(mode, word);
+    }
+
+    openModal(uploadCsvModal);
+}
+
+function returnToWordsPanel() {
+    isOpenedFromWordsPanel = false;
+    closeModal();
+    document.dispatchEvent(new CustomEvent("wordsPanelReturn"));
 }

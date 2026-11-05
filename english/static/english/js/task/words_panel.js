@@ -5,6 +5,13 @@ const closeWordsPanelButton = document.getElementById("closeWordsPanelButton");
 const wordsPanelBody = document.getElementById("wordsPanelBody");
 const wordsPanelCategoryTemplate = document.getElementById("wordsPanelCategoryTemplate");
 const wordsPanelRowTemplate = document.getElementById("wordsPanelRowTemplate");
+const deleteWordsPanelListButton = document.getElementById("deleteWordsPanelListButton");
+const saveWordsPanelButton = document.getElementById("saveWordsPanelButton");
+
+
+const canEditWords = wordsPanel?.dataset.canEdit === "true";
+
+const wordsPanelWordsByStepId = new Map();
 
 
 if (wordsPanel && openWordsPanelButton) {
@@ -22,15 +29,59 @@ if (wordsPanel && openWordsPanelButton) {
     });
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && wordsPanel.classList.contains("is-open")) {
-            setWordsPanelOpen(false);
+        if (event.key !== "Escape" || !wordsPanel.classList.contains("is-open")) {
+            return;
         }
+
+        if (canEditWords && isOpenedFromWordsPanel) {
+            return;
+        }
+
+        setWordsPanelOpen(false);
     });
+
+    if (canEditWords) {
+        wordsPanelBody.addEventListener("click", (event) => {
+            const addButton = event.target.closest(".words-panel-add-button");
+
+            if (addButton) {
+                openUploadCsvFromWordsPanel(
+                    "create", 
+                    {
+                        category: addButton.dataset.category
+                    }
+                );
+                return;
+            }
+
+            const row = event.target.closest(".words-panel-row.is-editable");
+
+            if (row) {
+                openUploadCsvFromWordsPanel(
+                    "edit",
+                    wordsPanelWordsByStepId.get(Number(row.dataset.stepId))
+                );
+            }
+        });
+
+        deleteWordsPanelListButton.addEventListener("click", () => {
+            openUploadCsvFromWordsPanel("delete");
+        });
+
+        saveWordsPanelButton.addEventListener("click", () => {
+            window.location.reload();
+        });
+
+        document.addEventListener("wordsPanelReturn", () => {
+            loadWordsProgress();
+        });
+    }
 }
 
 function setWordsPanelOpen(isOpen) {
     wordsPanel.classList.toggle("is-open", isOpen);
     wordsPanelCover.classList.toggle("is-open", isOpen);
+    document.body.classList.toggle("is-words-panel-open", isOpen);
 }
 
 async function loadWordsProgress() {
@@ -46,12 +97,20 @@ async function loadWordsProgress() {
 
 function renderWordsProgress(data) {
     wordsPanelBody.replaceChildren();
+    wordsPanelWordsByStepId.clear();
 
     for (const category of data.categories) {
         const section = wordsPanelCategoryTemplate.content.firstElementChild.cloneNode(true);
         const list = section.querySelector(".words-panel-list");
+        const addButton = section.querySelector(".words-panel-add-button")
 
         section.querySelector(".words-panel-category-title").textContent = category.category
+
+        if (canEditWords) {
+            addButton.dataset.category = category.category;
+        } else {
+            addButton.remove();
+        }
 
         for (const word of category.words) {
             list.append(
@@ -80,6 +139,20 @@ function createWordsPanelRow(word, requiredCorrectAnswers) {
         dot.classList.toggle("is-filled", index < word.correct_count);
 
         progress.append(dot);
+    }
+
+    if (canEditWords) {
+        row.classList.add("is-editable");
+        row.dataset.stepId = word.step_id;
+
+        wordsPanelWordsByStepId.set(word.step_id, {
+            step_id: word.step_id,
+            question: {
+                text: word.text
+            },
+            translation: word.translation,
+            images: word.images
+        });
     }
 
     return row;

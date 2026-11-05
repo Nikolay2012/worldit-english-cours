@@ -70,6 +70,13 @@ deleteWordsListButton.addEventListener("click", () => {
 
 // «Скасувати» в подтверждении удаления списка - возврат к списку
 cancelDeleteListButton.addEventListener("click", () => {
+    
+    if (isOpenedFromWordsPanel) {
+        returnToWordsPanel();
+
+        return;
+    }
+
     setUploadCsvConfirmDelete(false);
 });
 
@@ -155,6 +162,13 @@ uploadCsvWordForm.addEventListener("change", (event) => {
 });
 
 cancelWordButton.addEventListener("click", () => {
+
+    if (isOpenedFromWordsPanel) {
+        returnToWordsPanel();
+
+        return;
+    }
+
     closeWordForm();
 });
 
@@ -172,6 +186,13 @@ saveWordButton.addEventListener("click", async () => {
 
     try {
         const responseData = await wordSaveRequest(url, collectWordFormData());
+
+        if (isOpenedFromWordsPanel) {
+            returnToWordsPanel();
+
+            return;
+        }
+        
         renderWordsList(responseData.data);
         closeWordForm();
     } catch (error) {

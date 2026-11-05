@@ -5,22 +5,41 @@
 <div 
     class="words-panel" 
     id="wordsPanel" 
-    data-words-progress-url="{% url 'english:api:api_words_progress' task.id %}">
+    data-words-progress-url="{% url 'english:api:api_words_progress' task.id %}"
+    data-can-edit="{% if can_edit_words %}true{% else %}false{% endif %}">
+
     <div class="words-panel-header">
         <h3 class="words-panel-title" id="wordsPanelTitle">Список слів</h3>
 
         <button type="button" class="words-panel-close" id="closeWordsPanelButton">
-            <img src="{% static 'english/img/action_icons/close.svg' %}" alt="">
+            <img src="{% static 'english/img/action_icons/close.svg' %}" alt="close">
         </button>
     </div>
 
     <div class="words-panel-body" id="wordsPanelBody"></div>
+
+    {% if can_edit_words %}
+        <div class="words-panel-footer">
+            <button type="button" class="button upload-csv-cancel" id="deleteWordsPanelListButton">
+                <img src="{% static 'english/img/action_icons/trash-2.svg' %}" alt="trash-2">
+                Видалити список
+            </button>
+            <button type="button" class="button upload-csv-confirm" id="saveWordsPanelButton">
+                Зберегти
+            </button>
+        </div>
+    {% endif %}
 </div>
 
 <template id="wordsPanelCategoryTemplate">
     <section class="words-panel-category">
         <h4 class="words-panel-category-title"></h4>
         <ul class="words-panel-list"></ul>
+        
+        <button type="button" class="button add-words-button words-panel-add-button">
+            <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
+            Додати слова
+        </button>
     </section>
 </template>
 

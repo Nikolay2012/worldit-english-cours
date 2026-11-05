@@ -5,3 +5,5 @@ let wordFormState = {
     category: null
 };
 let imageStates = [];
+
+let isOpenedFromWordsPanel = false;

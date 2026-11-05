@@ -97,7 +97,15 @@ class QuestionHandler(StepHandler):
         return {
             "step_id": step.id,
             "text": question.text,
-            "translation": translation
+            "translation": translation,
+            "images": [
+                {
+                    "order": image.order,
+                    "url": image.image.url if image.image else None,
+                    "is_placeholder": image.is_placeholder
+                }
+                for image in question.images.all()
+            ]
         }
     
     def _get_option(self, step: EnglishTaskStep, data: dict) -> AnswerOption:

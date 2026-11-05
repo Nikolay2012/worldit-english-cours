@@ -116,6 +116,7 @@ class EnglishTaskView(DetailView):
         
         context.update(
             can_import=self._is_staff() and not has_steps,
+            can_edit_words=self._is_staff(),
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
             can_open_words_list=has_steps and self.object.type == "words",
