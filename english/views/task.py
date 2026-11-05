@@ -63,7 +63,8 @@ class EnglishTaskView(DetailView):
         return EnglishTask.objects.filter(
             lesson__module__course_id=settings.ENGLISH_COURSE_ID,
             lesson__module_id=self.kwargs["module_id"],
-            lesson_id=self.kwargs["lesson_id"]
+            lesson_id=self.kwargs["lesson_id"],
+            is_active=True
         ).select_related("lesson__module")
     
     def get(self, request, *args, **kwargs):

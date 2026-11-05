@@ -208,7 +208,8 @@ class ModuleView(ListView):
     def _get_tasks_queryset(self, block: str):
         
         tasks = EnglishTask.objects.filter(
-            block=block
+            block=block,
+            is_active=True
         ).order_by("order")
         
         if self._is_staff():

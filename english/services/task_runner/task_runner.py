@@ -62,7 +62,6 @@ from english.services.task_runner.mixins.words import WordsTaskRunnerMixin
 from users.models import CustomUser
 
 
-
 class TaskRunner(
         WordsTaskRunnerMixin
     ):
@@ -357,7 +356,8 @@ class TaskRunner(
         
         task = EnglishTask.objects.filter(
             pk=task_id,
-            lesson__module__course_id=settings.ENGLISH_COURSE_ID
+            lesson__module__course_id=settings.ENGLISH_COURSE_ID,
+            is_active=True
         ).first()
         
         if task is None:
