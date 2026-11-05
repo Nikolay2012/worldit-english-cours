@@ -53,7 +53,7 @@ function restoreOpenedLessons() {
     const openedLessonIds = getOpenedLessonIds();
 
     document.querySelectorAll(".lesson-card[data-id]").forEach((card) => {
-        console.log(card.classList);
+        
         if (openedLessonIds.has(card.dataset.id)) {
             card.classList.remove("collapsed");
         }
