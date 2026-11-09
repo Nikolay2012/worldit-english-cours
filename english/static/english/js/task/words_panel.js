@@ -116,8 +116,10 @@ async function loadWordsProgress() {
         wordsPanelData = await wordsProgressRequest(
             wordsPanel.dataset.wordsProgressUrl
         );
+
         renderWordsProgress();
     } catch (error) {
+        console.error(error);
         showMessage(error.message);
     }
 }
@@ -133,10 +135,8 @@ function renderWordsProgress() {
 
         section.querySelector(".words-panel-category-title").textContent = category.category;
 
-        if (canEditWords) {
+        if (addButton) {
             addButton.dataset.category = category.category;
-        } else {
-            addButton.remove();
         }
 
         for (const word of category.words) {
