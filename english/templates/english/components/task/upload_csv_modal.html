@@ -1,6 +1,8 @@
 {% load static %}
 
 <div class="modal" id="uploadCsvModal"
+    data-default-title="{{ default_title }}"
+    data-default-description="{{ default_description }}"
     data-import-url="{% url 'english:api:api_import_task_data' task.id %}"
     data-delete-url="{% url 'english:api:api_delete_task_steps' task.id %}"
     data-create-word-url="{% url 'english:api:api_create_word' task.id %}"
@@ -8,7 +10,7 @@
     data-placeholder-url="{% static 'english/img/questions_placeholder/questions_placeholder.png' %}">
 
     <div class="row">
-        <h3 id="uploadCsvTitle">Завантаження списку слів</h3>
+        <h3 id="uploadCsvTitle">{{ default_title }}</h3>
         <img src="{% static 'english/img/action_icons/close.svg' %}" class="closeModal" alt="close">
     </div>
 
@@ -16,7 +18,7 @@
 
         <div class="upload-csv-select">
             <p class="upload-csv-description">
-                Завантажте документ зі списком слів для цього уроку.
+                {{ default_description }}
             </p>
 
             <button type="button" class="upload-csv-dropzone" id="uploadCsvDropzone">

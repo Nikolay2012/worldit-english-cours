@@ -1,7 +1,8 @@
 // Заголовки и подсказки
 const CREATE_WORD_TITLE = "Додати нове слово";
 const EDIT_WORD_TITLE = "Редагувати слово";
-const DEFAULT_TITLE = "Завантаження списку слів";
+const DEFAULT_TITLE = uploadCsvModal.dataset.defaultTitle;
+
 const LIST_TITLE = "Список слів";
 const DELETE_LIST_TITLE = "Видалити список слів?";
 const DEFAULT_FILE_HINT = "Підтримується: .csv";

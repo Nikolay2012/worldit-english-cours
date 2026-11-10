@@ -46,6 +46,8 @@ from django.conf import settings
 from courses.models import Lesson, Module
 from english.models import EnglishTask
 from english.services.task import EnglishTaskService
+from english.views.task.mixins.words import WordsTaskContentMixin
+from english.views.task.mixins.sentences import SentencesTaskContentMixin
 
 
 ACCESS_TYPES = ["admin", "student"]
@@ -57,7 +59,11 @@ STAFF_TYPES = ["admin"]
     # если не будет - уберу name="dispatch"
     name="dispatch"
 )
-class EnglishTaskView(DetailView):
+class EnglishTaskView(
+        DetailView,
+        WordsTaskContentMixin,
+        SentencesTaskContentMixin
+    ):
     
     http_method_names = ["get"]
     template_name = "english/task.html"
@@ -121,10 +127,9 @@ class EnglishTaskView(DetailView):
         
         context.update(
             can_import=self._is_staff() and not has_steps,
-            can_edit_words=self._is_staff(),
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
-            can_open_words_list=has_steps and self.object.type == "words",
+            **self._get_type_context(has_steps=has_steps)
         )
         
         return context
@@ -149,6 +154,17 @@ class EnglishTaskView(DetailView):
                 self.object.get_absolute_url()
             )
         ]
+    
+    def _get_type_context(self, has_steps: bool):
+        
+        context_builders = {
+            "words": self._get_words_context,
+            "sentences": self._get_sentences_context
+        }
+        
+        builder = context_builders.get(self.object.type)
+        
+        return builder(has_steps=has_steps) if builder else {}
     
     def _get_content_component(self, has_steps: bool) -> str:
         

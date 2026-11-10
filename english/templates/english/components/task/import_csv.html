@@ -1,8 +1,11 @@
 {% load static %}
 
 <div class="task-empty-state">
-    <p class="task-empty-title">Завантажте список слів</p>
-    <p class="task-empty-text">Завантажте документ зі списком слів.</p>
+    <p class="task-empty-title">{{ import_title }}</p>
+    
+    {% for paragraph in import_text %}
+        <p class="task-empty-text">{{ paragraph }}</p>
+    {% endfor %}
 
     <button type="button" class="button upload-button">
         <img src="{% static 'english/img/action_icons/download.svg' %}" alt="download">
