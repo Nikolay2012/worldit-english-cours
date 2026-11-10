@@ -12,8 +12,13 @@ World IT
     <link rel="stylesheet" href="{% static 'english/css/components/task/import_csv.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task/upload_csv_modal.css' %}">
     <link rel="stylesheet" href="{% static 'english/css/components/task/run.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/task/words_panel.css' %}">
-    <link rel="stylesheet" href="{% static 'english/css/components/task/steps/question.css' %}">
+    {% if task.type == "words" %}
+        <link rel="stylesheet" href="{% static 'english/css/components/task/words_panel.css' %}">
+        <link rel="stylesheet" href="{% static 'english/css/components/task/steps/question.css' %}">
+    {% endif %}
+    {% if task.type == "sentences" %}
+        <link rel="stylesheet" href="{% static 'english/css/components/task/steps/sentence.css' %}">
+    {% endif %}
 {% endblock %}
 
 {% block main %}

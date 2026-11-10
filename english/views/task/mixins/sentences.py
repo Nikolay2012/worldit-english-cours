@@ -3,6 +3,12 @@ from english.views.task.mixins.base import TaskContentBase
 
 class SentencesTaskContentMixin(TaskContentBase):
     
+    # --
+    # временная часть для шаблона задания типа "предложения"
+    # пока ещё не готов парсинг
+    PREVIEW_COMPONENT = "english/components/task/sentence_preview.html"
+    # --
+    
     def _get_sentences_context(self, has_steps: bool):
         
         return {

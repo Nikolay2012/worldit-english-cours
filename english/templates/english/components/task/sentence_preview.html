@@ -1,0 +1,37 @@
+{% load static %}
+
+<div class="task-run" id="taskRun">
+    <div class="task-run-step" id="taskRunStep">
+        <div class="sentence-step">
+            <div class="sentence-text">
+                He <span class="sentence-gap"></span> live in <span class="sentence-gap"></span> house.
+            </div>
+
+            <div class="sentence-tokens">
+                <span class="sentence-token">does</span>
+                <span class="sentence-token">doesn`t</span>
+                <span class="sentence-token">the</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="task-run-progress">
+        <p class="task-run-progress-title">Ваш прогрес</p>
+
+        <div class="task-run-progress-track">
+            <div class="task-run-progress-bar" id="taskRunProgressBar"></div>
+        </div>
+
+        <div class="task-run-progress-labels">
+            <span id="taskRunProgressValue">0%</span>
+            <span>100%</span>
+        </div>
+    </div>
+</div>
+
+<template id="sentenceStepTemplate">
+    <div class="sentence-step">
+        <div class="sentence-text"></div>
+        <div class="sentence-tokens"></div>
+    </div>
+</template>
