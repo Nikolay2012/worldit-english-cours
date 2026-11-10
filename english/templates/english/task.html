@@ -18,6 +18,7 @@ World IT
     {% endif %}
     {% if task.type == "sentences" %}
         <link rel="stylesheet" href="{% static 'english/css/components/task/steps/sentence.css' %}">
+        <link rel="stylesheet" href="{% static 'english/css/components/task/theory_modal.css' %}">
     {% endif %}
 {% endblock %}
 
@@ -46,7 +47,7 @@ World IT
         {% endif %}
 
         {% if can_open_theory %}
-            <button type="button" class="button theory-modal-button" id="openTheoryModal">
+            <button type="button" class="button theory-modal-button" id="openTheoryModalButton">
                 <img src="{% static 'english/img/action_icons/question-mark-circled.svg' %}" alt="question-mark-circled">
                 Допомога
             </button>
@@ -59,6 +60,7 @@ World IT
         </div>
         <div id="modalCover">
             {% include 'english/components/task/upload_csv_modal.html' with task=task %}
+            {% include 'english/components/task/theory_modal.html' with theory_blocks=theory_blocks %}
             
             <div class="modal" id="messageModal" role="status">
                 <div class="row">
@@ -96,5 +98,6 @@ World IT
     
     {% if task.type == "sentences" %}
         <script src="{% static 'english/js/task/sentence_builder.js' %}"></script>
+        <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
     {% endif %}
 {% endblock %}

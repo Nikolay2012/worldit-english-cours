@@ -1,0 +1,41 @@
+{% load static %}
+
+<div class="modal" id="theoryModal">
+    <div class="theory-modal-header">
+        <h3 class="theory-modal-title">Допомога</h3>
+
+        <button type="button" class="theory-modal-close" id="closeTheoryModalIcon">
+            <img src="{% static 'english/img/action_icons/close.svg' %}" alt="close">
+        </button>
+    </div>
+
+    <div class="theory-modal-body" id="theoryModalBody">
+        {% for block in theory_blocks %}
+            {% if block.type == "title" %}
+                <h2 class="theory-title">
+                    {{ block.text }}
+                </h2>
+
+            {% elif block.type == "text" %}
+                <p class="theory-text">
+                    {% for part in block.parts %}
+                        {% if part.accent %}
+                            <span class="is-accent">{{ part.text }}</span>
+                        {% else %}
+                            {{ part }}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+
+            {% elif block.type == "image" %}
+                <img class="theory-image" src="{{ block.src }}" alt="{{ block.alt }}">
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="theory-modal-footer">
+        <button type="button" class="button theory-modal-confirm" id="closeTheoryModalButton">
+            Закрити
+        </button>
+    </div>
+</div>
