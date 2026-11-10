@@ -12,6 +12,7 @@ class SentencesTaskContentMixin(TaskContentBase):
     def _get_sentences_context(self, has_steps: bool):
         
         return {
+            "can_open_theory": True,
             "import_title": "Завантажте список речень",
             "import_text": [
                 "Увага!",

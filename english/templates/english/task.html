@@ -44,6 +44,13 @@ World IT
                 Список слів
             </button>
         {% endif %}
+
+        {% if can_open_theory %}
+            <button type="button" class="button theory-modal-button" id="openTheoryModal">
+                <img src="{% static 'english/img/action_icons/question-mark-circled.svg' %}" alt="question-mark-circled">
+                Допомога
+            </button>
+        {% endif %}
     </div>
 
     <div class="card-container">

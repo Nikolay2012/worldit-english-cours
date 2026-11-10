@@ -2,15 +2,51 @@
 
 <div class="task-run" id="taskRun">
     <div class="task-run-step" id="taskRunStep">
-        <div class="sentence-step">
-            <div class="sentence-text">
-                He <span class="sentence-gap"></span> live in <span class="sentence-gap"></span> house.
-            </div>
+        <div class="question-step">
+            <div class="question-step-prompt">
+                <p class="sentence-translation">Він не знаходить.</p>
 
+                <div class="sentence-answer-row">
+                    <div class="sentence-build" id="sentenceBuild">
+                        <div class="sentence-build-words" id="sentenceBuildWords"></div>
+                    </div>
+
+                    <button type="button" class="sentence-check-button" id="sentenceCheckButton" disabled>
+                        <img src="{% static 'english/img/action_icons/check.svg' %}" alt="check">
+                    </button>
+                </div>
+            </div>
+    
+            <div class="line-spacer"></div>
+    
             <div class="sentence-tokens">
-                <span class="sentence-token">does</span>
-                <span class="sentence-token">doesn`t</span>
-                <span class="sentence-token">the</span>
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">He</span>
+                </div>
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">doesn`t</span>
+                </div>
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">the</span>
+                </div>
+
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">He</span>
+                </div>
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">doesn`t</span>
+                </div>
+                <div class="sentence-token" draggable="true" data-token="He">
+                    <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2">
+                    <span class="sentence-token-text">the</span>
+                </div>
+
+                
             </div>
         </div>
     </div>
