@@ -171,15 +171,23 @@
     display: flex;
 }
 
-.dark-body .sentence-build-words .sentence-token:hover {
-    border-color: #FAF8FF;
-    background-color: var(--bg-primary);
+.dark-body .sentence-token-remove img {
+    filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 
-.dark-body .sentence-token.is-used {
+.dark-body .sentence-build-words .sentence-token {
     border-color: transparent;
-    background-color: rgba(255, 255, 255, 0.06);
-    color: #545879;
+    background-color: transparent;
+}
+
+.dark-body .sentence-build-words .sentence-token:hover {
+    border-color: #FAF8FF;
+    background-color: transparent;
+}
+
+
+.dark-body .sentence-token.is-used {
+    opacity: 0.5;
 }
 
 .dark-body .sentence-check-button {
