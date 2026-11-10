@@ -90,5 +90,11 @@ World IT
     <script src="{% static 'english/js/task/upload_csv/functions.js' %}"></script>
     <script src="{% static 'english/js/task/upload_csv/handlers.js' %}"></script>
     
-    <script src="{% static 'english/js/task/words_panel.js' %}"></script>
+    {% if task.type == "words" %}
+        <script src="{% static 'english/js/task/words_panel.js' %}"></script>
+    {% endif %}
+    
+    {% if task.type == "sentences" %}
+        <script src="{% static 'english/js/task/sentence_builder.js' %}"></script>
+    {% endif %}
 {% endblock %}
