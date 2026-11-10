@@ -1,6 +1,7 @@
 const sentenceTokens = document.querySelector(".sentence-tokens");
 const sentenceBuildWords = document.getElementById("sentenceBuildWords");
 const placedTokenTemplate = document.getElementById("sentencePlacedTokenTemplate");
+const sentenceCheckButton = document.getElementById("sentenceCheckButton");
 
 let activeDrag = null;
 
@@ -63,6 +64,8 @@ sentenceBuildWords.addEventListener("drop", (event) => {
 
     activeDrag.placed = true;
     activeDrag.tokenContainer.classList.add('is-used');
+
+    updateCheckButton();
 })
 
 sentenceBuildWords.addEventListener("dragstart", (event) => {
@@ -89,6 +92,8 @@ sentenceBuildWords.addEventListener("click", (event) => {
 
     getSource(token)?.classList.remove("is-used");
     token.remove();
+
+    updateCheckButton();
 });
 
 // Если токен не был дотянут до области sentence-words-build
@@ -107,6 +112,8 @@ document.addEventListener("dragend", (event) => {
     }
 
     activeDrag = null;
+
+    updateCheckButton();
 })
 
 function createPlacedToken(tokenContainer) {
@@ -131,4 +138,8 @@ function getInsertBefore(x, dragged) {
 
         return x < box.left + box.width / 2;
     }) || null;
+}
+
+function updateCheckButton() {
+    sentenceCheckButton.disabled = sentenceBuildWords.querySelector(".sentence-token") === null;
 }
