@@ -8,9 +8,9 @@ class Sentence(models.Model):
         on_delete=models.CASCADE,
         related_name="sentence"
     )
-    prompt = models.CharField(max_length=255)
-    answer = models.CharField(max_length=255)
-    template = models.CharField(max_length=255, blank=True)
+    prompt = models.TextField()
+    answer = models.TextField()
+    template = models.TextField(blank=True, default="")
     
     def __str__(self):
         return f"<Sentence: {self.prompt}>"

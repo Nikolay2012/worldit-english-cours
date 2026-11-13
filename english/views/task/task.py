@@ -168,15 +168,6 @@ class EnglishTaskView(
     
     def _get_content_component(self, has_steps: bool) -> str:
         
-        # --
-        # временная часть для шаблона задания типа "предложения"
-        # пока ещё не готов парсинг
-        preview = getattr(self, "PREVIEW_COMPONENT", None)
-        
-        if preview and self.object.type == "sentences" and self._is_staff():
-            return preview
-        # --
-        
         if self._is_staff():
             component = "run" if has_steps else "import_csv"
         else:
