@@ -30,14 +30,10 @@ function setUploadCsvLoading(isLoading) {
     confirmUploadCsvButton.disabled = isLoading || !uploadCsvInput.files[0];
 }
 
-function setUploadCsvList(isList, responseData) {
+function setUploadCsvList(isList) {
     uploadCsvModal.classList.toggle("is-list", isList);
     uploadCsvModal.classList.remove("is-loading");
     uploadCsvTitle.textContent = isList ? LIST_TITLE : DEFAULT_TITLE;
-
-    if (responseData) {
-        renderWordsList(responseData.data);
-    }
 }
 
 function setUploadCsvConfirmDelete(isConfirm) {
@@ -57,15 +53,6 @@ function resetUploadCsvModal() {
     resetWordForm();
 
     isOpenedFromWordsPanel = false;
-}
-
-function renderWordsList(categories) {
-    uploadCsvList.replaceChildren();
-    wordsByStepId.clear();
-
-    for (const category of categories) {
-        uploadCsvList.append(createCategory(category));
-    }
 }
 
 function createCategory(category) {

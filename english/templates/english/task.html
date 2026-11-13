@@ -97,11 +97,13 @@ World IT
     
     {% if task.type == "words" %}
         <script src="{% static 'english/js/task/words_panel.js' %}"></script>
+        <script src="{% static 'english/js/task/upload_csv/words_list.js' %}"></script>
     {% endif %}
 
     {% if task.type == "sentences" %}
         {% if can_open_theory %}
             <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
         {% endif %}
+        <script src="{% static 'english/js/task/upload_csv/sentences_list.js' %}"></script>
     {% endif %}
 {% endblock %}

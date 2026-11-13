@@ -5,6 +5,7 @@
     max-height: calc(100dvh - 32px);
     position: relative;
     padding: 24px;
+    gap: 24px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -270,15 +271,15 @@
     gap: 8px;
 }
 
-.word-progress-dot {
-    width: 12px;
-    height: 12px;
+.progress-dot {
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background-color: #E4E4E7;
     flex-shrink: 0;
 }
 
-.word-progress-dot.is-filled {
+.progress-dot.is-filled {
     background-color: #F98232;
 }
 
@@ -325,10 +326,11 @@
     cursor: not-allowed;
 }
 
-.add-words-button {
+.add-words-button,
+.add-sentence-button {
     width: fit-content;
     height: 36px;
-    padding: 8px 12px;
+    padding: 8px 16px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -339,12 +341,14 @@
     border-radius: 6px;
 }
 
-.add-words-button:hover {
+.add-words-button:hover,
+.add-sentence-button:hover {
     background-color: rgba(35, 35, 55, 0.05);
 }
 
 .add-words-button img,
-.upload-csv-list-actions img {
+.upload-csv-list-actions img,
+.add-sentence-button img {
     width: 16px;
     height: 16px;
 }
@@ -459,6 +463,42 @@
     background-color: rgba(35, 35, 55, 0.05);
 }
 
+.sentences-list-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sentence-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border: none;
+    background-color: transparent;
+    font: inherit;
+    font-size: 0.875rem;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.sentence-row:hover {
+    background-color: rgba(35, 35, 55, 0.05);
+}
+
+.sentence-text {
+    min-width: 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.dark-body .sentence-row:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
 .dark-body #uploadCsvModal .closeModal {
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
@@ -489,21 +529,23 @@
     background-color: rgba(255, 255, 255, 0.06);
 }
 
-.dark-body .word-progress-dot {
+.dark-body .progress-dot {
     background-color: #545879;
 }
 
-.dark-body .word-progress-dot.is-filled {
+.dark-body .progress-dot.is-filled {
     background-color: #F98232;
 }
 
 .dark-body .upload-csv-cancel,
-.dark-body .add-words-button {
+.dark-body .add-words-button,
+.dark-body .add-sentence-button {
     border-color: #FAF8FF;
 }
 
 .dark-body .upload-csv-cancel:hover,
-.dark-body .add-words-button:hover {
+.dark-body .add-words-button:hover,
+.dark-body .add-sentence-button:hover {
     background-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -525,7 +567,8 @@
 }
 
 .dark-body .add-words-button img,
-.dark-body .upload-csv-list-actions img {
+.dark-body .upload-csv-list-actions img,
+.dark-body .add-sentence-button img {
     filter: invert(100%) sepia(21%) saturate(222%) hue-rotate(211deg) brightness(105%) contrast(101%);
 }
 

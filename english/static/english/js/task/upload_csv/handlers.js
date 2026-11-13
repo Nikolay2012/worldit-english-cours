@@ -48,7 +48,14 @@ confirmUploadCsvButton.addEventListener("click", async () => {
             uploadCsvModal.dataset.importUrl, 
             formData
         );
-        setUploadCsvList(true, responseData);
+        
+        setUploadCsvList(true);
+        document.dispatchEvent(new CustomEvent("uploadCsvImported", {
+            detail: {
+                data: responseData.data
+            }
+        }));
+        
     } catch (error) {
         showMessage(error.message);
         setUploadCsvLoading(false);

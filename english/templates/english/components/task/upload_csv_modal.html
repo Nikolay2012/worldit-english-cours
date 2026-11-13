@@ -43,44 +43,68 @@
 
         <div class="upload-csv-list" id="uploadCsvList"></div>
 
-        <template id="wordsCategoryTemplate">
-            <section class="words-category">
-                <div class="words-category-header">
-                    <h4 class="words-category-title"></h4>
-                    <button type="button"
-                            class="button collapse-button">
-                        <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="chevron-up">
-                    </button>
-                </div>
-                <div class="words-category-body">
-                    <div class="words-category-body-inner">
-                        <ul class="words-list"></ul>
-
-                        <button type="button" class="button add-words-button">
-                            <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
-                            Додати слова
+        {% if task.type == "words" %}
+            <template id="wordsCategoryTemplate">
+                <section class="words-category">
+                    <div class="words-category-header">
+                        <h4 class="words-category-title"></h4>
+                        <button type="button"
+                                class="button collapse-button">
+                            <img src="{% static 'english/img/action_icons/chevron-up.svg' %}" alt="chevron-up">
                         </button>
                     </div>
-                </div>
-            </section>
-        </template>
+                    <div class="words-category-body">
+                        <div class="words-category-body-inner">
+                            <ul class="words-list"></ul>
 
-        <template id="wordRowTemplate">
-            <li class="words-list-item">
-                <button type="button" class="word-row">
-                    <span class="word-text"></span>
-                    <span class="word-progress">
-                        <span class="word-progress-dot"></span>
-                        <span class="word-progress-dot"></span>
-                        <span class="word-progress-dot"></span>
-                        <span class="word-progress-dot"></span>
-                        <span class="word-progress-dot"></span>
-                        <span class="word-progress-dot"></span>
-                    </span>
-                    <span class="word-translation"></span>
-                </button>
-            </li>
-        </template>
+                            <button type="button" class="button add-words-button">
+                                <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
+                                Додати слова
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <template id="wordRowTemplate">
+                <li class="words-list-item">
+                    <button type="button" class="word-row">
+                        <span class="word-text"></span>
+                        <span class="word-progress">
+                            <span class="progress-dot"></span>
+                            <span class="progress-dot"></span>
+                            <span class="progress-dot"></span>
+                            <span class="progress-dot"></span>
+                            <span class="progress-dot"></span>
+                            <span class="progress-dot"></span>
+                        </span>
+                        <span class="word-translation"></span>
+                    </button>
+                </li>
+            </template>
+        {% endif %}
+
+        {% if task.type == "sentences" %}
+            <template id="sentencesListTemplate">
+                <section class="sentences-list-block">
+                    <ul class="words-list sentences-list"></ul>
+
+                    <button type="button" class="button add-sentence-button">
+                        <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
+                        Додати речення
+                    </button>
+                </section>
+            </template>
+
+            <template id="sentenceRowTemplate">
+                <li class="words-list-item">
+                    <button type="button" class="sentence-row">
+                        <span class="sentence-text"></span>
+                        <span class="word-progress"></span>
+                    </button>
+                </li>
+            </template>
+        {% endif %}
 
         <div class="upload-csv-confirm-delete">
             <p class="upload-csv-confirm-text">
