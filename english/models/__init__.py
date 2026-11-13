@@ -4,7 +4,7 @@ from .english_task import EnglishTask
 from .open_english_task import OpenEnglishTask
 from .question import Question
 from .reading_text import ReadingText
-from .sentence_word import SentenceWord
+from .sentence_token import SentenceToken
 from .sentence import Sentence
 from .student_answer import StudentAnswer
 from .student_progress import StudentProgress

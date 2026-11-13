@@ -9,7 +9,7 @@ admin.site.register([
     OpenEnglishTask,
     Question,
     ReadingText,
-    SentenceWord,
+    SentenceToken,
     Sentence,
     StudentAnswer,
     StudentProgress,
