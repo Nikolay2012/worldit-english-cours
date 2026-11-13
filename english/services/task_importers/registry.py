@@ -25,6 +25,7 @@ from django.conf import settings
 from english.models.english_task import EnglishTask
 from english.services.exceptions import NotFoundError, ValidationError
 from english.services.task_importers.base import BaseEnglishTaskImporter
+from english.services.task_importers.sentence import SentenceImporter
 from english.services.task_importers.word import WordImporter
 
 
@@ -33,6 +34,7 @@ class TaskImportersRegistry:
         
         self.TASK_IMPORTERS = {
             "words": WordImporter,
+            "sentences": SentenceImporter
         }
     
     def get_task_importer(self, task_id: int) -> BaseEnglishTaskImporter:

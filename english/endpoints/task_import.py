@@ -59,7 +59,7 @@ class TaskImportEndpoint(View):
             )
         
         try:
-            words_list = TaskImportersRegistry().get_task_importer(
+            result_list = TaskImportersRegistry().get_task_importer(
                 task_id=task_id
             ).import_file(
                 task_id=task_id,
@@ -84,6 +84,6 @@ class TaskImportEndpoint(View):
             )
         
         return JsonResponse(
-            {"ok": True, "data": words_list}, 
+            {"ok": True, "data": result_list}, 
             status=200
         )

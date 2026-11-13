@@ -60,7 +60,10 @@ World IT
         </div>
         <div id="modalCover">
             {% include 'english/components/task/upload_csv_modal.html' with task=task %}
-            {% include 'english/components/task/theory_modal.html' with theory_blocks=theory_blocks %}
+            
+            {% if can_open_theory %}
+                {% include 'english/components/task/theory_modal.html' with theory_blocks=theory_blocks %}
+            {% endif %}
             
             <div class="modal" id="messageModal" role="status">
                 <div class="row">
@@ -95,9 +98,10 @@ World IT
     {% if task.type == "words" %}
         <script src="{% static 'english/js/task/words_panel.js' %}"></script>
     {% endif %}
-    
+
     {% if task.type == "sentences" %}
-        <script src="{% static 'english/js/task/sentence_builder.js' %}"></script>
-        <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
+        {% if can_open_theory %}
+            <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
+        {% endif %}
     {% endif %}
 {% endblock %}
