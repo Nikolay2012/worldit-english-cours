@@ -1,4 +1,4 @@
-#modalCover > .modal,
+#modalCover > .modal:not(#messageModal),
 #modalCover > #theoryModal {
     display: none;
 }

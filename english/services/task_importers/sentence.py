@@ -66,6 +66,14 @@ class SentenceImporter(BaseEnglishTaskImporter):
     # Полное украинское предложение, которое у студента будет отображено как вопрос
     FILL_PROMPT_COLUMN = 4
     
+    
+    # Ограничения для парсинга варианта задания "Предложения"
+    # С ними невозможно загрузить csv для других вариантов заданий, 
+    # например, варианта задания "Слова"
+    BUILD_MAX_COLUMNS = 3
+    FILL_MAX_COLUMNS = 5
+    MIN_SENTENCE_WORDS = 2
+    
     def import_file(
             self, 
             task_id: int,
@@ -193,6 +201,11 @@ class SentenceImporter(BaseEnglishTaskImporter):
                 f"Рядок {line}: немає речення українською (перекладу)"
             )
         
+        if any(cells[self.FILL_MAX_COLUMNS:]):
+            raise ValidationError(
+                f"Рядок {line}: кількість стовпців перевищує максимальну у завданні типу 'Речення'"
+            )
+        
         gaps_count = template.count(self.GAP_MARKER)
         
         if gaps_count == 0:
@@ -281,6 +294,11 @@ class SentenceImporter(BaseEnglishTaskImporter):
                 f"Рядок {line}: немає речення українською (перекладу)"
             )
         
+        if any(cells[self.BUILD_MAX_COLUMNS:]):
+            raise ValidationError(
+                f"Рядок {line}: кількість стовпців перевищує максимальну у завданні типу 'Речення'"
+            )
+        
         if self.GAP_PATTERN.search(sentence):
             raise ValidationError(
                 f"Рядок {line}: у реченні для побудови не може бути пропуску ___"
@@ -291,6 +309,15 @@ class SentenceImporter(BaseEnglishTaskImporter):
         # для избежания ошибок с разніми форматами и исключить человеческий фактор при заполнеии основніх таблиц, 
         # которіе загружаются сюда, в приложения
         tokens = tokenize(sentence)
+        
+        words_count = sum(
+            1 for token in tokens if self.LATIN_PATTERN.search(token)
+        )
+        
+        if words_count < self.MIN_SENTENCE_WORDS:
+            raise ValidationError(
+                f"Рядок {line}: речення має містити мінімум {self.MIN_SENTENCE_WORDS} слова/слів"
+            )
         
         self._validate_tokens(
             line=line,

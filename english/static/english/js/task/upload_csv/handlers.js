@@ -57,6 +57,7 @@ confirmUploadCsvButton.addEventListener("click", async () => {
         }));
         
     } catch (error) {
+        console.log(error.message);
         showMessage(error.message);
         setUploadCsvLoading(false);
     }
