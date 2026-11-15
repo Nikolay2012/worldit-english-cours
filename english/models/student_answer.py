@@ -22,7 +22,7 @@ class StudentAnswer(models.Model):
         blank=True
     )
     
-    built_sentence = models.CharField(max_length=255, blank=True)
+    built_sentence = models.TextField(blank=True)
     
     def __str__(self):
         return f"<StudentAnswer: {self.student} - {self.step}>"
