@@ -54,6 +54,18 @@ class SentenceImporter(BaseEnglishTaskImporter):
         "what", "where", "when", "why", "how", "who",
     }
     
+    GAP_MARKER = "___"
+    # Нулевой артикль, которым обозначен основной вариант вставки, 
+    # или один из вариантов вставки в варианте задания "Доповнити речення"
+    ZERO_ARTICLE = "-"
+    
+    # Вырезка колонок со словами, которыми будут заполняться пропуски
+    # В актуальной версии таблиц это колонки с 1 по 3 включительно
+    FILL_ANSWER_COLUMNS = slice(1, 4)
+    
+    # Полное украинское предложение, которое у студента будет отображено как вопрос
+    FILL_PROMPT_COLUMN = 4
+    
     def import_file(
             self, 
             task_id: int,
@@ -158,8 +170,75 @@ class SentenceImporter(BaseEnglishTaskImporter):
         cells: list[str]
     ) -> dict:
         
-        raise ValidationError("Імпорт речень з пропусками ще не підтримується")
-
+        # Шаблон c пропусками, которые должен будет заполнить студент
+        template = self.GAP_PATTERN.sub(
+            self.GAP_MARKER, 
+            normalize_sentence(cells[0])
+        )
+        
+        answers = [
+            normalize_sentence(cell) for cell in cells[self.FILL_ANSWER_COLUMNS] if cell
+        ]
+        
+        # Украинское предложение
+        prompt = cells[self.FILL_PROMPT_COLUMN] if len(cells) > self.FILL_PROMPT_COLUMN else ""
+        
+        if not self.LATIN_PATTERN.search(template):
+            raise ValidationError(
+                f"Рядок {line}: немає речення англійською"
+            )
+        
+        if not prompt:
+            raise ValidationError(
+                f"Рядок {line}: немає речення українською (перекладу)"
+            )
+        
+        gaps_count = template.count(self.GAP_MARKER)
+        
+        if gaps_count == 0:
+            raise ValidationError(
+                f"Рядок {line}: немає пропуску ___"
+            )
+        
+        if gaps_count != len(answers):
+            raise ValidationError(
+                f"Рядок {line}: пропусків {gaps_count}, а відповідей {len(answers)}"
+            )
+        
+        self._validate_tokens(
+            line=line,
+            tokens=answers
+        )
+        
+        return {
+            "prompt": prompt,
+            "template": template,
+            "answer": self._fill_gaps(template=template, answers=answers),
+            "tokens": answers,
+            "first_lowercase": False
+        }
+    
+    def _fill_gaps(
+        self,
+        template: str,
+        answers: list[str]
+    ) -> str:
+        
+        parts = template.split(self.GAP_MARKER)
+        filled = parts[0]
+        
+        # Пересобираем предложение перед записью и возвращением на клиент
+        # заполняя, при этом, пропуски
+        for answer, part in zip(answers, parts[1:]):
+            if answer != self.ZERO_ARTICLE:
+                filled += answer
+            
+            filled += part
+        
+        sentence = join_tokens(tokenize(filled))
+        
+        return sentence[:1].upper() + sentence[1:]
+    
     # rows а не row
     # не путайте
     def _parse_build_rows(
