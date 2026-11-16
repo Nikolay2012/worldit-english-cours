@@ -2,12 +2,40 @@ const sentencesListTemplate = document.getElementById("sentencesListTemplate");
 const sentenceRowTemplate = document.getElementById("sentenceRowTemplate");
 const sentenceAnswerInput = document.getElementById("sentenceAnswerInput");
 const sentencePromptInput = document.getElementById("sentencePromptInput");
+const saveSentenceButton = document.getElementById("saveSentenceButton");
 
 const SENTENCES_LIST_TITLE = "Список речень";
 const sentencesByStepId = new Map();
 
+
 document.addEventListener("uploadCsvImported", (event) => {
     renderSentencesList(event.detail.data);
+});
+
+saveSentenceButton.addEventListener('click', async (event) => {
+    
+    if (!isValidSentenceForm()) {
+        return;
+    }
+
+    saveSentenceButton.disabled = true;
+
+    try {
+        const responseData = await sentenceSaveRequest(
+            getSentenceSaveUrl(), 
+            {
+                answer: sentenceAnswerInput.value.trim(),
+                prompt: sentencePromptInput.value.trim()
+            }
+        );
+
+        renderSentencesList(responseData.data);
+        closeSentenceForm();
+    } catch (error) {
+        showMessage(error.message);
+    } finally {
+        saveSentenceButton.disabled = false;
+    }
 });
 
 uploadCsvModal.addEventListener("click", (event) => {
@@ -94,9 +122,9 @@ function openSentenceForm(mode, sentence) {
     sentenceFormState.mode = mode;
 
     if (mode === "edit") {
-        sentenceFormState.stepId = sentence.stepId;
-        sentenceFormState.answerValue = sentence.answer;
-        sentenceFormState.promptValue = sentence.prompt;
+        sentenceFormState.stepId = sentence.step_id;
+        sentenceAnswerInput.value = sentence.answer;
+        sentencePromptInput.value = sentence.prompt;
 
         if (sentence.gaps) {
             // копируем выбранные пропуски прямиков в состояние
@@ -112,4 +140,48 @@ function closeSentenceForm() {
     uploadCsvModal.classList.remove("is-sentence-form", "is-sentence-gaps");
     uploadCsvTitle.textContent = SENTENCES_LIST_TITLE;
     resetSentenceForm();
+}
+
+function isValidSentenceForm() {
+    if (!sentenceAnswerInput.value.trim()) {
+        showMessage("Введіть речення англійською");
+        return false;
+    }
+
+    if (!sentencePromptInput.value.trim()) {
+        showMessage("Введіть речення українською");
+        return false;
+    }
+
+    return true;
+}
+
+function getSentenceSaveUrl() {
+    if (sentenceFormState.mode === "create") {
+        return uploadCsvModal.dataset.createSentenceUrl;
+    }
+
+    // "/\/0\/$/" - без выделения просто "/0/"
+    // берем именно такой кусок маршрута, потому что просто "0" 
+    // может быть использовать уже в других частях машрута
+    return uploadCsvModal.dataset.updateSentenceUrl.replace(/\/0\/$/, `/${sentenceFormState.stepId}/`);
+}
+
+async function sentenceSaveRequest(url, data) {
+    
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify(data)
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok || !responseData.ok) {
+        throw new Error(responseData.error || "Не вдалося зберегти речення");
+    }
+
+    return responseData;
 }

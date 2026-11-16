@@ -285,23 +285,23 @@ class SentenceImporter(BaseEnglishTaskImporter):
         prompt = cells[1] if len(cells) > 1 else ""
         
         if not self.LATIN_PATTERN.search(sentence):
-            raise ValidationError(
-                f"Рядок {line}: немає речення англійською"
+            raise self._row_error(
+                line, message="немає речення англійською"
             )
         
         if not prompt:
-            raise ValidationError(
-                f"Рядок {line}: немає речення українською (перекладу)"
+            raise self._row_error(
+                line, message="немає речення українською (перекладу)"
             )
         
         if any(cells[self.BUILD_MAX_COLUMNS:]):
-            raise ValidationError(
-                f"Рядок {line}: кількість стовпців перевищує максимальну у завданні типу 'Речення'"
+            raise self._row_error(
+                line, message="кількість стовпців перевищує максимальну у завданні типу 'Речення'"
             )
         
         if self.GAP_PATTERN.search(sentence):
-            raise ValidationError(
-                f"Рядок {line}: у реченні для побудови не може бути пропуску ___"
+            raise self._row_error(
+                line, message="у реченні для побудови не може бути пропуску ___"
             )
         
         # Токенизация - разбор предложения на токені
@@ -309,14 +309,16 @@ class SentenceImporter(BaseEnglishTaskImporter):
         # для избежания ошибок с разніми форматами и исключить человеческий фактор при заполнеии основніх таблиц, 
         # которіе загружаются сюда, в приложения
         tokens = tokenize(sentence)
+        # Сервер выставляет верхний регистр на первого слова вне зависимости от ситуации (это "Скласти" или "Доповонити")
+        tokens[0] = tokens[0][:1].upper() + tokens[0][1:]
         
         words_count = sum(
             1 for token in tokens if self.LATIN_PATTERN.search(token)
         )
         
         if words_count < self.MIN_SENTENCE_WORDS:
-            raise ValidationError(
-                f"Рядок {line}: речення має містити мінімум {self.MIN_SENTENCE_WORDS} слова/слів"
+            raise self._row_error(
+                line, message=f"речення має містити мінімум {self.MIN_SENTENCE_WORDS} слова"
             )
         
         self._validate_tokens(
@@ -388,6 +390,8 @@ class SentenceImporter(BaseEnglishTaskImporter):
             "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS
         }
     
+    # прежний _create_steps разбит на: _create_steps, _create_sentence_step, _create_sentence_tokens
+    # разбит на части потому, что эти части используются в SentenceStepService
     def _create_steps(
         self,
         task: EnglishTask,
@@ -395,24 +399,57 @@ class SentenceImporter(BaseEnglishTaskImporter):
     ):
         
         for order, data in enumerate(sentences):
-            step = EnglishTaskStep.objects.create(
+            self._create_sentence_step(
                 task=task,
                 order=order,
-                kind="sentence"
+                data=data
             )
-            
-            sentence = Sentence.objects.create(
-                step=step,
-                prompt=data["prompt"],
-                answer=data["answer"],
-                template=data["template"]
+    
+    def _create_sentence_step(
+            self,
+            task: EnglishTask,
+            order: int,
+            data: dict
+        ):
+        
+        step = EnglishTaskStep.objects.create(
+            task=task,
+            order=order,
+            kind="sentence"
+        )
+        
+        sentence = Sentence.objects.create(
+            step=step,
+            prompt=data["prompt"],
+            answer=data["answer"],
+            template=data["template"]
+        )
+        
+        self._create_sentence_tokens(
+            sentence=sentence,
+            data=data
+        )
+        
+    def _create_sentence_tokens(self, sentence: Sentence, data: dict):
+        
+        SentenceToken.objects.bulk_create([
+            SentenceToken(
+                sentence=sentence,
+                text=text,
+                order=index,
+                is_lowercase=index == 0 and data["first_lowercase"]
+            ) for index, text in enumerate(data["tokens"])
+        ])
+    
+    def _row_error(
+        self, 
+        line: int| None, 
+        message:str
+    ) -> ValidationError:
+        
+        if line is None:
+            return ValidationError(
+                message[:1].upper() + message[1:]
             )
-            
-            SentenceToken.objects.bulk_create([
-                SentenceToken(
-                    sentence=sentence,
-                    text=text,
-                    order=index,
-                    is_lowercase=index == 0 and data["first_lowercase"]
-                ) for index, text in enumerate(data["tokens"])
-            ])
+        
+        return ValidationError(f"Рядок {line}: {message}")

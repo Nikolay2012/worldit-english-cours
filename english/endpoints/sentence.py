@@ -2,6 +2,8 @@
 
 """
 
+import json
+
 from django.http import HttpRequest, JsonResponse
 from django.views import View
 
@@ -25,17 +27,31 @@ class SentenceEndpoint(View):
     ) -> JsonResponse:
         
         service = SentenceStepService()
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"ok": False, "error": "Некоректні дані запиту"},
+                status=400
+            )
+        
+        if not isinstance(data, dict):
+            return JsonResponse(
+                {"ok": False, "error": "Некоректні дані запиту"},
+                status=400
+            )
         
         try:
             if step_id is None:
                 sentences_list = service.create(
                     task_id=task_id,
-                    data=request.POST
+                    data=data
                 )
             else:
                 sentences_list = service.update(
                     task_id=task_id,
-                    data=request.POST,
+                    data=data,
                     step_id=step_id
                 )
                 
