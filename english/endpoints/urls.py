@@ -5,6 +5,7 @@
 from django.urls import path
 from english.endpoints.lesson_tasks import LessonTasksEndpoint
 from english.endpoints.next_step import NextStepEndpoint
+from english.endpoints.sentence import SentenceEndpoint
 from english.endpoints.step_answer import StepAnswerEndpoint
 from english.endpoints.task_import import TaskImportEndpoint
 from english.endpoints.task_steps import TaskStepsEndpoint
@@ -60,5 +61,15 @@ urlpatterns = [
         "tasks/<int:task_id>/words/batch/", 
         WordsBatchEndpoint.as_view(), 
         name="api_words_batch"
+    ),
+    path(
+        "tasks/<int:task_id>/sentences/", 
+        SentenceEndpoint.as_view(), 
+        name="api_create_sentence"
+    ),
+    path(
+        "tasks/<int:task_id>/sentences/<int:step_id>/", 
+        SentenceEndpoint.as_view(), 
+        name="api_update_sentence"
     )
 ]

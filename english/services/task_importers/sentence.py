@@ -384,6 +384,7 @@ class SentenceImporter(BaseEnglishTaskImporter):
                     "template": step.sentence.template
                 } for step in steps
             ],
+            "is_fill": any(step.sentence.is_fill for step in steps),
             "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS
         }
     

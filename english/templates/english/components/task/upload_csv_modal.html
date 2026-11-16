@@ -104,6 +104,39 @@
                     </button>
                 </li>
             </template>
+
+            <div class="upload-csv-sentence-form" id="uploadCsvSentenceForm">
+                <div class="upload-csv-field">
+                    <label class="upload-csv-field-label" for="sentenceAnswerInput">Речення англійською</label>
+                    <input type="text" class="upload-csv-field-input" id="sentenceAnswerInput" placeholder="Введіть речення англійською">
+                </div>
+
+                <div class="upload-csv-field">
+                    <label class="upload-csv-field-label" for="sentencePromptInput">Речення українською</label>
+                    <input type="text" class="upload-csv-field-input" id="sentencePromptInput" placeholder="Введіть речення українською">
+                </div>
+
+                <p class="upload-csv-hint sentence-build-only">
+                    Створюване речення буде варіанту “Скласти речення”, оскільки всі інші речення завдання мають такий тип
+                </p>
+                <p class="upload-csv-hint sentence-fill-only">
+                    Створюване речення буде варіанту “Доповнити речення”, оскільки всі інші речення завдання мають такий тип
+                </p>
+            </div>
+
+            <div class="upload-csv-sentence-gaps" id="uploadCsvSentenceGaps">
+                <p class="upload-csv-field-label">Оберіть пропуски</p>
+
+                <div class="sentence-gaps-preview" id="sentenceGapsPreview"></div>
+
+                <p class="upload-csv-hint">
+                    Розділові знаки не можна обрати в якості пропуску (вони прибрані з просмотру)
+                </p>
+            </div>
+
+            <template id="sentenceGapTokenTemplate">
+                <button type="button" class="sentence-gap-token"></button>
+            </template>
         {% endif %}
 
         <div class="upload-csv-confirm-delete">
@@ -183,5 +216,28 @@
                 Зберегти
             </button>
         </div>
+
+        {% if task.type == "sentences" %}
+            <div class="upload-csv-actions upload-csv-sentence-actions">
+                <button type="button" class="button upload-csv-cancel" id="cancelSentenceButton">
+                    Скасувати
+                </button>
+                <button type="button" class="button upload-csv-confirm sentence-build-only" id="saveSentenceButton">
+                    Зберегти
+                </button>
+                <button type="button" class="button upload-csv-confirm sentence-fill-only" id="confirmSentenceButton">
+                    Підтвердити
+                </button>
+            </div>
+
+            <div class="upload-csv-actions upload-csv-sentence-gaps-actions">
+                <button type="button" class="button upload-csv-cancel" id="backSentenceGapsButton">
+                    Скасувати
+                </button>
+                <button type="button" class="button upload-csv-confirm" id="saveSentenceGapsButton" disabled>
+                    Зберегти
+                </button>
+            </div>
+        {% endif %}
     </div>
 </div>

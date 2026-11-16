@@ -6,3 +6,4 @@ from .next_step import NextStepEndpoint
 from .step_answer import StepAnswerEndpoint
 from .words_progress import WordsProgressEndpoint
 from .words_batch import WordsBatchEndpoint
+from .sentence import SentenceEndpoint

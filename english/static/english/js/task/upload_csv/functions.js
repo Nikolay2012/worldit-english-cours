@@ -42,12 +42,17 @@ function setUploadCsvConfirmDelete(isConfirm) {
 }
 
 function resetUploadCsvModal() {
+
     uploadCsvInput.value = "";
     setSelectedFile(null);
     setUploadCsvLoading(false);
     setUploadCsvList(false);
 
-    uploadCsvModal.classList.remove("is-confirm-delete", "is-create-word", "is-edit-word");
+    uploadCsvModal.classList.remove(
+        "is-confirm-delete", "is-create-word", 
+        "is-edit-word", "is-sentence-form", 
+        "is-sentence-gaps", "is-fill-sentences"
+    );
     confirmDeleteListButton.disabled = false;
 
     resetWordForm();
@@ -295,10 +300,10 @@ function openUploadCsvFromWordsPanel(mode, word) {
     openModal(uploadCsvModal);
 }
 
-function returnToWordsPanel(change = null) {
+function returnToWordsPanel(change=null) {
     resetUploadCsvModal();
     closeModal();
-    document.dispatchEvent(new CustomEvent("wordsPanelReturn", { detail: { change } }));
+    document.dispatchEvent(new CustomEvent("wordsPanelReturn", {detail: {change}}));
 }
 
 function collectWordChange() {

@@ -2,6 +2,9 @@
 const CREATE_WORD_TITLE = "Додати нове слово";
 const EDIT_WORD_TITLE = "Редагувати слово";
 const DEFAULT_TITLE = uploadCsvModal.dataset.defaultTitle;
+const CREATE_SENTENCE_TITLE = "Додати нове речення";
+const EDIT_SENTENCE_TITLE = "Редагувати речення";
+
 
 const LIST_TITLE = "Список слів";
 const DELETE_LIST_TITLE = "Видалити список слів?";

@@ -12,5 +12,9 @@ class Sentence(models.Model):
     answer = models.TextField()
     template = models.TextField(blank=True, default="")
     
+    @property
+    def is_fill(self):
+        return True if self.template else False
+    
     def __str__(self):
         return f"<Sentence: {self.prompt}>"
