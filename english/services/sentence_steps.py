@@ -10,7 +10,7 @@ from english.models.english_task import EnglishTask
 from english.models.sentence import Sentence
 from english.services.exceptions import NotFoundError, ValidationError
 from english.services.task_importers.sentence import SentenceImporter
-from english.services.sentence_text import tokenize
+from english.services.sentence_text import join_tokens, tokenize
 
 
 class SentenceStepService(SentenceImporter):
@@ -134,33 +134,86 @@ class SentenceStepService(SentenceImporter):
             raise ValidationError(
                 "Тип речення не збігається з іншими реченнями завдання"
             )
-        
-        # временно
-        if is_fill:
-            raise ValidationError(
-                "Завдання типу 'доповнити' тимчасово не пидтримуються"
-            )
     
     def _parse_form(self, data: dict) -> dict:
         
         # _prase_build_row унаследован из SentenceImporter
-        return self._parse_build_row(
+        parsed =  self._parse_build_row(
             line=None,
             cells=[
                 str(data.get("answer", "")),
                 str(data.get("prompt", ""))
             ]
         )
+        
+        if "gaps" not in data:
+            return parsed
+        
+        gaps = self._parse_gaps(
+            gaps=data["gaps"],
+            tokens=parsed["tokens"]
+        )
+        
+        parsed["template"] = join_tokens([
+            # собираем шаблон с учетом пропусков в формате сервера
+            # проверяем, указан ли индекс слова в gaps, 
+            # если указан - в template это слово будет отмечено как ___
+            self.GAP_MARKER if index in gaps else token
+            for index, token in enumerate(parsed["tokens"])
+        ])
+        
+        parsed["tokens"] = [parsed["tokens"][index] for index in gaps]
+        return parsed
+    
+    def _parse_gaps(self, gaps, tokens: list[str]) -> list[int]:
+        
+        if not isinstance(gaps, list) or not gaps:
+            raise ValidationError(
+                "Позначте коректно пропуски"
+            )
+        
+        # После убора пропусков, длина gaps оригинального и gaps без пропусков не могут не совпадать
+        # если не совпадают - значит при сборке тела запроса были допущены ошибки
+        if len(set(gaps)) != len(gaps):
+            raise ValidationError(
+                "Пропуски не можуть повторюватися"
+            )
+        
+        for gap in gaps:
+            if type(gap) != int or not 0 <= gap < len(tokens):
+                raise ValidationError(
+                    "Некоректний номер пропуску"
+                )
+            
+            if not any(char.isalnum() for char in tokens[gap]):
+                raise ValidationError(
+                    "Розділові знаки не можуть бути пропусками"
+                )
+        
+        return sorted(gaps)
     
     def _set_first_lowercase(
             self, 
             parsed: dict, 
             other_answers
-        ) -> None:
+        ):
         
-        others = [{"tokens": tokenize(answer)} for answer in other_answers]
+        current = {
+            "tokens": tokenize(parsed["answer"])
+        }
+        others = [
+            {
+                "tokens": tokenize(answer)
+            } for answer in other_answers
+        ]
         
-        self._set_lowercase_flags(sentences=others + [parsed])
+        self._set_lowercase_flags(sentences=others + [current])
+        
+        # если шаблон предложения есть и НЕ начинается с пропуска, то сервер выставляет для него заглавную букву
+        if parsed["template"] and not parsed["template"].startswith(self.GAP_MARKER):
+            parsed["first_lowercase"] = False
+        else:
+            parsed["first_lowercase"] = current["first_lowercase"]
     
     def sentence_preview(self, task_id: int, data: dict) -> dict:
         
@@ -169,7 +222,7 @@ class SentenceStepService(SentenceImporter):
         
         if not Sentence.objects.filter(
             step__task=task
-        ).exclude(template="").exists:
+        ).exclude(template="").exists():
             raise ValidationError(
                 "Завдання не містить речень з пропусками"
             )

@@ -370,7 +370,9 @@ class SentenceImporter(BaseEnglishTaskImporter):
         
         for token in tokens:
             if len(token) > self.MAX_TOKEN_LENGTH:
-                raise ValidationError(f"Рядок {line}: занадто довге слово «{token[:20]}…»")
+                raise self._row_error(
+                    line, message=f"занадто довге слово «{token[:20]}…»"
+                )
     
     def _get_sentences_list(self, task: EnglishTask) -> dict:
         
@@ -383,12 +385,34 @@ class SentenceImporter(BaseEnglishTaskImporter):
                     "step_id": step.id,
                     "answer": step.sentence.answer,
                     "prompt": step.sentence.prompt,
-                    "template": step.sentence.template
+                    "template": step.sentence.template,
+                    "gaps": self._get_gap_indices(step.sentence.template)
                 } for step in steps
             ],
             "is_fill": any(step.sentence.is_fill for step in steps),
-            "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS
+            "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS,
         }
+    
+    def _get_gap_indices(self, template: str) -> list[int]:
+        
+        if not template:
+            return []
+        
+        gaps = []
+        index = 0
+        
+        # перебираем до последнего элемента
+        # например: ['he ', ' she ', ' it']
+        # после ' it' ничего нету. Если не делать срез списка, 
+        # то будет отмечен пропуск после ' it', что будет ошибкой
+        for part in template.split(self.GAP_MARKER)[:-1]:
+            # подсчитываем, сколько тоенов стоит в куске перед пропусков, 
+            # чтобы сдвинуть счетчик
+            index += len(tokenize(part))
+            gaps.append(index)
+            index += 1
+        
+        return gaps
     
     # прежний _create_steps разбит на: _create_steps, _create_sentence_step, _create_sentence_tokens
     # разбит на части потому, что эти части используются в SentenceStepService

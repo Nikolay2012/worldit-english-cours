@@ -151,7 +151,7 @@ function renderSentenceGaps(tokens) {
 
         button.textContent = token.text;
         button.dataset.index = token.index;
-        button.classList.toggle('is-gapp', sentenceFormState.gaps.includes(token.index));
+        button.classList.toggle('is-gap', sentenceFormState.gaps.includes(token.index));
 
         sentenceGapsPreview.append(button);
     }
@@ -246,7 +246,7 @@ function openSentenceForm(mode, sentence) {
         sentenceFormState.stepId = sentence.step_id;
         sentenceAnswerInput.value = sentence.answer;
         sentencePromptInput.value = sentence.prompt;
-        sentencePromptInput.previewAnswer = sentence.answer;
+        sentenceFormState.previewAnswer = sentence.answer;
 
         if (sentence.gaps) {
             // копируем выбранные пропуски прямиков в состояние
