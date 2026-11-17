@@ -567,7 +567,7 @@
 }
 
 .sentence-gap-token:hover {
-    border-bottom-color: #E4E4E7;
+    border-bottom-color: #bababc;
 }
 
 .sentence-gap-token.is-gap {
@@ -579,15 +579,15 @@
 }
 
 .dark-body .sentence-gap-token {
-    color: var(--text-fog);
+    color: white;
 }
 
 .dark-body .sentence-gap-token:hover {
-    border-bottom-color: #545879;
+    border-bottom-color: #757aa4;
 }
 
 .dark-body .sentence-gap-token.is-gap {
-    border-bottom-color: var(--text-fog);
+    border-bottom-color: white;
 }
 
 .dark-body .sentence-row:hover {

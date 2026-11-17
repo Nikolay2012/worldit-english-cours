@@ -8,7 +8,8 @@ let wordFormState = {
 let sentenceFormState = {
     mode: null, 
     stepId: null,
-    gaps: []
+    gaps: [],
+    previewAnswer: null
 };
 
 let imageStates = [];

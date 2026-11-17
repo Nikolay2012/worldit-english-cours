@@ -6,7 +6,7 @@
     data-import-url="{% url 'english:api:api_import_task_data' task.id %}"
     data-delete-url="{% url 'english:api:api_delete_task_steps' task.id %}"
     data-placeholder-url="{% static 'english/img/questions_placeholder/questions_placeholder.png' %}"
-    
+
     {% if task.type == "words" %}
         data-create-word-url="{% url 'english:api:api_create_word' task.id %}"
         data-update-word-url="{% url 'english:api:api_update_word' task.id 0 %}"
@@ -14,6 +14,7 @@
     {% if task.type == "sentences" %}
         data-create-sentence-url="{% url 'english:api:api_create_sentence' task.id %}"
         data-update-sentence-url="{% url 'english:api:api_update_sentence' task.id 0 %}"
+        data-preview-sentence-url="{% url 'english:api:api_preview_sentence' task.id %}"
     {% endif %}
     >
 

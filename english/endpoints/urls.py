@@ -12,6 +12,7 @@ from english.endpoints.task_steps import TaskStepsEndpoint
 from english.endpoints.word import WordEndpoint
 from english.endpoints.words_batch import WordsBatchEndpoint
 from english.endpoints.words_progress import WordsProgressEndpoint
+from english.endpoints.sentence_preview import SentencePreviewEndpoint
 
 app_name = "api"
 
@@ -71,5 +72,10 @@ urlpatterns = [
         "tasks/<int:task_id>/sentences/<int:step_id>/", 
         SentenceEndpoint.as_view(), 
         name="api_update_sentence"
+    ),
+    path(
+        "tasks/<int:task_id>/sentences/preview/", 
+        SentencePreviewEndpoint.as_view(), 
+        name="api_preview_sentence"
     )
 ]

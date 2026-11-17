@@ -161,3 +161,31 @@ class SentenceStepService(SentenceImporter):
         others = [{"tokens": tokenize(answer)} for answer in other_answers]
         
         self._set_lowercase_flags(sentences=others + [parsed])
+    
+    def sentence_preview(self, task_id: int, data: dict) -> dict:
+        
+        task = self._get_sentence_task(
+            task_id=task_id)
+        
+        if not Sentence.objects.filter(
+            step__task=task
+        ).exclude(template="").exists:
+            raise ValidationError(
+                "Завдання не містить речень з пропусками"
+            )
+        
+        parsed_form = self._parse_form(data=data)
+        
+        return {
+            "tokens": [
+                {
+                    "index": index,
+                    "text": text,
+                    # isalnum() определяет, состоит ли строка из букв или цифр
+                    # необходимо для того, чтобы не пропускать разделительные знаки на клиент, 
+                    # для выбора пропусков. Потому что разделительные знаки нельзя поставить в качестве пропуска
+                    "is_word": any(char.isalnum() for char in text)
+                }
+                for index, text in enumerate(parsed_form["tokens"])
+            ]
+        }

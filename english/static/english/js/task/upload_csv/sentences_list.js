@@ -4,6 +4,11 @@ const sentenceAnswerInput = document.getElementById("sentenceAnswerInput");
 const sentencePromptInput = document.getElementById("sentencePromptInput");
 const saveSentenceButton = document.getElementById("saveSentenceButton");
 
+const confirmSentenceButton = document.getElementById("confirmSentenceButton");
+const sentenceGapTokenTemplate = document.getElementById("sentenceGapTokenTemplate");
+const backSentenceGapsButton = document.getElementById("backSentenceGapsButton");
+const saveSentenceGapsButton = document.getElementById("saveSentenceGapsButton");
+
 const SENTENCES_LIST_TITLE = "Список речень";
 const sentencesByStepId = new Map();
 
@@ -21,7 +26,7 @@ saveSentenceButton.addEventListener('click', async (event) => {
     saveSentenceButton.disabled = true;
 
     try {
-        const responseData = await sentenceSaveRequest(
+        const responseData = await sentenceRequest(
             getSentenceSaveUrl(), 
             {
                 answer: sentenceAnswerInput.value.trim(),
@@ -60,6 +65,122 @@ uploadCsvModal.addEventListener("click", (event) => {
         openSentenceForm("edit", sentence);
     }
 });
+
+confirmSentenceButton.addEventListener("click", async (event) => {
+    
+    if (!isValidSentenceForm) {
+        return;
+    }
+
+    const answer = sentenceAnswerInput.value.trim();
+
+    confirmSentenceButton.disabled = true;
+
+    try {
+        const responseData = await sentenceRequest(
+            uploadCsvModal.dataset.previewSentenceUrl,
+            {
+                answer: answer,
+                prompt: sentencePromptInput.value.trim()
+            }
+        )
+
+        if (sentenceFormState.previewAnswer !== answer) {
+            sentenceFormState.gaps = [];
+        }
+
+        sentenceFormState.previewAnswer = answer;
+
+        renderSentenceGaps(responseData.data.tokens);
+        openSentenceGaps();
+    } catch (error) {
+        showMessage(error.message);
+    } finally {
+        confirmSentenceButton.disabled = false;
+    }
+});
+
+sentenceGapsPreview.addEventListener('click', (event) => {
+    const token = event.target.closest(".sentence-gap-token");
+
+    if (!token) {
+        return;
+    }
+
+    toggleSentenceGap(token);
+});
+
+// Переключение на режим назад, к основному режиму модалки создания/редактирования
+// где сами предложения еще вводтся
+// без выбора пропусков
+backSentenceGapsButton.addEventListener("click", () => {
+    uploadCsvModal.classList.remove("is-sentence-gaps");
+    uploadCsvModal.classList.add("is-sentence-form");
+});
+
+saveSentenceGapsButton.addEventListener("click", async () => {
+    saveSentenceGapsButton.disabled = true;
+
+    try {
+        const responseData = await sentenceRequest(getSentenceSaveUrl(), {
+            answer: sentenceAnswerInput.value.trim(),
+            prompt: sentencePromptInput.value.trim(),
+            gaps: sentenceFormState.gaps.slice().sort((a, b) => a - b)
+        });
+
+        renderSentencesList(responseData.data);
+        closeSentenceForm();
+    } catch (error) {
+        showMessage(error.message);
+        saveSentenceGapsButton.disabled = sentenceFormState.gaps.length === 0;
+    }
+});
+
+
+function renderSentenceGaps(tokens) {
+    sentenceGapsPreview.replaceChildren();
+
+    for (const token of tokens) {
+        // Пропускаем не слова или не цифры. Таким образом - пропускаем разделительные знаки в отображении
+        // Ествественно, is_word записан сервером, здесь лишь пользуемся его данными
+        if (!token.is_word) {
+            continue;
+        }
+
+        const button = sentenceGapTokenTemplate.content.firstElementChild.cloneNode(true);
+
+        button.textContent = token.text;
+        button.dataset.index = token.index;
+        button.classList.toggle('is-gapp', sentenceFormState.gaps.includes(token.index));
+
+        sentenceGapsPreview.append(button);
+    }
+
+    // Пока не выбраны пропуски, кнопка не будет активирована для юзера
+    saveSentenceGapsButton.disabled = sentenceFormState.gaps.length === 0;
+
+}
+
+function openSentenceGaps() {
+    uploadCsvModal.classList.remove('is-sentence-form');
+    uploadCsvModal.classList.add('is-sentence-gaps');
+}
+
+function toggleSentenceGap(token) {
+
+    const index = Number(token.dataset.index);
+    const gaps = sentenceFormState.gaps;
+
+    if (gaps.includes(index)) {
+        gaps.splice(gaps.indexOf(index), 1);
+    } else {
+        gaps.push(index);
+    }
+
+    token.classList.toggle("is-gap", gaps.includes(index));
+    saveSentenceGapsButton.disabled = gaps.length === 0;
+}
+
 
 function renderSentencesList(data) {
     sentencesByStepId.clear();
@@ -125,6 +246,7 @@ function openSentenceForm(mode, sentence) {
         sentenceFormState.stepId = sentence.step_id;
         sentenceAnswerInput.value = sentence.answer;
         sentencePromptInput.value = sentence.prompt;
+        sentencePromptInput.previewAnswer = sentence.answer;
 
         if (sentence.gaps) {
             // копируем выбранные пропуски прямиков в состояние
@@ -167,7 +289,7 @@ function getSentenceSaveUrl() {
     return uploadCsvModal.dataset.updateSentenceUrl.replace(/\/0\/$/, `/${sentenceFormState.stepId}/`);
 }
 
-async function sentenceSaveRequest(url, data) {
+async function sentenceRequest(url, data) {
     
     const response = await fetch(url, {
         method: "POST",
