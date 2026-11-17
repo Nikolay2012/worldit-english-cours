@@ -7,7 +7,7 @@ const EDIT_SENTENCE_TITLE = "Редагувати речення";
 
 
 const LIST_TITLE = "Список слів";
-const DELETE_LIST_TITLE = "Видалити список слів?";
+const DELETE_LIST_TITLE = "Видалити список?";
 const DEFAULT_FILE_HINT = "Підтримується: .csv";
 
 // Макс. размер csv - мегабайт, как MAX_CSV_SIZE на сервере
