@@ -153,21 +153,65 @@ class SentenceStepService(SentenceImporter):
             gaps=data["gaps"],
             tokens=parsed["tokens"]
         )
+        zero_gaps = self._parse_zero_gaps(
+            zero_gaps=data.get("zero_gaps", []),
+            tokens=parsed["tokens"]
+        )
         
-        parsed["template"] = join_tokens([
-            # собираем шаблон с учетом пропусков в формате сервера
-            # проверяем, указан ли индекс слова в gaps, 
-            # если указан - в template это слово будет отмечено как ___
-            self.GAP_MARKER if index in gaps else token
-            for index, token in enumerate(parsed["tokens"])
-        ])
+        if not gaps and not zero_gaps:
+            raise ValidationError("Відсутні пропуски")
         
-        parsed["tokens"] = [parsed["tokens"][index] for index in gaps]
+        # токены предложения для поля template этого предложения (его записи если быть точнее)
+        template_tokens = []
+        # токены из которых состоит предложение и котороые будут отображены на странице
+        answers = []
+        
+        for index in range(len(parsed["tokens"]) + 1):
+            if index in zero_gaps:
+                template_tokens.append(self.GAP_MARKER)
+                answers.append(self.ZERO_ARTICLE)
+            
+            if index == len(parsed["tokens"]):
+                break
+            
+            if index in gaps:
+                template_tokens.append(self.GAP_MARKER)
+                answers.append(parsed["tokens"][index])
+            else:
+                template_tokens.append(parsed["tokens"][index])
+        
+        parsed["template"] = join_tokens(template_tokens)
+        parsed["tokens"] = answers
+        parsed["first_word_gap"] = 0 in gaps and 0 not in zero_gaps
+        
         return parsed
+    
+    def _parse_zero_gaps(self, zero_gaps, tokens: list[str]) -> list[int]:
+        
+        if not isinstance(zero_gaps, list):
+            raise ValidationError(
+                "Некоректні нульові артиклі"
+            )
+        
+        # После убора пропусков, длина zero_gaps оригинального и zero_gaps без пропусков не могут не совпадать
+        # если не совпадают - значит при сборке тела запроса были допущены ошибки
+        if len(set(zero_gaps)) != len(zero_gaps):
+            raise ValidationError(
+                "Нульові артиклі не можуть повторюватися"
+            )
+        
+        for zero_gap in zero_gaps:
+            # второе <= ибо нулевой артикль может стоять после последнего слова
+            if type(zero_gap) != int or not 0 <= zero_gap <= len(tokens):
+                raise ValidationError(
+                    "Некоректна позиція нульового артикля"
+                )
+        
+        return sorted(zero_gaps)
     
     def _parse_gaps(self, gaps, tokens: list[str]) -> list[int]:
         
-        if not isinstance(gaps, list) or not gaps:
+        if not isinstance(gaps, list):
             raise ValidationError(
                 "Позначте коректно пропуски"
             )
@@ -210,7 +254,7 @@ class SentenceStepService(SentenceImporter):
         self._set_lowercase_flags(sentences=others + [current])
         
         # если шаблон предложения есть и НЕ начинается с пропуска, то сервер выставляет для него заглавную букву
-        if parsed["template"] and not parsed["template"].startswith(self.GAP_MARKER):
+        if parsed["template"] and not parsed.get("first_word_gap"):
             parsed["first_lowercase"] = False
         else:
             parsed["first_lowercase"] = current["first_lowercase"]

@@ -9,7 +9,8 @@ let sentenceFormState = {
     mode: null, 
     stepId: null,
     gaps: [],
-    previewAnswer: null
+    previewAnswer: null,
+    zeroGaps: []
 };
 
 let imageStates = [];

@@ -8,6 +8,7 @@ const confirmSentenceButton = document.getElementById("confirmSentenceButton");
 const sentenceGapTokenTemplate = document.getElementById("sentenceGapTokenTemplate");
 const backSentenceGapsButton = document.getElementById("backSentenceGapsButton");
 const saveSentenceGapsButton = document.getElementById("saveSentenceGapsButton");
+const sentenceZeroGapTemplate = document.getElementById("sentenceZeroGapTemplate");
 
 const SENTENCES_LIST_TITLE = "Список речень";
 const sentencesByStepId = new Map();
@@ -68,7 +69,7 @@ uploadCsvModal.addEventListener("click", (event) => {
 
 confirmSentenceButton.addEventListener("click", async (event) => {
     
-    if (!isValidSentenceForm) {
+    if (!isValidSentenceForm()) {
         return;
     }
 
@@ -87,6 +88,7 @@ confirmSentenceButton.addEventListener("click", async (event) => {
 
         if (sentenceFormState.previewAnswer !== answer) {
             sentenceFormState.gaps = [];
+            sentenceFormState.zeroGaps = [];
         }
 
         sentenceFormState.previewAnswer = answer;
@@ -101,6 +103,14 @@ confirmSentenceButton.addEventListener("click", async (event) => {
 });
 
 sentenceGapsPreview.addEventListener('click', (event) => {
+    // Удаление отметки нулевого артикля (тут он назван как zeroGap)
+    const sentenceZeroGap = event.target.closest(".sentence-zero-gap");
+
+    if (sentenceZeroGap) {
+        removeZeroGap(sentenceZeroGap);
+        return;
+    }
+
     const token = event.target.closest(".sentence-gap-token");
 
     if (!token) {
@@ -125,14 +135,15 @@ saveSentenceGapsButton.addEventListener("click", async () => {
         const responseData = await sentenceRequest(getSentenceSaveUrl(), {
             answer: sentenceAnswerInput.value.trim(),
             prompt: sentencePromptInput.value.trim(),
-            gaps: sentenceFormState.gaps.slice().sort((a, b) => a - b)
+            gaps: sentenceFormState.gaps.slice().sort((a, b) => a - b),
+            zero_gaps: sentenceFormState.zeroGaps.slice().sort((a, b) => a -b)
         });
 
         renderSentencesList(responseData.data);
         closeSentenceForm();
     } catch (error) {
         showMessage(error.message);
-        saveSentenceGapsButton.disabled = sentenceFormState.gaps.length === 0;
+        updateSaveSentenceGapsButton();
     }
 });
 
@@ -141,6 +152,11 @@ function renderSentenceGaps(tokens) {
     sentenceGapsPreview.replaceChildren();
 
     for (const token of tokens) {
+        if (sentenceFormState.zeroGaps.includes(token.index)) {
+            sentenceGapsPreview.append(
+                createZeroGap(token.index));
+        }
+
         // Пропускаем не слова или не цифры. Таким образом - пропускаем разделительные знаки в отображении
         // Ествественно, is_word записан сервером, здесь лишь пользуемся его данными
         if (!token.is_word) {
@@ -156,8 +172,14 @@ function renderSentenceGaps(tokens) {
         sentenceGapsPreview.append(button);
     }
 
-    // Пока не выбраны пропуски, кнопка не будет активирована для юзера
-    saveSentenceGapsButton.disabled = sentenceFormState.gaps.length === 0;
+    if (sentenceFormState.zeroGaps.includes(tokens.length)) {
+        sentenceGapsPreview.append(
+            createZeroGap(tokens.length)
+        );
+    }
+
+    // Пока не выбраны пропуски, кнопка не будет активирована для юзера (в том числе и нулевой артикль)
+    updateSaveSentenceGapsButton();
 
 }
 
@@ -178,7 +200,7 @@ function toggleSentenceGap(token) {
     }
 
     token.classList.toggle("is-gap", gaps.includes(index));
-    saveSentenceGapsButton.disabled = gaps.length === 0;
+    updateSaveSentenceGapsButton();
 }
 
 
@@ -229,7 +251,9 @@ function resetSentenceForm() {
     sentenceFormState = {
         mode: null, 
         stepId: null,
-        gaps: []
+        gaps: [],
+        previewAnswer: null,
+        zeroGaps: []
     };
 
     sentenceAnswerInput.value = "";
@@ -251,6 +275,10 @@ function openSentenceForm(mode, sentence) {
         if (sentence.gaps) {
             // копируем выбранные пропуски прямиков в состояние
             sentenceFormState.gaps = sentence.gaps.slice();
+        }
+
+        if (sentence.zero_gaps) {
+            sentenceFormState.zeroGaps = sentence.zero_gaps;
         }
     }
 
@@ -287,6 +315,31 @@ function getSentenceSaveUrl() {
     // берем именно такой кусок маршрута, потому что просто "0" 
     // может быть использовать уже в других частях машрута
     return uploadCsvModal.dataset.updateSentenceUrl.replace(/\/0\/$/, `/${sentenceFormState.stepId}/`);
+}
+
+function createZeroGap(position) {
+    const zeroGap = sentenceZeroGapTemplate.content.firstElementChild.cloneNode(true);
+
+    zeroGap.dataset.position = position;
+
+    return zeroGap;
+}
+
+function removeZeroGap(zeroGap) {
+    const position = Number(zeroGap.dataset.position);
+
+    sentenceFormState.zeroGaps = sentenceFormState.zeroGaps.filter(
+        (item) => item !== position
+    );
+    zeroGap.remove();
+
+    updateSaveSentenceGapsButton();
+}
+
+function updateSaveSentenceGapsButton() {
+    const gapsCount = sentenceFormState.gaps.length + sentenceFormState.zeroGaps.length;
+
+    saveSentenceGapsButton.disabled = gapsCount === 0;
 }
 
 async function sentenceRequest(url, data) {

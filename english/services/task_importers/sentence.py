@@ -377,42 +377,68 @@ class SentenceImporter(BaseEnglishTaskImporter):
     def _get_sentences_list(self, task: EnglishTask) -> dict:
         
         steps = task.steps.select_related(
-            "sentence").order_by('order')
+                "sentence"
+            ).prefetch_related(
+                "sentence__tokens"
+            ).order_by('order')
         
         return {
             "sentences": [
-                {
-                    "step_id": step.id,
-                    "answer": step.sentence.answer,
-                    "prompt": step.sentence.prompt,
-                    "template": step.sentence.template,
-                    "gaps": self._get_gap_indices(step.sentence.template)
-                } for step in steps
+                self._serialize_sentence(sentence=step.sentence, step_id=step.id) for step in steps
             ],
             "is_fill": any(step.sentence.is_fill for step in steps),
             "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS,
         }
     
-    def _get_gap_indices(self, template: str) -> list[int]:
+    def _serialize_sentence(
+        self, 
+        sentence: Sentence, 
+        step_id: int
+    ) -> dict:
+        
+        gaps, zero_gaps = self._get_gap_positions(
+            template=sentence.template,
+            answers=[token.text for token in sentence.tokens.all()]
+        )
+        
+        return {
+            "step_id": step_id,
+            "answer": sentence.answer,
+            "prompt": sentence.prompt,
+            "template": sentence.template,
+            "gaps": gaps,
+            "zero_gaps": zero_gaps,
+        }
+    
+    def _get_gap_positions(
+            self, 
+            template: str, 
+            answers: list[str]
+        ) -> tuple[list[int], list[int]]:
         
         if not template:
-            return []
+            return ([], [])
         
         gaps = []
+        zero_gaps = []
         index = 0
         
         # перебираем до последнего элемента
         # например: ['he ', ' she ', ' it']
         # после ' it' ничего нету. Если не делать срез списка, 
         # то будет отмечен пропуск после ' it', что будет ошибкой
-        for part in template.split(self.GAP_MARKER)[:-1]:
+        for part, answer in zip(template.split(self.GAP_MARKER)[:-1], answers):
             # подсчитываем, сколько тоенов стоит в куске перед пропусков, 
             # чтобы сдвинуть счетчик
             index += len(tokenize(part))
-            gaps.append(index)
-            index += 1
+            
+            if answer == self.ZERO_ARTICLE:
+                zero_gaps.append(index)
+            else:
+                gaps.append(index)
+                index += 1
         
-        return gaps
+        return (gaps, zero_gaps)
     
     # прежний _create_steps разбит на: _create_steps, _create_sentence_step, _create_sentence_tokens
     # разбит на части потому, что эти части используются в SentenceStepService

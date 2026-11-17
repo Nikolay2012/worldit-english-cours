@@ -574,6 +574,33 @@
     border-bottom-color: var(--text-main);
 }
 
+.sentence-gaps-preview {
+    align-items: center;
+}
+
+.sentence-zero-gap {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background-color: rgba(13, 19, 63, 0.35);
+    cursor: pointer;
+}
+
+.sentence-zero-gap:hover {
+    background-color: rgba(13, 19, 63, 0.5);
+}
+
+.dark-body .sentence-zero-gap {
+    background-color: rgba(250, 248, 255, 0.35);
+}
+
+.dark-body .sentence-zero-gap:hover {
+    background-color: rgba(250, 248, 255, 0.5);
+}
+
 .dark-body .sentence-gaps-preview {
     background-color: rgba(255, 255, 255, 0.06);
 }
@@ -758,5 +785,10 @@
 
     .sentence-gap-token {
         font-size: 1.5rem;
+    }
+    
+    .sentence-zero-gap {
+        width: 28px;
+        height: 28px;
     }
 }
