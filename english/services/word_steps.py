@@ -110,6 +110,11 @@ class WordStepService(WordImporter):
         # Если были, то к полученному выше max_order прибавляем 1
         order = 0 if max_order is None else max_order + 1
         
+        all_words = set(
+            Question.objects.filter(step__task=task).values_list("text", flat=True)
+        )
+        all_words.add(word)
+        
         with transaction.atomic():
             # Внутри транзакции запускаем создание EnglishTaskStep
             # Метод ._create_word_step() унаследован из WordImporter

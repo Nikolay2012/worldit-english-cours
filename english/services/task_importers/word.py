@@ -75,6 +75,25 @@ class WordImporter(BaseEnglishTaskImporter):
         if len(all_translations) < self.ANSWER_OPTIONS_COUNT:
             raise ValidationError(f"У файлі має бути щонайменше {self.ANSWER_OPTIONS_COUNT} різних перекладів")
         
+        all_words = set()
+        
+        for row in rows:
+            word_key = row["word"].lower()
+            
+            if word_key in all_words:
+                raise ValidationError(
+                    f"Слово «{word_key}» повторюється у файлі"
+                )
+            
+            all_words.add(word_key)
+        
+        all_words = {row["word"] for row in rows}
+        
+        if len(all_words) < self.ANSWER_OPTIONS_COUNT:
+            raise ValidationError(
+                f"У файлі має бути щонайменше {self.ANSWER_OPTIONS_COUNT} різних слів"
+            )
+        
         # Изображения
         urls = {}
         
@@ -101,6 +120,7 @@ class WordImporter(BaseEnglishTaskImporter):
                     order=order,
                     row=row,
                     category=categories[row["category"]],
+                    all_words=all_words,
                     all_translations=all_translations,
                     image_files=(
                         images_data[(order, 0)], # зображення 1
@@ -151,7 +171,10 @@ class WordImporter(BaseEnglishTaskImporter):
         
         question = step.question
         options = list(question.options.all())
-        correct = next((option for option in options if option.is_correct), None)
+        correct = next(
+            (option for option in options if option.is_correct and option.language == "uk"), 
+            None
+        )
 
         return {
             "step_id": step.id,
@@ -170,6 +193,7 @@ class WordImporter(BaseEnglishTaskImporter):
         return {
             "id": option.id,
             "text": option.text,
+            "language": option.language,
             "is_correct": option.is_correct,
             "order": option.order,
         }
@@ -189,6 +213,7 @@ class WordImporter(BaseEnglishTaskImporter):
             order: int,
             row: dict[str, str],
             category: WordCategory,
+            all_words: set[str],
             all_translations: set[str],
             image_files: tuple
         ):
@@ -215,7 +240,14 @@ class WordImporter(BaseEnglishTaskImporter):
         self._create_answer_options(
             question=question,
             correct=row["translation"],
-            all_translations=all_translations
+            all_options=all_translations,
+            language="uk"
+        )
+        self._create_answer_options(
+            question=question,
+            correct=row["word"],
+            all_options=all_words,
+            language="en"
         )
         
         self._create_question_images(
@@ -228,12 +260,13 @@ class WordImporter(BaseEnglishTaskImporter):
             self,
             question: Question,
             correct: str,
-            all_translations: set[str]
+            language: str,
+            all_options: set[str]
         ):
         
         # {correct} - специально оборачиваем правильный вариант ответа в множество
         # для возможности удаления правильного варианта ответа из выборки
-        wrong_options = list(all_translations - {correct})
+        wrong_options = list(all_options - {correct})
         
         wrong_options_after_sample = random.sample(
             wrong_options,
@@ -255,13 +288,15 @@ class WordImporter(BaseEnglishTaskImporter):
         # путём вмешательства в работу JS клиента со стороны пользователя
         random.shuffle(options)
         
-        for option_order, (text, is_correct) in enumerate(options):
-            AnswerOption.objects.create(
+        AnswerOption.objects.bulk_create([
+            AnswerOption(
                 question=question,
                 is_correct=is_correct,
                 text=text,
+                language=language,
                 order=option_order
-            )
+            ) for option_order, (text, is_correct) in enumerate(options)
+        ])
     
     def _create_question_images(
             self,
