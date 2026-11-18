@@ -140,6 +140,51 @@ function getInsertBefore(x, dragged) {
     }) || null;
 }
 
+// 
 function updateCheckButton() {
     sentenceCheckButton.disabled = sentenceBuildWords.querySelector(".sentence-token") === null;
 }
+
+
+// 
+function markSourceUsed(source) {
+    source.classList.add("is-used");
+    source.draggable = false;
+}
+
+function releaseSource(source) {
+    if (!source) {
+        return;
+    }
+
+    source.classList.remove("is-used");
+    source.draggable = true;
+}
+
+function updateCheckButton() {
+    sentenceCheckButton.disabled = sentenceBuildWords.querySelector(".sentence-token") === null;
+}
+
+sentenceTokens.addEventListener("click", (event) => {
+    const source = event.target.closest(".sentence-token");
+
+    if (!source || source.classList.contains("is-used")) {
+        return;
+    }
+
+    sentenceBuildWords.append(createPlacedToken(source));
+    markSourceUsed(source);
+    updateCheckButton();
+});
+
+sentenceBuildWords.addEventListener("click", (event) => {
+    const token = event.target.closest(".sentence-token");
+
+    if (!token) {
+        return;
+    }
+
+    releaseSource(getSource(token));
+    token.remove();
+    updateCheckButton();
+});
