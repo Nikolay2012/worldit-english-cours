@@ -30,20 +30,14 @@ World IT
                         як саме блокується модуль 
                     -->
                     {% for module in modules %}
-                        <div class="module-container {% if module.id == 2 %}blocked{% endif %}">
+                        <div class="module-container">
                             <div class="info-labels-container">
                                 <img 
-                                src="
-                                    {% if module.id == 2 %}
-                                        {% static 'english/img/info_icons/lock-closed.svg' %}
-                                    {% else %}
-                                        {% static 'english/img/info_icons/lock-open-1.svg' %}
-                                    {% endif %}
-                                    "
+                                src="{% static 'english/img/info_icons/lock-open-1.svg' %}"
                                 alt="lock">
                                 <p class="module-title" title="Модуль №{{ module.order_number }} {{ module.name }}">
                                     <!-- хотя вместо module.id должен быть order_number, которого нету в модели Module -->
-                                    <span class="module-number">Модуль №{{ module.id }}</span> 
+                                    <span class="module-number">Модуль №{{ module.id }}.</span> 
                                     <span class="module-name">{{ module.name }}</span>
                                 </p>
                             </div>
@@ -68,6 +62,7 @@ World IT
                                     <img src="{% static 'english/img/action_icons/info-circled.svg' %}" alt="info">
                                 </div>
                             </div>
+                            <a href="{% url 'english:english_module' module.id %}" class="module-link-area" tabindex="-1"></a>
                         </div>
                     {% endfor %}
                     <div id="modalCover">

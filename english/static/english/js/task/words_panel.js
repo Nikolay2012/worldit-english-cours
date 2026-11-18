@@ -112,6 +112,8 @@ function setWordsPanelOpen(isOpen) {
 }
 
 async function loadWordsProgress() {
+    setWordsPanelLoading(true);
+
     try {
         wordsPanelData = await wordsProgressRequest(
             wordsPanel.dataset.wordsProgressUrl
@@ -121,7 +123,13 @@ async function loadWordsProgress() {
     } catch (error) {
         console.error(error);
         showMessage(error.message);
+    } finally{
+        setWordsPanelLoading(false);
     }
+}
+
+function setWordsPanelLoading(isLoading) {
+    wordsPanel.classList.toggle("is-loading", isLoading);
 }
 
 function renderWordsProgress() {
