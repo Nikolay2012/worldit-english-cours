@@ -47,6 +47,8 @@ class WordsProgressEndpoint(View):
         task_id: int
     ) -> JsonResponse:
         
+        # time.sleep(5)
+        
         try:
             data = TaskRunner(
                 task_id=task_id,

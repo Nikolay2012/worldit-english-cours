@@ -266,3 +266,23 @@ body.is-words-panel-open #modalCover {
     content: " •";
     color: #F98232;
 }
+
+.words-panel-loader {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.words-panel.is-loading .words-panel-loader {
+    display: flex;
+}
+
+.words-panel.is-loading .words-panel-body {
+    display: none;
+}
+
+.words-panel.is-loading .words-panel-footer {
+    display: none;
+}
