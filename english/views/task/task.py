@@ -168,6 +168,9 @@ class EnglishTaskView(
     
     def _get_content_component(self, has_steps: bool) -> str:
         
+        # if self.object.type == "sentences":
+        #     return "english/components/task/sentence_preview.html"
+        
         if self._is_staff():
             component = "run" if has_steps else "import_csv"
         else:

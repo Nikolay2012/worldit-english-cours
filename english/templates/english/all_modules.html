@@ -43,7 +43,7 @@ World IT
                                 alt="lock">
                                 <p class="module-title" title="Модуль №{{ module.order_number }} {{ module.name }}">
                                     <!-- хотя вместо module.id должен быть order_number, которого нету в модели Module -->
-                                    <span class="module-number">Модуль №{{ module.id }}</span> 
+                                    <span class="module-number">Модуль №{{ module.id }}.</span> 
                                     <span class="module-name">{{ module.name }}</span>
                                 </p>
                             </div>
@@ -68,6 +68,7 @@ World IT
                                     <img src="{% static 'english/img/action_icons/info-circled.svg' %}" alt="info">
                                 </div>
                             </div>
+                            <a href="{% url 'english:english_module' module.id %}" class="module-link-area" tabindex="-1"></a>
                         </div>
                     {% endfor %}
                     <div id="modalCover">
