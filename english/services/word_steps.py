@@ -94,6 +94,19 @@ class WordStepService(WordImporter):
             translation=translation
         )
         
+        self._validate_unique_word(
+            task=task,
+            word=word
+        )
+        
+        all_words = self._get_task_words(task=task)
+        all_words.add(word)
+        
+        if len(all_words - {word}) < self.ANSWER_OPTIONS_COUNT -1: # отнимаем правильній ответ
+            raise ValidationError(
+                f"У завданні має бути щонайменше {self.ANSWER_OPTIONS_COUNT -1} інших слів"
+            )
+        
         # К уже имеющимся переводам добавляем новый
         all_translations = self._get_task_translations(task=task)
         all_translations.add(translation)
@@ -131,6 +144,7 @@ class WordStepService(WordImporter):
                     "image_2": ""
                 },
                 category=category,
+                all_words=all_words,
                 all_translations=all_translations,
                 image_files=(images.get(0), images.get(1))
             )
@@ -162,12 +176,19 @@ class WordStepService(WordImporter):
             translation=translation, 
             exclude_step=step
         )
+        self._validate_unique_word(
+            task=task, 
+            word=word, 
+            exclude_step=step
+        )
         
         question: Question = step.question
         correct_answer_option: AnswerOption = question.options.get(
-            is_correct=True
+            is_correct=True,
+            language="uk"
         )
         old_translation = correct_answer_option.text
+        old_word = question.text
         
         old_image_files = []
         
@@ -223,8 +244,22 @@ class WordStepService(WordImporter):
                 AnswerOption.objects.filter(
                     question__step__task=task,
                     is_correct=False,
+                    language="uk",
                     text=old_translation
                 ).update(text=translation)
+            
+            if word != old_word:
+                question.options.filter(
+                    is_correct=True,
+                    language="en"
+                ).update(text=word)
+                
+                AnswerOption.objects.filter(
+                    question__step__task=task,
+                    language="en",
+                    is_correct=False,
+                    text=old_word
+                ).update(text=word)
             
             # Удаляем старые файлы из медиа
             transaction.on_commit(
@@ -345,7 +380,8 @@ class WordStepService(WordImporter):
         options = AnswerOption.objects.filter(
             question__step__task=task,
             is_correct=True,
-            text__iexact=translation
+            text__iexact=translation,
+            language="uk"
         )
         
         if exclude_step is not None:
@@ -354,11 +390,38 @@ class WordStepService(WordImporter):
         if options.exists():
             raise ValidationError("Такий переклад вже є в іншого слова")
     
+    def _validate_unique_word(
+            self,
+            task: EnglishTask,
+            word: str,
+            exclude_step: EnglishTaskStep | None = None
+        ):
+        
+        questions = Question.objects.filter(
+            step__task=task,
+            text__iexact=word
+        )
+        
+        if exclude_step is not None:
+            questions = questions.exclude(
+                step=exclude_step)
+            
+        if questions.exists():
+            raise ValidationError(
+                "Таке слово вже є в цьому завданні")
+    
+    def _get_task_words(self, task: EnglishTask):
+        
+        return set(
+            Question.objects.filter(step__task=task).values_list("text", flat=True)
+        )
+    
     def _get_task_translations(self, task: EnglishTask) -> set[str]:
         
         return set(
             AnswerOption.objects.filter(
                 question__step__task=task,
+                language="uk",
                 is_correct=True
             ).values_list("text", flat=True)
         )
