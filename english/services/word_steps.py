@@ -187,6 +187,12 @@ class WordStepService(WordImporter):
             is_correct=True,
             language="uk"
         )
+        
+        if correct_answer_option is None:
+            raise ValidationError(
+                "Варіанти відповіді цього слова пошкоджені або відсутні"
+            )
+        
         old_translation = correct_answer_option.text
         old_word = question.text
         

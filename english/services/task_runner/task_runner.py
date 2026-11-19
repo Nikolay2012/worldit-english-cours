@@ -313,7 +313,12 @@ class TaskRunner(
             }
         
         return {
-            "percent": round(progress.correct_count / (steps_count * self.REQUIRED_CORRECT_ANSWERS) * 100),
+            # min для старіх шагов, на которіе студенті уже ответили 
+            # до віпуска фикса багов в работе заданий "Слова"
+            "percent": min(
+                100, 
+                round(progress.correct_count / (steps_count * self.REQUIRED_CORRECT_ANSWERS) * 100)
+            ),
             "is_completed": progress.status == "completed"
         }
     

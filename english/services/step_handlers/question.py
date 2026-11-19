@@ -46,7 +46,13 @@ class QuestionHandler(StepHandler):
     # (слово «реализуем» здесь лишь условное, имитируем интерфейсы)
     def get_step_data(self, step: EnglishTaskStep) -> dict:
         
-        question: Question = step.question
+        try:
+            question: Question = step.question
+        except Question.DoesNotExist as error:
+            raise ValidationError(
+                "Питання цього кроку відсутнє"
+            ) from error
+        
         prompt = self._get_prompt(question=question)
         
         language = "en" if prompt['kind'] == 'image' else "uk"
