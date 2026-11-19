@@ -60,6 +60,7 @@ from english.models.english_task_step import EnglishTaskStep
 from english.models.student_answer import StudentAnswer
 from english.models.student_progress import StudentProgress
 from english.services.exceptions import NotFoundError, ValidationError
+from english.services.progress import EnglishProgressService
 from english.services.step_handlers.registry import StepHandlerRegistry
 from english.services.task_runner.mixins.words import WordsTaskRunnerMixin
 from users.models import CustomUser
@@ -306,20 +307,16 @@ class TaskRunner(
             progress: StudentProgress
         ) -> dict:
         
-        if steps_count == 0:
-            return {
-                "percent": 0, 
-                "is_completed": False
-            }
+        percent = EnglishProgressService(
+            student=self.student
+        ).get_task_percent(
+            steps_count=steps_count,
+            correct_count=progress.correct_count
+        )
         
         return {
-            # min для старіх шагов, на которіе студенті уже ответили 
-            # до віпуска фикса багов в работе заданий "Слова"
-            "percent": min(
-                100, 
-                round(progress.correct_count / (steps_count * self.REQUIRED_CORRECT_ANSWERS) * 100)
-            ),
-            "is_completed": progress.status == "completed"
+            "percent": percent,
+            "is_completed": True if steps_count > 0 and progress.status == "completed" else False
         }
     
     def _get_progress_record(self) -> StudentProgress:

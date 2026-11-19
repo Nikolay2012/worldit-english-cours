@@ -26,12 +26,13 @@ GET /courses/english/modules/?page=2 - пагинация
 """
 
 from django.shortcuts import get_object_or_404
-from WorldIT.decorators import required_type
 from django.utils.decorators import method_decorator
 from django.conf import settings
-
-from courses.models import Course, Module
 from django.views.generic import ListView
+
+from WorldIT.decorators import required_type
+from courses.models import Course, Module
+from english.services.progress import EnglishProgressService
 
 
 # Нужен ли доступ для "manager"?
@@ -68,7 +69,28 @@ class AllModulesView(ListView):
         ]
         context["is_staff"] = self._is_staff()
         
+        self._attach_modules_progress(modules=context["modules"])
+        
         return context
+    
+    def _attach_modules_progress(self, modules):
+        
+        student = self._get_student()
+        
+        if student is None:
+            return
+        
+        progress_service = EnglishProgressService(
+            student=student
+        )
+        modules_percents = progress_service.get_modules_percents()
+        
+        # Прикрепляем прогресс студента по модулю ко временному атрибуту progress_percent
+        # Атрибут progress_percent используется в шаблоне
+        for module in modules:
+            module.progress_percent = modules_percents.get(module.id, 0)
+        
+        return progress_service.get_course_percent()
     
     def _is_staff(self) -> bool:
             
@@ -79,3 +101,10 @@ class AllModulesView(ListView):
                     return True
             
             return False
+    
+    def _get_student(self):
+        return getattr(
+            self.request.user, 
+            "profile_student", 
+            None
+        )
