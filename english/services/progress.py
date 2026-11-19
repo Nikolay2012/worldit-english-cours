@@ -102,4 +102,12 @@ class EnglishProgressService:
         }
     
     def get_course_percent(self) -> int:
-        pass
+        
+        module_percents = list(
+            self.get_modules_percents().values()
+        )
+        
+        if not module_percents:
+            return 0
+        
+        return sum(module_percents) // len(module_percents)
