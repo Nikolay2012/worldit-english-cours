@@ -13,19 +13,18 @@ uploadCsvDropzone.addEventListener("click", () => {
 });
 
 uploadCsvInput.addEventListener("change", () => {
-    const file = uploadCsvInput.files[0];
-    if (!file) {
-        return;
-    }
-
-    if (!isValidCsvFile(file)) {
-        uploadCsvInput.value = "";
-        setSelectedFile(null);
-        return;
-    }
-
-    setSelectedFile(file);
+    handleCsvInputChange(uploadCsvInput, setSelectedFile);
 });
+
+if (uploadCsvVariantsInput) {
+    uploadCsvVariantsDropzone.addEventListener("click", () => {
+        uploadCsvVariantsInput.click();
+    });
+
+    uploadCsvVariantsInput.addEventListener("change", () => {
+        handleCsvInputChange(uploadCsvVariantsInput, setSelectedVariantsFile);
+    });
+}
 
 cancelUploadCsvButton.addEventListener("click", () => {
     resetUploadCsvModal();
@@ -33,13 +32,17 @@ cancelUploadCsvButton.addEventListener("click", () => {
 });
 
 confirmUploadCsvButton.addEventListener("click", async () => {
-    const file = uploadCsvInput.files[0];
-    if (!file) {
+    
+    if (!isUploadReady()) {
         return;
     }
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", uploadCsvInput.files[0]);
+
+    if (uploadCsvVariantsInput) {
+        formData.append("variants_file", uploadCsvVariantsInput.files[0]);
+    }
 
     setUploadCsvLoading(true);
 
@@ -230,22 +233,8 @@ uploadCsvModal.addEventListener("drop", (event) => {
     event.preventDefault();
 });
 
-uploadCsvDropzone.addEventListener("dragover", (event) => {
-    event.preventDefault();
-});
+bindDropzoneDrop(uploadCsvDropzone, uploadCsvInput);
 
-uploadCsvDropzone.addEventListener("drop", (event) => {
-    event.preventDefault();
-
-    const file = event.dataTransfer.files[0];
-
-    if (!file) {
-        return;
-    }
-
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-
-    uploadCsvInput.files = dataTransfer.files;
-    uploadCsvInput.dispatchEvent(new Event("change"));
-});
+if (uploadCsvVariantsDropzone) {
+    bindDropzoneDrop(uploadCsvVariantsDropzone, uploadCsvVariantsInput);
+}

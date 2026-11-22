@@ -20,14 +20,47 @@ function isValidCsvFile(file) {
 }
 
 function setSelectedFile(file) {
-    uploadCsvDropzone.classList.toggle("has-file", Boolean(file));
-    uploadCsvFileName.textContent = file ? `Файл: ${file.name}` : DEFAULT_FILE_HINT;
-    confirmUploadCsvButton.disabled = !file;
+    setDropzoneFile(uploadCsvDropzone, uploadCsvFileName, file);
+}
+
+function setSelectedVariantsFile(file) {
+    setDropzoneFile(uploadCsvVariantsDropzone, uploadCsvVariantsFileName, file);
+}
+
+function setDropzoneFile(dropzone, fileNameElement, file) {
+    dropzone.classList.toggle("has-file", Boolean(file));
+    fileNameElement.textContent = file ? `Файл: ${file.name}` : DEFAULT_FILE_HINT;
+    confirmUploadCsvButton.disabled = !isUploadReady();
+}
+
+function handleCsvInputChange(input, setFile) {
+    const file = input.files[0];
+
+    if (!file || !isValidCsvFile(file)) {
+        input.value = "";
+        setFile(null);
+        return;
+    }
+
+    setFile(file);
+}
+
+function isUploadReady() {
+
+    if (!uploadCsvInput.files[0]) {
+        return false;
+    }
+
+    if (uploadCsvVariantsInput && !uploadCsvVariantsInput.files[0]) {
+        return false;
+    }
+
+    return true;
 }
 
 function setUploadCsvLoading(isLoading) {
     uploadCsvModal.classList.toggle("is-loading", isLoading);
-    confirmUploadCsvButton.disabled = isLoading || !uploadCsvInput.files[0];
+    confirmUploadCsvButton.disabled = isLoading || !isUploadReady();
 }
 
 function setUploadCsvList(isList) {
@@ -45,6 +78,12 @@ function resetUploadCsvModal() {
 
     uploadCsvInput.value = "";
     setSelectedFile(null);
+
+    if (uploadCsvVariantsInput) {
+        uploadCsvVariantsInput.value = "";
+        setSelectedVariantsFile(null);
+    }
+
     setUploadCsvLoading(false);
     setUploadCsvList(false);
 
@@ -318,4 +357,27 @@ function collectWordChange() {
             file: state.file
         }))
     };
+}
+
+function bindDropzoneDrop(dropzone, input) {
+    dropzone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+    });
+
+    dropzone.addEventListener("drop", (event) => {
+        event.preventDefault();
+
+        const file = event.dataTransfer.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        // data transer для поулчения file list
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+
+        input.files = dataTransfer.files;
+        input.dispatchEvent(new Event("change"));
+    });
 }

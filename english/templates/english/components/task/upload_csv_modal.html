@@ -30,16 +30,37 @@
                 {{ default_description }}
             </p>
 
-            <button type="button" class="upload-csv-dropzone" id="uploadCsvDropzone">
-                <span class="upload-csv-dropzone-title">
-                    Натисніть, щоб <strong>обрати файл</strong>
-                </span>
-                <span class="upload-csv-dropzone-hint" id="uploadCsvFileName">
-                    Підтримується: .csv
-                </span>
-            </button>
+            {% if task.type == "sentences" %}
+                <div class="upload-csv-dropzones">
+                    <button type="button" class="upload-csv-dropzone" id="uploadCsvDropzone">
+                        <span class="upload-csv-dropzone-label"><strong>Речення</strong></span>
+                        <span class="upload-csv-dropzone-hint" id="uploadCsvFileName">
+                            Підтримуються: .csv
+                        </span>
+                    </button>
 
-            <input type="file" id="uploadCsvInput" accept=".csv,text/csv" hidden>
+                    <button type="button" class="upload-csv-dropzone" id="uploadCsvVariantsDropzone">
+                        <span class="upload-csv-dropzone-label"><strong>Слова для речень</strong></span>
+                        <span class="upload-csv-dropzone-hint" id="uploadCsvVariantsFileName">
+                            Підтримуються: .csv
+                        </span>
+                    </button>
+                </div>
+
+                <input type="file" id="uploadCsvInput" accept=".csv,text/csv" hidden>
+                <input type="file" id="uploadCsvVariantsInput" accept=".csv,text/csv" hidden>
+            {% else %}
+                <button type="button" class="upload-csv-dropzone" id="uploadCsvDropzone">
+                    <span class="upload-csv-dropzone-title">
+                        Натисніть, щоб <strong>обрати файл</strong>
+                    </span>
+                    <span class="upload-csv-dropzone-hint" id="uploadCsvFileName">
+                        Підтримується: .csv
+                    </span>
+                </button>
+
+                <input type="file" id="uploadCsvInput" accept=".csv,text/csv" hidden>
+            {% endif %}
         </div>
 
         <div class="upload-csv-loading">

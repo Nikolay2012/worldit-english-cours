@@ -20,3 +20,6 @@ const saveWordButton = document.getElementById("saveWordButton");
 const imageSlots = uploadCsvWordForm.querySelectorAll(".upload-csv-image");
 const uploadCsvCloseIcon = uploadCsvModal.querySelector(".closeModal");
 const modalCover = document.getElementById("modalCover");
+const uploadCsvVariantsInput = document.getElementById("uploadCsvVariantsInput");
+const uploadCsvVariantsDropzone = document.getElementById("uploadCsvVariantsDropzone");
+const uploadCsvVariantsFileName = document.getElementById("uploadCsvVariantsFileName");

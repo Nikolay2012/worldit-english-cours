@@ -64,7 +64,8 @@
 }
 
 .upload-csv-dropzone-title,
-.upload-csv-dropzone-hint {
+.upload-csv-dropzone-hint,
+.upload-csv-dropzone-label {
     font-size: 0.875rem;
     color: var(--text-fg-primary);
 }
@@ -87,6 +88,24 @@
 
 .upload-csv-dropzone.has-file .upload-csv-dropzone-hint {
     color: #0D133F;
+}
+
+.upload-csv-dropzones {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.upload-csv-dropzones .upload-csv-dropzone {
+    margin-top: 0;
+}
+
+.upload-csv-dropzones .upload-csv-dropzone-hint {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .upload-csv-progress {
@@ -634,6 +653,10 @@
     border-color: transparent;
 }
 
+.dark-body .upload-csv-dropzone.has-file .upload-csv-dropzone-label {
+    color: #71717A;
+}
+
 .dark-body .upload-csv-progress {
     background-color: #545879;
 }
@@ -790,5 +813,9 @@
     .sentence-zero-gap {
         width: 28px;
         height: 28px;
+    }
+
+    .upload-csv-dropzones {
+        grid-template-columns: 1fr;
     }
 }
