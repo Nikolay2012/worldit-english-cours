@@ -5,10 +5,6 @@ const sentencePromptInput = document.getElementById("sentencePromptInput");
 const saveSentenceButton = document.getElementById("saveSentenceButton");
 
 const confirmSentenceButton = document.getElementById("confirmSentenceButton");
-const sentenceGapTokenTemplate = document.getElementById("sentenceGapTokenTemplate");
-const backSentenceGapsButton = document.getElementById("backSentenceGapsButton");
-const saveSentenceGapsButton = document.getElementById("saveSentenceGapsButton");
-const sentenceZeroGapTemplate = document.getElementById("sentenceZeroGapTemplate");
 
 const SENTENCES_LIST_TITLE = "Список речень";
 const sentencesByStepId = new Map();
@@ -89,6 +85,7 @@ confirmSentenceButton.addEventListener("click", async (event) => {
         if (sentenceFormState.previewAnswer !== answer) {
             sentenceFormState.gaps = [];
             sentenceFormState.zeroGaps = [];
+            sentenceFormState.marks = [];
         }
 
         sentenceFormState.previewAnswer = answer;
@@ -100,24 +97,6 @@ confirmSentenceButton.addEventListener("click", async (event) => {
     } finally {
         confirmSentenceButton.disabled = false;
     }
-});
-
-sentenceGapsPreview.addEventListener('click', (event) => {
-    // Удаление отметки нулевого артикля (тут он назван как zeroGap)
-    const sentenceZeroGap = event.target.closest(".sentence-zero-gap");
-
-    if (sentenceZeroGap) {
-        removeZeroGap(sentenceZeroGap);
-        return;
-    }
-
-    const token = event.target.closest(".sentence-gap-token");
-
-    if (!token) {
-        return;
-    }
-
-    toggleSentenceGap(token);
 });
 
 // Переключение на режим назад, к основному режиму модалки создания/редактирования
@@ -147,62 +126,10 @@ saveSentenceGapsButton.addEventListener("click", async () => {
     }
 });
 
-
-function renderSentenceGaps(tokens) {
-    sentenceGapsPreview.replaceChildren();
-
-    for (const token of tokens) {
-        if (sentenceFormState.zeroGaps.includes(token.index)) {
-            sentenceGapsPreview.append(
-                createZeroGap(token.index));
-        }
-
-        // Пропускаем не слова или не цифры. Таким образом - пропускаем разделительные знаки в отображении
-        // Ествественно, is_word записан сервером, здесь лишь пользуемся его данными
-        if (!token.is_word) {
-            continue;
-        }
-
-        const button = sentenceGapTokenTemplate.content.firstElementChild.cloneNode(true);
-
-        button.textContent = token.text;
-        button.dataset.index = token.index;
-        button.classList.toggle('is-gap', sentenceFormState.gaps.includes(token.index));
-
-        sentenceGapsPreview.append(button);
-    }
-
-    if (sentenceFormState.zeroGaps.includes(tokens.length)) {
-        sentenceGapsPreview.append(
-            createZeroGap(tokens.length)
-        );
-    }
-
-    // Пока не выбраны пропуски, кнопка не будет активирована для юзера (в том числе и нулевой артикль)
-    updateSaveSentenceGapsButton();
-
-}
-
 function openSentenceGaps() {
     uploadCsvModal.classList.remove('is-sentence-form');
     uploadCsvModal.classList.add('is-sentence-gaps');
 }
-
-function toggleSentenceGap(token) {
-
-    const index = Number(token.dataset.index);
-    const gaps = sentenceFormState.gaps;
-
-    if (gaps.includes(index)) {
-        gaps.splice(gaps.indexOf(index), 1);
-    } else {
-        gaps.push(index);
-    }
-
-    token.classList.toggle("is-gap", gaps.includes(index));
-    updateSaveSentenceGapsButton();
-}
-
 
 function renderSentencesList(data) {
     sentencesByStepId.clear();
@@ -253,12 +180,14 @@ function resetSentenceForm() {
         stepId: null,
         gaps: [],
         previewAnswer: null,
-        zeroGaps: []
+        zeroGaps: [],
+        marks: []
     };
 
     sentenceAnswerInput.value = "";
     sentencePromptInput.value = "";
     sentenceGapsPreview.replaceChildren();
+    clearPlacingToken();
 }
 
 function openSentenceForm(mode, sentence) {
@@ -315,31 +244,6 @@ function getSentenceSaveUrl() {
     // берем именно такой кусок маршрута, потому что просто "0" 
     // может быть использовать уже в других частях машрута
     return uploadCsvModal.dataset.updateSentenceUrl.replace(/\/0\/$/, `/${sentenceFormState.stepId}/`);
-}
-
-function createZeroGap(position) {
-    const zeroGap = sentenceZeroGapTemplate.content.firstElementChild.cloneNode(true);
-
-    zeroGap.dataset.position = position;
-
-    return zeroGap;
-}
-
-function removeZeroGap(zeroGap) {
-    const position = Number(zeroGap.dataset.position);
-
-    sentenceFormState.zeroGaps = sentenceFormState.zeroGaps.filter(
-        (item) => item !== position
-    );
-    zeroGap.remove();
-
-    updateSaveSentenceGapsButton();
-}
-
-function updateSaveSentenceGapsButton() {
-    const gapsCount = sentenceFormState.gaps.length + sentenceFormState.zeroGaps.length;
-
-    saveSentenceGapsButton.disabled = gapsCount === 0;
 }
 
 async function sentenceRequest(url, data) {

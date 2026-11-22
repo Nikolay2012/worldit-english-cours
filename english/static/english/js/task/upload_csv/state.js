@@ -10,7 +10,9 @@ let sentenceFormState = {
     stepId: null,
     gaps: [],
     previewAnswer: null,
-    zeroGaps: []
+    zeroGaps: [],
+    // Разделитльные знаки указанные в предложении
+    marks: []
 };
 
 let imageStates = [];
