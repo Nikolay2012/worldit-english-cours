@@ -58,7 +58,8 @@ class WordImporter(BaseEnglishTaskImporter):
     def import_file(
             self, 
             task_id: int, 
-            file: UploadedFile
+            file: UploadedFile,
+            extra_files: dict | None = None
         ) -> list[dict[str, str]]:
         
         task, rows = super().import_file(

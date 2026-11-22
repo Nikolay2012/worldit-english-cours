@@ -53,7 +53,7 @@ class TaskImportEndpoint(View):
             return JsonResponse(
                 {
                     "ok": False,
-                    "message": "Файл не передано"
+                    "error": "Файл не передано"
                 }, 
                 status=400
             )
@@ -63,7 +63,8 @@ class TaskImportEndpoint(View):
                 task_id=task_id
             ).import_file(
                 task_id=task_id,
-                file=uploaded_file
+                file=uploaded_file,
+                extra_files=request.FILES
             )
         except NotFoundError as error:
             return JsonResponse(
