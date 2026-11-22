@@ -12,3 +12,4 @@ from .theory import Theory
 from .video import Video
 from .word_category import WordCategory
 from .question_image import QuestionImage
+from .sentence_word_variant import SentenceWordVariant

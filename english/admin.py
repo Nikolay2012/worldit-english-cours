@@ -16,5 +16,6 @@ admin.site.register([
     Theory,
     Video,
     WordCategory,
-    QuestionImage
+    QuestionImage,
+    SentenceWordVariant
 ])
