@@ -769,6 +769,66 @@
     transform: rotate(180deg);
 }
 
+#uploadCsvModal .sentence-gaps-preview {
+    min-height: 200px;
+    align-content: center;
+}
+
+.sentence-gap-token:disabled {
+    cursor: default;
+}
+
+.sentence-gap-token:disabled:hover {
+    border-bottom-color: transparent;
+}
+
+.sentence-inserted-mark {
+    color: #F98232;
+}
+
+.sentence-inserted-mark:hover {
+    border-bottom-color: transparent;
+    opacity: 0.7;
+}
+
+.sentence-insert-slot {
+    width: 0;
+    height: 36px;
+    margin: 0 -6px;
+    padding: 0;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 6px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: width 0.15s ease, margin 0.15s ease;
+}
+
+#uploadCsvModal.is-placing-token .sentence-insert-slot {
+    width: 24px;
+    margin: 0;
+    border: 1px dashed #71717A;
+}
+
+#uploadCsvModal.is-placing-token .sentence-insert-slot:hover,
+.sentence-insert-slot.is-drop-target {
+    border-style: solid;
+    border-color: #F98232;
+    background-color: rgba(249, 130, 50, 0.2);
+}
+
+#uploadCsvModal .sentence-gaps-palette .sentence-token.is-selected {
+    border-color: #0D133F;
+}
+
+.dark-body #uploadCsvModal.is-placing-token .sentence-insert-slot {
+    border-color: #FAF8FF;
+}
+
+.dark-body #uploadCsvModal .sentence-gaps-palette .sentence-token.is-selected {
+    border-color: white;
+}
+
 @media (max-width: 750px) {
     #uploadCsvModal {
         width: calc(100% - 40px);
@@ -817,5 +877,17 @@
 
     .upload-csv-dropzones {
         grid-template-columns: 1fr;
+    }
+
+    .sentence-insert-slot {
+        height: 28px;
+    }
+
+    #uploadCsvModal.is-placing-token .sentence-insert-slot {
+        width: 20px;
+    }
+
+    #uploadCsvModal .sentence-gaps-preview {
+        min-height: 140px;
     }
 }

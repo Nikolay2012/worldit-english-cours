@@ -160,9 +160,52 @@
                 <div class="sentence-gaps-preview" id="sentenceGapsPreview"></div>
 
                 <p class="upload-csv-hint">
-                    Розділові знаки не можна обрати в якості пропуску (вони прибрані з просмотру)
+                    Розділові знаки не можна обрати в якості пропуску
                 </p>
+
+                <div class="sentence-tokens sentence-gaps-palette" id="sentenceGapsPalette">
+                    <div class="sentence-token" draggable="true" data-kind="zero" data-token="-">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">___</span>
+                    </div>
+                    <div class="sentence-token" draggable="true" data-kind="mark" data-token=",">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">,</span>
+                    </div>
+                    <div class="sentence-token" draggable="true" data-kind="mark" data-token=".">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">.</span>
+                    </div>
+                    <div class="sentence-token" draggable="true" data-kind="mark" data-token="-">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">-</span>
+                    </div>
+                    <div class="sentence-token" draggable="true" data-kind="mark" data-token=":">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">:</span>
+                    </div>
+                    <div class="sentence-token" draggable="true" data-kind="mark" data-token=";">
+                        <img class="sentence-token-grip" src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" alt="drag-handle-dots-2" draggable="false">
+                        <span class="sentence-token-text">;</span>
+                    </div>
+                </div>
             </div>
+
+            <template id="sentenceGapTokenTemplate">
+                <button type="button" class="sentence-gap-token"></button>
+            </template>
+
+            <template id="sentenceZeroGapTemplate">
+                <button type="button" class="sentence-zero-gap" title="Нульовий артикль" aria-label="Нульовий артикль"></button>
+            </template>
+
+            <template id="sentenceInsertedMarkTemplate">
+                <button type="button" class="sentence-gap-token sentence-inserted-mark" title="Прибрати знак"></button>
+            </template>
+
+            <template id="sentenceInsertSlotTemplate">
+                <button type="button" class="sentence-insert-slot" aria-label="Вставити сюди"></button>
+            </template>
 
             <template id="sentenceGapTokenTemplate">
                 <button type="button" class="sentence-gap-token"></button>
