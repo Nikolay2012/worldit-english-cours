@@ -33,7 +33,7 @@ from django.db import transaction
 from django.conf import settings
 from english.models.english_task import EnglishTask
 from english.models.question_image import QuestionImage
-from english.services.exceptions import ConflictError, NotFoundError
+from english.services.exceptions import NotFoundError
 
 
 class TaskStepsService:
@@ -41,11 +41,6 @@ class TaskStepsService:
         self.task = self._get_task(task_id=task_id)
     
     def delete_all(self):
-        
-        # Если на задание уже отвечали - список не удаляем,
-        # иначе пропадёт прогресс студентов
-        if self._has_student_answers():
-            raise ConflictError("Студенти вже відповідали на це завдання")
         
         # Имена файлов собираем ДО удаления,
         # после delete() записей QuestionImage уже не будет
@@ -61,6 +56,7 @@ class TaskStepsService:
         
         with transaction.atomic():
             self.task.steps.all().delete()
+            self._delete_type_data()
             
             # Файлы удаляются только после успешного коммита
             # Если транзакция откатится, картинки останутся на месте
@@ -72,11 +68,6 @@ class TaskStepsService:
         for name in image_names:
             default_storage.delete(name)
     
-    # Пока метод пустой
-    # будет заполнен с настройкой прогресса студентов в прохождении заданий
-    def _has_student_answers(self) -> bool:
-        return False
-    
     def _get_task(self, task_id: int) -> EnglishTask:
         task = EnglishTask.objects.filter(
             pk=task_id,
@@ -87,3 +78,21 @@ class TaskStepsService:
             raise NotFoundError("Завдання не знайдено")
         
         return task
+    
+    # Метод, определяющий методы с дополнительной логикой удаления в конкретных типах заданий
+    # К примеру: для задания 'предложения', помимо шагов задания, нужно удалять записи SentenceWordVariant,
+    # в то время как для задания 'слова' этого делать не нужно
+    def _delete_type_data(self):
+        
+        delete_methods = {
+            "sentences": self._delete_sentence_word_variants
+        }
+        
+        method = delete_methods.get(self.task.type)
+        
+        if method is not None:
+            return method()
+    
+    def _delete_sentence_word_variants(self):
+        
+        self.task.word_variants.all().delete()
