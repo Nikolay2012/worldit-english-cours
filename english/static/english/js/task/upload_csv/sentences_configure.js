@@ -64,7 +64,10 @@ sentenceGapsPreview.addEventListener("drop", (event) => {
     }
 
     event.preventDefault();
-    insertPlacingToken(Number(slot.dataset.position));
+    insertPlacingToken(
+        Number(slot.dataset.position),
+        Number(slot.dataset.index)
+    );
 });
 
 sentenceGapsPreview.addEventListener("click", (event) => {
@@ -72,23 +75,16 @@ sentenceGapsPreview.addEventListener("click", (event) => {
 
     if (slot) {
         if (placingToken) {
-            insertPlacingToken(Number(slot.dataset.position));
+            insertPlacingToken(Number(slot.dataset.position), Number(slot.dataset.index));
         }
 
         return;
     }
 
-    const zeroGap = event.target.closest(".sentence-zero-gap");
+    const insert = event.target.closest(".sentence-zero-gap, .sentence-inserted-mark");
 
-    if (zeroGap) {
-        removeZeroGap(Number(zeroGap.dataset.position));
-        return;
-    }
-
-    const mark = event.target.closest(".sentence-inserted-mark");
-
-    if (mark) {
-        removeInsertedMark(Number(mark.dataset.position));
+    if (insert) {
+        removeInsert(Number(insert.dataset.position), Number(insert.dataset.index));
         return;
     }
 
@@ -116,10 +112,8 @@ saveSentenceGapsButton.addEventListener("click", async () => {
             prompt: sentencePromptInput.value.trim(),
             // Все наборы: gaps, zero_gaps, marks копируем для сортировки от меньшего к больше
             gaps: sentenceFormState.gaps.slice().sort((a, b) => a - b),
-            zero_gaps: sentenceFormState.zeroGaps.slice().sort((a, b) => a - b),
-            marks: sentenceFormState.marks.slice().sort((a, b) => a.position - b.position)
+            inserts: sentenceFormState.inserts
         });
-
         renderSentencesList(responseData.data);
         closeSentenceForm();
     } catch (error) {
@@ -134,7 +128,14 @@ function renderSentenceGaps(tokens) {
     sentenceGapsPreview.replaceChildren();
 
     for (let position = 0; position <= tokens.length; position++) {
-        sentenceGapsPreview.append(createInsertedItem(position));
+        const inserts = getInsertsAt(position);
+
+        sentenceGapsPreview.append(createInsertSlot(position, 0));
+
+        inserts.forEach((insert, index) => {
+            sentenceGapsPreview.append(createInsertedItem(insert, index));
+            sentenceGapsPreview.append(createInsertSlot(position, index + 1));
+        });
 
         if (position === tokens.length) {
             break;
@@ -146,20 +147,19 @@ function renderSentenceGaps(tokens) {
     updateSaveSentenceGapsButton();
 }
 
-function createInsertedItem(position) {
+function createInsertedItem(insert, index) {
+    const item = insert.kind === "zero"
+        ? sentenceZeroGapTemplate.content.firstElementChild.cloneNode(true)
+        : sentenceInsertedMarkTemplate.content.firstElementChild.cloneNode(true);
 
-    if (sentenceFormState.zeroGaps.includes(position)) {
-        return createZeroGap(position);
+    if (insert.kind === "mark") {
+        item.textContent = insert.text;
     }
 
-    const mark = sentenceFormState.marks.find(
-        (item) => item.position === position);
+    item.dataset.position = insert.position;
+    item.dataset.index = index;
 
-    if (mark) {
-        return createInsertedMark(mark);
-    }
-
-    return createInsertSlot(position);
+    return item;
 }
 
 function createSentenceGapToken(token) {
@@ -177,27 +177,11 @@ function createSentenceGapToken(token) {
     return button;
 }
 
-function createZeroGap(position) {
-    const zeroGap = sentenceZeroGapTemplate.content.firstElementChild.cloneNode(true);
-
-    zeroGap.dataset.position = position;
-
-    return zeroGap;
-}
-
-function createInsertedMark(mark) {
-    const button = sentenceInsertedMarkTemplate.content.firstElementChild.cloneNode(true);
-
-    button.textContent = mark.text;
-    button.dataset.position = mark.position;
-
-    return button;
-}
-
-function createInsertSlot(position) {
+function createInsertSlot(position, index) {
     const slot = sentenceInsertSlotTemplate.content.firstElementChild.cloneNode(true);
 
     slot.dataset.position = position;
+    slot.dataset.index = index;
 
     return slot;
 }
@@ -216,35 +200,41 @@ function toggleSentenceGap(token) {
     updateSaveSentenceGapsButton();
 }
 
-function insertPlacingToken(position) {
+function insertPlacingToken(position, index) {
 
-    if (placingToken.kind === "zero") {
-        sentenceFormState.zeroGaps.push(position);
-    } else {
-        sentenceFormState.marks.push({
-            position: position,
-            text: placingToken.text
-        });
+    if (placingToken.kind === "zero" && hasZeroGapAt(position)) {
+        showMessage("На цьому місці вже є нульовий артикль");
+        clearPlacingToken();
+        return;
     }
+
+    sentenceFormState.inserts.splice(getInsertsOffset(position) + index, 0, {
+        position: position,
+        kind: placingToken.kind,
+        text: placingToken.text
+    });
 
     clearPlacingToken();
     renderSentenceGaps(sentenceGapsTokens);
 }
 
-function removeZeroGap(position) {
-    sentenceFormState.zeroGaps = sentenceFormState.zeroGaps.filter(
-        (item) => item !== position
-    );
-
+function removeInsert(position, index) {
+    sentenceFormState.inserts.splice(getInsertsOffset(position) + index, 1);
     renderSentenceGaps(sentenceGapsTokens);
 }
 
-function removeInsertedMark(position) {
-    sentenceFormState.marks = sentenceFormState.marks.filter(
-        (item) => item.position !== position
-    );
+function getInsertsAt(position) {
+    return sentenceFormState.inserts.filter((insert) => insert.position === position);
+}
 
-    renderSentenceGaps(sentenceGapsTokens);
+function getInsertsOffset(position) {
+    const offset = sentenceFormState.inserts.findIndex((insert) => insert.position >= position);
+
+    return offset === -1 ? sentenceFormState.inserts.length : offset;
+}
+
+function hasZeroGapAt(position) {
+    return getInsertsAt(position).some((insert) => insert.kind === "zero");
 }
 
 function setPlacingToken(token) {
@@ -276,7 +266,9 @@ function setDropTarget(slot) {
 }
 
 function updateSaveSentenceGapsButton() {
-    const gapsCount = sentenceFormState.gaps.length + sentenceFormState.zeroGaps.length;
+    const zeroGapsCount = sentenceFormState.inserts.filter(
+        (insert) => insert.kind === "zero"
+    ).length;
 
-    saveSentenceGapsButton.disabled = gapsCount === 0;
+    saveSentenceGapsButton.disabled = sentenceFormState.gaps.length + zeroGapsCount === 0;
 }

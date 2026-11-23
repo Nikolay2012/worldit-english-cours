@@ -84,8 +84,7 @@ confirmSentenceButton.addEventListener("click", async (event) => {
 
         if (sentenceFormState.previewAnswer !== answer) {
             sentenceFormState.gaps = [];
-            sentenceFormState.zeroGaps = [];
-            sentenceFormState.marks = [];
+            sentenceFormState.inserts = [];
         }
 
         sentenceFormState.previewAnswer = answer;
@@ -180,8 +179,7 @@ function resetSentenceForm() {
         stepId: null,
         gaps: [],
         previewAnswer: null,
-        zeroGaps: [],
-        marks: []
+        inserts: []
     };
 
     sentenceAnswerInput.value = "";
@@ -207,7 +205,11 @@ function openSentenceForm(mode, sentence) {
         }
 
         if (sentence.zero_gaps) {
-            sentenceFormState.zeroGaps = sentence.zero_gaps;
+            sentenceFormState.inserts = sentence.zero_gaps.map((position) => ({
+                position: position,
+                kind: "zero",
+                text: "-"
+            }));
         }
     }
 

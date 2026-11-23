@@ -554,7 +554,6 @@
 .upload-csv-sentence-gaps {
     flex-direction: column;
     gap: 16px;
-    margin-top: 24px;
 }
 
 .upload-csv-hint {
@@ -759,17 +758,19 @@
     border-bottom-color: transparent;
 }
 
-.sentence-inserted-mark {
-    color: #F98232;
+.sentence-inserted-mark,
+.sentence-zero-gap {
+    color: var(--text-main);
 }
 
-.sentence-inserted-mark:hover {
+.sentence-inserted-mark:hover,
+.sentence-zero-gap:hover {
     border-bottom-color: transparent;
     opacity: 0.7;
 }
 
 .sentence-insert-slot {
-    width: 12px;
+    width: 20px;
     height: 36px;
     margin: 0 -12px;
     padding: 0;
@@ -785,6 +786,11 @@
 
 .dark-body #uploadCsvModal .sentence-gaps-palette .sentence-token.is-selected {
     border-color: white;
+}
+
+.dark-body .sentence-inserted-mark,
+.dark-body .sentence-zero-gap {
+    color: var(--text-main);
 }
 
 @media (max-width: 750px) {
