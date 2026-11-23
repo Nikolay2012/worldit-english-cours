@@ -80,6 +80,7 @@
     border-style: solid;
     border-color: transparent;
     background-color: #E4E4E7;
+    height: 100%;
 }
 
 .upload-csv-dropzone.has-file .upload-csv-dropzone-title {
@@ -99,13 +100,18 @@
 
 .upload-csv-dropzones .upload-csv-dropzone {
     margin-top: 0;
+    min-width: 0;
+    overflow: hidden;
 }
 
-.upload-csv-dropzones .upload-csv-dropzone-hint {
-    max-width: 100%;
+.upload-csv-dropzones .upload-csv-dropzone-hint,
+.upload-csv-dropzones .upload-csv-dropzone-label {
+    display: block;
+    width: 100%;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .upload-csv-progress {
@@ -818,7 +824,7 @@
     }
 
     .upload-csv-dropzone {
-        padding: 32px 16px;
+        padding: 28px 16px;
     }
 
     .word-progress {
