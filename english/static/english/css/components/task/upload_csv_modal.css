@@ -80,7 +80,6 @@
     border-style: solid;
     border-color: transparent;
     background-color: #E4E4E7;
-    height: 100%;
 }
 
 .upload-csv-dropzone.has-file .upload-csv-dropzone-title {
@@ -858,5 +857,9 @@
 
     .sentence-insert-slot {
         height: 28px;
+    }
+
+    .upload-csv-dropzone.has-file {
+        height: 100%;
     }
 }
