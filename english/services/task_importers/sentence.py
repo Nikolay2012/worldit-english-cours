@@ -87,6 +87,27 @@ from english.services.sentence_text import (
     tokenize, join_tokens
 )
 
+"""
+Sentence:
+_get_gap_positions
+
+import_file
+_skip_header
+_read_rows
+_is_fill
+_parse_fill_rows
+_parse_fill_row
+_row_error
+_fill_gaps
+_parse_build_rows
+_parse_build_row
+_set_lowercase_flags
+_is_first_lowercase
+_create_steps
+_validate_tokens
+_create_sentence_tokens
+"""
+
 
 class SentenceImporter(BaseEnglishTaskImporter):
     
@@ -463,125 +484,6 @@ class SentenceImporter(BaseEnglishTaskImporter):
                     line, message=f"занадто довге слово «{token[:20]}…»"
                 )
     
-    def _get_sentences_list(self, task: EnglishTask) -> dict:
-        
-        steps = task.steps.select_related(
-                "sentence"
-            ).prefetch_related(
-                Prefetch(
-                    "sentence__tokens", 
-                    queryset=SentenceToken.objects.order_by('order')
-                )
-            ).order_by('order')
-        
-        return {
-            "sentences": [
-                self._serialize_sentence(sentence=step.sentence, step_id=step.id) for step in steps
-            ],
-            "is_fill": any(step.sentence.is_fill for step in steps),
-            "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS,
-        }
-    
-    def _serialize_sentence(
-        self, 
-        sentence: Sentence, 
-        step_id: int
-    ) -> dict:
-        
-        answers = [token.text for token in sentence.tokens.all()]
-        
-        gaps, zero_gaps = self._get_gap_positions(
-            template=sentence.template,
-            answers=answers
-        )
-        
-        return {
-            "step_id": step_id,
-            "answer": sentence.answer,
-            "prompt": sentence.prompt,
-            "template": sentence.template,
-            "gaps": gaps,
-            "zero_gaps": zero_gaps,
-            "parts": self._get_sentence_parts(
-                sentence=sentence,
-                answers=answers
-            )
-        }
-    
-    def _get_sentence_parts(
-        self, 
-        sentence: Sentence, 
-        answers: list[str]
-    ) -> list[dict]:
-        
-        if not sentence.template:
-            return [{"kind": "text", "text": sentence.answer}]
-        
-        pieces = sentence.template.split(self.GAP_MARKER)
-        parts = []
-        
-        for index, piece in enumerate(pieces):
-            if piece:
-                parts.append({"kind": "text", "text": piece})
-            
-            if index == len(pieces) - 1:
-                break
-            
-            answer = answers[index] if index < len(answers) else ""
-            
-            if answer == self.ZERO_ARTICLE:
-                parts.append({"kind": "zero"})
-            else:
-                parts.append({"kind": "gap", "text": answer})
-        
-        self._capitalize_first_part(parts=parts)
-        
-        return parts
-    
-    def _capitalize_first_part(self, parts: list[dict]):
-        
-        for part in parts:
-            if part["kind"] == "zero":
-                continue
-            
-            text = part["text"]
-            stripped = text.lstrip()
-            offset = len(text) - len(stripped)
-            
-            part["text"] = text[:offset] + stripped[:1].upper() + stripped[1:]
-            
-            return
-    
-    def _get_gap_positions(
-            self, 
-            template: str, 
-            answers: list[str]
-        ) -> tuple[list[int], list[int]]:
-        
-        if not template:
-            return ([], [])
-        
-        gaps = []
-        zero_gaps = []
-        index = 0
-        
-        # перебираем до последнего элемента
-        # например: ['he ', ' she ', ' it']
-        # после ' it' ничего нету. Если не делать срез списка, 
-        # то будет отмечен пропуск после ' it', что будет ошибкой
-        for part, answer in zip(template.split(self.GAP_MARKER)[:-1], answers):
-            # подсчитываем, сколько тоенов стоит в куске перед пропусков, 
-            # чтобы сдвинуть счетчик
-            index += len(tokenize(part))
-            
-            if answer == self.ZERO_ARTICLE:
-                zero_gaps.append(index)
-            else:
-                gaps.append(index)
-                index += 1
-        
-        return (gaps, zero_gaps)
-    
     # прежний _create_steps разбит на: _create_steps, _create_sentence_step, _create_sentence_tokens
     # разбит на части потому, что эти части используются в SentenceStepService
     def _create_steps(
@@ -597,31 +499,6 @@ class SentenceImporter(BaseEnglishTaskImporter):
                 data=data
             )
     
-    def _create_sentence_step(
-            self,
-            task: EnglishTask,
-            order: int,
-            data: dict
-        ):
-        
-        step = EnglishTaskStep.objects.create(
-            task=task,
-            order=order,
-            kind="sentence"
-        )
-        
-        sentence = Sentence.objects.create(
-            step=step,
-            prompt=data["prompt"],
-            answer=data["answer"],
-            template=data["template"]
-        )
-        
-        self._create_sentence_tokens(
-            sentence=sentence,
-            data=data
-        )
-        
     def _create_sentence_tokens(
             self, 
             sentence: Sentence, 
@@ -649,126 +526,3 @@ class SentenceImporter(BaseEnglishTaskImporter):
             )
         
         return ValidationError(f"Рядок {line}: {message}")
-    
-    def _get_variants_file(self, extra_files: dict | None) -> UploadedFile:
-        
-        if not extra_files:
-            extra_files = {}
-        
-        variants_file = extra_files.get(self.VARIANTS_FILE_FIELD)
-        
-        if variants_file is None:
-            raise ValidationError(
-                f"Завантажте файл «{self.VARIANTS_FILE_LABEL}»"
-            )
-        
-        return variants_file
-    
-    def _parse_variants_file(self, file: UploadedFile) -> list[list[str]]:
-        
-        rows = self._skip_variants_header(
-            rows=self._read_rows(file=file)
-        )
-        
-        if not rows:
-            raise ValidationError(
-                f"У файлі «{self.VARIANTS_FILE_LABEL}» немає жодного рядка зі словами"
-            )
-        
-        return [
-            self._parse_variants_row(line=line, cells=cells)
-            for line, cells in rows
-        ]
-    
-    def _skip_variants_header(
-            self, 
-            rows: list[tuple[int, list[str]]]
-        ) -> list[tuple[int, list[str]]]:
-        
-        for index, (line, cells) in enumerate(rows):
-            if not any(
-                self.CYRILLIC_PATTERN.search(cell) for cell in cells
-                ):
-                return rows[index:]
-        
-        return []
-    
-    def _parse_variants_row(
-            self, 
-            line: int, 
-            cells: list[str]
-        ) -> list[str]:
-        
-        group = []
-        normalized_words = set()
-        
-        for cell in cells:
-            word = normalize_sentence(cell)
-            
-            if not word:
-                continue
-            
-            self._validate_variant_word(line=line, word=word)
-            
-            if word.lower() in normalized_words:
-                continue
-            
-            normalized_words.add(word.lower())
-            group.append(word)
-        
-        if len(group) < self.MIN_VARIANT_GROUP_SIZE:
-            raise self._variants_row_error(
-                line=line,
-                message=f"має бути щонайменше {self.MIN_VARIANT_GROUP_SIZE} різних слова"
-            )
-        
-        return group
-    
-    def _validate_variant_word(self, line: int, word: str):
-        
-        if word == self.ZERO_ARTICLE:
-            return
-        
-        tokens = tokenize(word)
-        
-        if len(tokens) != 1 or not tokens[0][0].isalnum():
-            raise self._variants_row_error(
-                line=line,
-                message=f"«{word}» має бути одним словом"
-            )
-        
-        if len(word) > self.MAX_TOKEN_LENGTH:
-            raise self._variants_row_error(
-                line=line,
-                message=f"слово «{word}» довше за {self.MAX_TOKEN_LENGTH} символів"
-            )
-    
-    def _variants_row_error(
-            self, 
-            line: int, 
-            message: str
-        ) -> ValidationError:
-        
-        return ValidationError(
-            f"«{self.VARIANTS_FILE_LABEL}», рядок {line}: {message}"
-        )
-    
-    def _create_word_variants(
-            self, 
-            task: EnglishTask, 
-            groups: list[list[str]]
-        ):
-        
-        task.word_variants.all().delete()
-        
-        SentenceWordVariant.objects.bulk_create([
-            SentenceWordVariant(
-                task=task,
-                row=row,
-                position=position,
-                text=word,
-                normalized=word.lower()
-            )
-            for row, group in enumerate(groups)
-            for position, word in enumerate(group)
-        ])
