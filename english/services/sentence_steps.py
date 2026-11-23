@@ -39,9 +39,13 @@
 -Для "Доповнити речення" дополнительно:
     -gaps - номера токенов, которые станут пропусками,
     знаки препинания пропуском быть не могут
-    -zero_gaps - позиции нулевого артикля (между токенами или после последнего)
+    -inserts - вставки по порядку: {"position", "kind", "text"}
+        -position - перед каким токеном стоит вставка (от 0 до количества токенов)
+        -kind "zero" - нулевой артикль, не больше одного в позиции
+        -kind "mark" - знак препинания (INSERT_MARKS), становится частью предложения
     -должен быть хотя бы один пропуск или нулевой артикль
-    -собирает шаблон с ___ и список ответов для пропусков (токены SentenceToken)
+    -собирает шаблон с ___, полное предложение (со вставленными знаками)
+    и список ответов для пропусков (токены SentenceToken)
 
 Регистр первого слова - метод ._set_first_lowercase():
 -"Скласти речення" - по той же эвристике, что и при импорте
@@ -81,7 +85,7 @@ class SentenceStepService(SentenceImporter):
     def __init__(self):
         super().__init__()
         
-        
+        self.SENTENCE_INSERT_MARKS = ["-", ",", ".", ":", ";"]
     
     def create(
             self,
@@ -213,65 +217,145 @@ class SentenceStepService(SentenceImporter):
         if "gaps" not in data:
             return parsed
         
+        tokens = parsed["tokens"]
+        
         gaps = self._parse_gaps(
             gaps=data["gaps"],
-            tokens=parsed["tokens"]
+            tokens=tokens
         )
-        zero_gaps = self._parse_zero_gaps(
-            zero_gaps=data.get("zero_gaps", []),
-            tokens=parsed["tokens"]
+        inserts = self._parse_inserts(
+            inserts=data.get("inserts", []),
+            tokens=tokens
         )
         
-        if not gaps and not zero_gaps:
+        if not gaps and not any(insert["kind"] == "zero" for insert in inserts):
             raise ValidationError("Відсутні пропуски")
+        
+        inserts_by_position = {}
+        
+        for insert in inserts:
+            inserts_by_position.setdefault(
+                insert["position"],
+                []
+            ).append(insert)
         
         # токены предложения для поля template этого предложения (его записи если быть точнее)
         template_tokens = []
         # токены из которых состоит предложение и котороые будут отображены на странице
         answers = []
+        sentence_tokens = []
+        first_word_gap = None
         
-        for index in range(len(parsed["tokens"]) + 1):
-            if index in zero_gaps:
-                template_tokens.append(self.GAP_MARKER)
-                answers.append(self.ZERO_ARTICLE)
+        for position in range(len(tokens) + 1):
+            for insert in inserts_by_position.get(position, []):
+                if insert["kind"] == "zero":
+                    template_tokens.append(self.GAP_MARKER)
+                    answers.append(self.ZERO_ARTICLE)
+                    continue
+                
+                template_tokens.append(insert["text"])
+                sentence_tokens.append(insert["text"])
+                
+                if first_word_gap is None:
+                    first_word_gap = False
             
-            if index == len(parsed["tokens"]):
+            if position == len(tokens):
                 break
             
-            if index in gaps:
+            token = tokens[position]
+            sentence_tokens.append(token)
+            
+            if position in gaps:
                 template_tokens.append(self.GAP_MARKER)
-                answers.append(parsed["tokens"][index])
+                answers.append(token)
             else:
-                template_tokens.append(parsed["tokens"][index])
+                template_tokens.append(token)
+            
+            if first_word_gap is None:
+                first_word_gap = position in gaps
+            
+            # if index in zero_gaps:
+            #     template_tokens.append(self.GAP_MARKER)
+            #     answers.append(self.ZERO_ARTICLE)
+            
+            # if index == len(tokens):
+            #     break
+            
+            # if index in gaps:
+            #     template_tokens.append(self.GAP_MARKER)
+            #     answers.append(tokens[index])
+            # else:
+            #     template_tokens.append(tokens[index])
         
+        parsed["answer"] = join_tokens(sentence_tokens)
         parsed["template"] = join_tokens(template_tokens)
         parsed["tokens"] = answers
-        parsed["first_word_gap"] = 0 in gaps and 0 not in zero_gaps
+        parsed["first_word_gap"] = bool(first_word_gap)
         
         return parsed
     
-    def _parse_zero_gaps(self, zero_gaps, tokens: list[str]) -> list[int]:
+    def _parse_inserts(self, inserts, tokens: list[str]) -> list[int]:
         
-        if not isinstance(zero_gaps, list):
+        if not isinstance(inserts, list):
             raise ValidationError(
-                "Некоректні нульові артиклі"
+                "Некоректні вставки"
             )
         
-        # После убора пропусков, длина zero_gaps оригинального и zero_gaps без пропусков не могут не совпадать
-        # если не совпадают - значит при сборке тела запроса были допущены ошибки
-        if len(set(zero_gaps)) != len(zero_gaps):
-            raise ValidationError(
-                "Нульові артиклі не можуть повторюватися"
-            )
+        parsed = []
+        zero_positions = set()
+        previous_position = 0
         
-        for zero_gap in zero_gaps:
-            # второе <= ибо нулевой артикль может стоять после последнего слова
-            if type(zero_gap) != int or not 0 <= zero_gap <= len(tokens):
+        for insert in inserts:
+            
+            if not isinstance(insert, dict):
                 raise ValidationError(
-                    "Некоректна позиція нульового артикля"
+                    "Некоректні вставки"
+                )
+            
+            position = insert.get("position")
+            kind = insert.get("kind")
+            
+            # второе <= ибо нулевой артикль может стоять после последнего слова
+            if type(position) != int or not 0 <= position <= len(tokens):
+                raise ValidationError(
+                    "Некоректна позиція вставки"
+                )
+            
+            if position < previous_position:
+                return ValidationError(
+                    "Вставки мають йти по порядку"
+                )
+            
+            previous_position = position
+            
+            if kind == "zero":
+                if position in zero_positions:
+                    raise ValidationError(
+                        "Нульові артиклі не можуть повторюватися"
+                    )
+                
+                zero_positions.add(position)
+                parsed.append({
+                    "position": position,
+                    "kind": "zero"
+                })
+            elif kind == "mark":
+                text = insert.get("text")
+                
+                if text not in self.SENTENCE_INSERT_MARKS:
+                    raise ValidationError("Некоректний розділовий знак")
+                
+                parsed.append({
+                    "position": position,
+                    "kind": "mark",
+                    "text": text
+                })
+            else:
+                raise ValidationError(
+                    "Некоректний тип вставки"
                 )
         
-        return sorted(zero_gaps)
+        return parsed
     
     def _parse_gaps(self, gaps, tokens: list[str]) -> list[int]:
         

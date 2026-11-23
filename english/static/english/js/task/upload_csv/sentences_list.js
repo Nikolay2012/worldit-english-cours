@@ -106,25 +106,6 @@ backSentenceGapsButton.addEventListener("click", () => {
     uploadCsvModal.classList.add("is-sentence-form");
 });
 
-saveSentenceGapsButton.addEventListener("click", async () => {
-    saveSentenceGapsButton.disabled = true;
-
-    try {
-        const responseData = await sentenceRequest(getSentenceSaveUrl(), {
-            answer: sentenceAnswerInput.value.trim(),
-            prompt: sentencePromptInput.value.trim(),
-            gaps: sentenceFormState.gaps.slice().sort((a, b) => a - b),
-            zero_gaps: sentenceFormState.zeroGaps.slice().sort((a, b) => a -b)
-        });
-
-        renderSentencesList(responseData.data);
-        closeSentenceForm();
-    } catch (error) {
-        showMessage(error.message);
-        updateSaveSentenceGapsButton();
-    }
-});
-
 function openSentenceGaps() {
     uploadCsvModal.classList.remove('is-sentence-form');
     uploadCsvModal.classList.add('is-sentence-gaps');

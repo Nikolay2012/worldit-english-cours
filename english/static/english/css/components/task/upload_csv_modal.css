@@ -785,7 +785,7 @@
 }
 
 .dark-body #uploadCsvModal .sentence-gaps-palette .sentence-token.is-selected {
-    border-color: white;
+    border-color: #F98232;
 }
 
 .dark-body .sentence-inserted-mark,
