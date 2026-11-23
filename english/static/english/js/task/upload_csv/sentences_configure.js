@@ -97,6 +97,9 @@ sentenceGapsPreview.addEventListener("click", (event) => {
     toggleSentenceGap(token);
 });
 
+// Переключение на режим назад, к основному режиму модалки создания/редактирования
+// где сами предложения еще вводтся
+// без выбора пропусков
 backSentenceGapsButton.addEventListener("click", () => {
     clearPlacingToken();
     uploadCsvModal.classList.remove("is-sentence-gaps");

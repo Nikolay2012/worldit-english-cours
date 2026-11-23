@@ -73,6 +73,7 @@ import re
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
+from django.db.models import Prefetch
 
 from english.models.sentence import Sentence
 from english.models.english_task import EnglishTask
@@ -467,7 +468,10 @@ class SentenceImporter(BaseEnglishTaskImporter):
         steps = task.steps.select_related(
                 "sentence"
             ).prefetch_related(
-                "sentence__tokens"
+                Prefetch(
+                    "sentence__tokens", 
+                    queryset=SentenceToken.objects.order_by('order')
+                )
             ).order_by('order')
         
         return {
@@ -484,9 +488,11 @@ class SentenceImporter(BaseEnglishTaskImporter):
         step_id: int
     ) -> dict:
         
+        answers = [token.text for token in sentence.tokens.all()]
+        
         gaps, zero_gaps = self._get_gap_positions(
             template=sentence.template,
-            answers=[token.text for token in sentence.tokens.all()]
+            answers=answers
         )
         
         return {
@@ -496,7 +502,55 @@ class SentenceImporter(BaseEnglishTaskImporter):
             "template": sentence.template,
             "gaps": gaps,
             "zero_gaps": zero_gaps,
+            "parts": self._get_sentence_parts(
+                sentence=sentence,
+                answers=answers
+            )
         }
+    
+    def _get_sentence_parts(
+        self, 
+        sentence: Sentence, 
+        answers: list[str]
+    ) -> list[dict]:
+        
+        if not sentence.template:
+            return [{"kind": "text", "text": sentence.answer}]
+        
+        pieces = sentence.template.split(self.GAP_MARKER)
+        parts = []
+        
+        for index, piece in enumerate(pieces):
+            if piece:
+                parts.append({"kind": "text", "text": piece})
+            
+            if index == len(pieces) - 1:
+                break
+            
+            answer = answers[index] if index < len(answers) else ""
+            
+            if answer == self.ZERO_ARTICLE:
+                parts.append({"kind": "zero"})
+            else:
+                parts.append({"kind": "gap", "text": answer})
+        
+        self._capitalize_first_part(parts=parts)
+        
+        return parts
+    
+    def _capitalize_first_part(self, parts: list[dict]):
+        
+        for part in parts:
+            if part["kind"] == "zero":
+                continue
+            
+            text = part["text"]
+            stripped = text.lstrip()
+            offset = len(text) - len(stripped)
+            
+            part["text"] = text[:offset] + stripped[:1].upper() + stripped[1:]
+            
+            return
     
     def _get_gap_positions(
             self, 

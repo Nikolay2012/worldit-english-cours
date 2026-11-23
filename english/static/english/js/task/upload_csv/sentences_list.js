@@ -98,14 +98,6 @@ confirmSentenceButton.addEventListener("click", async (event) => {
     }
 });
 
-// Переключение на режим назад, к основному режиму модалки создания/редактирования
-// где сами предложения еще вводтся
-// без выбора пропусков
-backSentenceGapsButton.addEventListener("click", () => {
-    uploadCsvModal.classList.remove("is-sentence-gaps");
-    uploadCsvModal.classList.add("is-sentence-form");
-});
-
 function openSentenceGaps() {
     uploadCsvModal.classList.remove('is-sentence-form');
     uploadCsvModal.classList.add('is-sentence-gaps');
@@ -121,7 +113,7 @@ function renderSentencesList(data) {
 
     for (const sentence of data.sentences) {
         list.append(
-            createSentenceRow(sentence, data.required_correct_answers)
+            createSentenceRow(sentence)
         );
     }
 
@@ -130,20 +122,16 @@ function renderSentencesList(data) {
     uploadCsvTitle.textContent = SENTENCES_LIST_TITLE;
 }
 
-function createSentenceRow(sentence, requiredCorrectAnswers) {
+function createSentenceRow(sentence) {
     const rowItem = sentenceRowTemplate.content.firstElementChild.cloneNode(true);
     const row = rowItem.querySelector(".sentence-row");
-    const progress = rowItem.querySelector(".word-progress");
 
     row.dataset.stepId = sentence.step_id;
-    row.querySelector(".sentence-text").textContent = sentence.answer;
-
-    for (let index = 0; index < requiredCorrectAnswers; index++) {
-        const dot = document.createElement("span");
-
-        dot.className = "progress-dot";
-        progress.append(dot);
-    }
+    renderSentenceText(
+        row.querySelector(".sentence-text"), 
+        sentence.parts
+    );
+    row.title = sentence.answer;
 
     sentencesByStepId.set(sentence.step_id, sentence);
     return rowItem;
@@ -246,4 +234,20 @@ async function sentenceRequest(url, data) {
     }
 
     return responseData;
+}
+
+function renderSentenceText(element, parts) {
+
+    for (const part of parts) {
+        if (part.kind == "text") {
+            element.append(part.text);
+            continue;
+        }
+
+        const span = document.createElement("span");
+        span.className = part.kind === "gap" ? "sentence-text-gap" : "sentence-text-zero";
+        span.textContent = part.kind === "gap" ? part.text : "___";
+
+        element.append(span);
+    }
 }

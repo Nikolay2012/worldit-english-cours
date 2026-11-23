@@ -510,8 +510,18 @@
 
 .sentence-text {
     min-width: 0;
+    padding-bottom: 6px;
+    margin-bottom: -6px;
     font-size: 1rem;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sentence-text-gap {
+    text-decoration: underline;
+    text-decoration-thickness: 1.25px;
+    text-underline-offset: 4px;
 }
 
 #uploadCsvModal .upload-csv-sentence-form,
@@ -554,6 +564,9 @@
 .upload-csv-sentence-gaps {
     flex-direction: column;
     gap: 16px;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: scroll;
 }
 
 .upload-csv-hint {
@@ -746,7 +759,6 @@
 }
 
 #uploadCsvModal .sentence-gaps-preview {
-    min-height: 200px;
     align-content: center;
 }
 
@@ -840,9 +852,5 @@
 
     .sentence-insert-slot {
         height: 28px;
-    }
-
-    #uploadCsvModal .sentence-gaps-preview {
-        min-height: 140px;
     }
 }
