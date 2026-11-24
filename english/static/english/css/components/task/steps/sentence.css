@@ -88,7 +88,7 @@
     align-items: flex-end;
     gap: 16px;
     padding: 16px;
-    border-bottom: 2px solid #B3B3C5;
+    border-bottom: 3px solid #B3B3C5;
 }
 
 .sentence-build {
@@ -169,6 +169,22 @@
 
 .sentence-build-words .sentence-token:hover .sentence-token-remove {
     display: flex;
+}
+
+.sentence-answer-row.is-correct {
+    border-bottom-color: #56DF6B;
+}
+
+.sentence-answer-row.is-wrong {
+    border-bottom-color: #FF4C4C;
+}
+
+.dark-body .sentence-answer-row.is-correct {
+    border-bottom-color: #56DF6B;
+}
+
+.dark-body .sentence-answer-row.is-wrong {
+    border-bottom-color: #FF4C4C;
 }
 
 .dark-body .sentence-token-remove img {

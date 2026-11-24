@@ -1,7 +1,9 @@
 import { questionRenderer } from "./renderers/question.js";
+import { sentenceRenderer } from "./renderers/sentence.js";
 
 const STEP_RENDERERS = {
-    question: questionRenderer
+    question: questionRenderer,
+    sentence: sentenceRenderer
 };
 
 const taskRun = document.getElementById("taskRun");

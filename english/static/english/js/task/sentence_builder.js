@@ -1,190 +1,225 @@
-const sentenceTokens = document.querySelector(".sentence-tokens");
-const sentenceBuildWords = document.getElementById("sentenceBuildWords");
 const placedTokenTemplate = document.getElementById("sentencePlacedTokenTemplate");
-const sentenceCheckButton = document.getElementById("sentenceCheckButton");
 
-let activeDrag = null;
+export function createSentenceBuilder(stepElement) {
+    const sentenceTokens = stepElement.querySelector(".sentence-tokens");
+    const sentenceBuildWords = stepElement.querySelector(".sentence-build-words");
+    const sentenceCheckButton = stepElement.querySelector(".sentence-check-button");
 
-sentenceTokens.addEventListener("dragstart", (event) => {
+    let activeDrag = null;
+    let isLocked = false;
 
-    const tokenContainer = event.target.closest('.sentence-token');
+    sentenceTokens.addEventListener("dragstart", (event) => {
+        const tokenContainer = event.target.closest(".sentence-token");
 
-    if (!tokenContainer || tokenContainer.classList.contains("is-used")) {
-        return;
-    }
+        if (isLocked || !tokenContainer || tokenContainer.classList.contains("is-used")) {
+            return;
+        }
 
-    activeDrag = {
-        tokenContainer: tokenContainer,
-        token: null,
-        placed: false,
-        fromSentenceBuild: false
-    };
-});
+        activeDrag = {
+            tokenContainer: tokenContainer,
+            token: null,
+            placed: false,
+            fromBuild: false
+        };
+    });
 
+    sentenceBuildWords.addEventListener("dragstart", (event) => {
+        const sentenceToken = event.target.closest(".sentence-token");
 
-sentenceBuildWords.addEventListener("dragover", (event) => {
+        if (isLocked || !sentenceToken) {
+            return;
+        }
 
-    if (!activeDrag) {
-        return;
-    }
+        activeDrag = {
+            tokenContainer: getSource(sentenceToken),
+            token: sentenceToken,
+            placed: false,
+            fromBuild: true
+        };
+    });
 
-    event.preventDefault();
+    sentenceBuildWords.addEventListener("dragover", (event) => {
 
-    if (!activeDrag.token){
-        activeDrag.token = createPlacedToken(activeDrag.tokenContainer);
-    }
+        if (!activeDrag) {
+            return;
+        }
 
-    // индекс на который поставим новыйт окен предложения
-    const before = getInsertBefore(event.clientX, activeDrag.token)
-    sentenceBuildWords.insertBefore(activeDrag.token, before)
-});
+        event.preventDefault();
 
-sentenceBuildWords.addEventListener("dragleave", (event) => {
+        if (!activeDrag.token) {
+            activeDrag.token = createPlacedToken(activeDrag.tokenContainer);
+        }
 
-    if (!activeDrag || activeDrag.fromBuild || !activeDrag.token || activeDrag.placed) {
-        return;
-    }
+        const before = getInsertBefore(event.clientX, activeDrag.token);
+        sentenceBuildWords.insertBefore(activeDrag.token, before);
+        refreshPlacedTokens();
+    });
 
-    if (sentenceBuildWords.contains(event.relatedTarget)) {
-        return;
-    }
+    sentenceBuildWords.addEventListener("dragleave", (event) => {
 
-    activeDrag.token.remove();
-    activeDrag.token = null;
+        if (!activeDrag || activeDrag.fromBuild || !activeDrag.token || activeDrag.placed) {
+            return;
+        }
 
-});
+        if (sentenceBuildWords.contains(event.relatedTarget)) {
+            return;
+        }
 
-sentenceBuildWords.addEventListener("drop", (event) => {
-    
-    if (!activeDrag) {
-        return;
-    }
-    
-    event.preventDefault();
+        activeDrag.token.remove();
+        activeDrag.token = null;
+        refreshPlacedTokens();
+    });
 
-    activeDrag.placed = true;
-    activeDrag.tokenContainer.classList.add('is-used');
+    sentenceBuildWords.addEventListener("drop", (event) => {
 
-    updateCheckButton();
-})
+        if (!activeDrag) {
+            return;
+        }
 
-sentenceBuildWords.addEventListener("dragstart", (event) => {
-    const sentenceToken = event.target.closest(".sentence-token");
+        event.preventDefault();
 
-    if (!sentenceToken) {return;}
+        activeDrag.placed = true;
+        markSourceUsed(activeDrag.tokenContainer);
 
-    activeDrag = {
-        tokenContainer: getSource(sentenceToken),
-        token: sentenceToken,
-        placed: false,
-        fromBuild: true
-    };
-});
+        updateBuild();
+    });
 
-sentenceBuildWords.addEventListener("click", (event) => {
-    const removeButton = event.target.closest(".sentence-token-remove");
+    stepElement.addEventListener("dragend", () => {
 
-    if (!removeButton) {
-        return;
-    }
+        if (!activeDrag) {
+            return;
+        }
 
-    const token = removeButton.closest(".sentence-token");
-
-    getSource(token)?.classList.remove("is-used");
-    token.remove();
-
-    updateCheckButton();
-});
-
-// Если токен не был дотянут до области sentence-words-build
-document.addEventListener("dragend", (event) => {
-
-    if (!activeDrag) {
-        return;
-    }
-
-    if (!activeDrag.placed) {
-        // Удаление уже размещенных частей предложения, которые были вытянуты
-        if (activeDrag.fromBuild) {
+        if (!activeDrag.placed && activeDrag.token) {
             activeDrag.token.remove();
-            activeDrag.tokenContainer?.classList.remove('is-used');
+
+            if (activeDrag.fromBuild) {
+                releaseSource(activeDrag.tokenContainer);
+            }
+        }
+
+        activeDrag = null;
+        updateBuild();
+    });
+
+    sentenceTokens.addEventListener("click", (event) => {
+        const source = event.target.closest(".sentence-token");
+
+        if (isLocked || !source || source.classList.contains("is-used")) {
+            return;
+        }
+
+        sentenceBuildWords.append(createPlacedToken(source));
+        markSourceUsed(source);
+        updateBuild();
+    });
+
+    sentenceBuildWords.addEventListener("click", (event) => {
+        const token = event.target.closest(".sentence-token");
+
+        if (isLocked || !token) {
+            return;
+        }
+
+        releaseSource(getSource(token));
+        token.remove();
+        updateBuild();
+    });
+
+    function createPlacedToken(tokenContainer) {
+        const token = placedTokenTemplate.content.firstElementChild.cloneNode(true);
+
+        token.querySelector(".sentence-token-text").textContent = tokenContainer.dataset.token;
+        token.dataset.sourceId = tokenContainer.dataset.id;
+        token.dataset.token = tokenContainer.dataset.token;
+
+        return token;
+    }
+
+    function getSource(token) {
+        return sentenceTokens.querySelector(`[data-id="${token.dataset.sourceId}"]`);
+    }
+
+    function getInsertBefore(x, dragged) {
+        const items = [...sentenceBuildWords.querySelectorAll(".sentence-token")]
+            .filter((item) => item !== dragged);
+
+        return items.find((item) => {
+            const box = item.getBoundingClientRect();
+
+            return x < box.left + box.width / 2;
+        }) || null;
+    }
+
+    function markSourceUsed(source) {
+        source.classList.add("is-used");
+        source.draggable = false;
+    }
+
+    function releaseSource(source) {
+
+        if (!source) {
+            return;
+        }
+
+        source.classList.remove("is-used");
+        source.draggable = true;
+    }
+
+    function updateCheckButton() {
+        sentenceCheckButton.disabled = isLocked || sentenceBuildWords.querySelector(".sentence-token") === null;
+    }
+
+    function setTokensDraggable(isDraggable) {
+
+        for (const token of sentenceBuildWords.querySelectorAll(".sentence-token")) {
+            token.draggable = isDraggable;
+        }
+
+        for (const token of sentenceTokens.querySelectorAll(".sentence-token")) {
+            token.draggable = isDraggable && !token.classList.contains("is-used");
         }
     }
 
-    activeDrag = null;
-
-    updateCheckButton();
-})
-
-function createPlacedToken(tokenContainer) {
-    const token = placedTokenTemplate.content.firstElementChild.cloneNode(true);
-
-    token.querySelector(".sentence-token-text").textContent = tokenContainer.dataset.token;
-    token.dataset.sourceId = tokenContainer.dataset.id;
-
-    return token;
-}
-
-function getSource(token) {
-    return sentenceTokens.querySelector(`[data-id="${token.dataset.sourceId}"]`);
-}
-
-function getInsertBefore(x, dragged) {
-    const items = [...sentenceBuildWords.querySelectorAll(".sentence-token")]
-        .filter((item) => item !== dragged);
-
-    return items.find((item) => {
-        const box = item.getBoundingClientRect();
-
-        return x < box.left + box.width / 2;
-    }) || null;
-}
-
-// 
-function updateCheckButton() {
-    sentenceCheckButton.disabled = sentenceBuildWords.querySelector(".sentence-token") === null;
-}
-
-
-// 
-function markSourceUsed(source) {
-    source.classList.add("is-used");
-    source.draggable = false;
-}
-
-function releaseSource(source) {
-    if (!source) {
-        return;
+    function lock() {
+        isLocked = true;
+        setTokensDraggable(false);
+        updateCheckButton();
     }
 
-    source.classList.remove("is-used");
-    source.draggable = true;
-}
-
-function updateCheckButton() {
-    sentenceCheckButton.disabled = sentenceBuildWords.querySelector(".sentence-token") === null;
-}
-
-sentenceTokens.addEventListener("click", (event) => {
-    const source = event.target.closest(".sentence-token");
-
-    if (!source || source.classList.contains("is-used")) {
-        return;
+    function unlock() {
+        isLocked = false;
+        setTokensDraggable(true);
+        updateCheckButton();
     }
 
-    sentenceBuildWords.append(createPlacedToken(source));
-    markSourceUsed(source);
-    updateCheckButton();
-});
-
-sentenceBuildWords.addEventListener("click", (event) => {
-    const token = event.target.closest(".sentence-token");
-
-    if (!token) {
-        return;
+    function getTokens() {
+        return [...sentenceBuildWords.querySelectorAll(".sentence-token-text")].map(
+            (text) => text.textContent
+        );
     }
 
-    releaseSource(getSource(token));
-    token.remove();
-    updateCheckButton();
-});
+    function refreshPlacedTokens() {
+        const tokens = sentenceBuildWords.querySelectorAll(".sentence-token");
+
+        tokens.forEach((token, index) => {
+            const text = token.dataset.token;
+
+            token.querySelector(".sentence-token-text").textContent = index === 0
+                ? text.charAt(0).toUpperCase() + text.slice(1)
+                : text;
+        });
+    }
+
+    function updateBuild() {
+        refreshPlacedTokens();
+        updateCheckButton();
+    }
+
+    return {
+        lock: lock,
+        unlock: unlock,
+        getTokens: getTokens
+    };
+    
+}

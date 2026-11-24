@@ -58,7 +58,7 @@ class SentenceWordVariantMixin(SentenceMixinBase):
     MIN_VARIANT_GROUP_SIZE = 2
     
     def _get_variants_file(self, extra_files: dict | None) -> UploadedFile:
-            
+        
         if not extra_files:
             extra_files = {}
         

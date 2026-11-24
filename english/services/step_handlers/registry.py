@@ -23,13 +23,15 @@ StepHandlerRegistry().get_handler(kind) - возвращает объект об
 from english.services.exceptions import ValidationError
 from english.services.step_handlers.base import StepHandler
 from english.services.step_handlers.question import QuestionHandler
+from english.services.step_handlers.sentence import SentenceHandler
 
 
 class StepHandlerRegistry:
     def __init__(self):
         
         self.STEP_HANDLERS = {
-            "question": QuestionHandler
+            "question": QuestionHandler,
+            "sentence": SentenceHandler
         }
     
     def get_handler(self, kind: str) -> StepHandler:

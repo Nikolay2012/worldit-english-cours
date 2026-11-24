@@ -1,1 +1,50 @@
-<script src="{% static 'english/js/task/sentence_builder.js' %}"></script>
+{% load static %}
+
+<template id="sentenceStepTemplate">
+    <div class="question-step">
+        <div class="question-step-prompt">
+            <p class="sentence-translation"></p>
+
+            <div class="sentence-answer-row">
+                <div class="sentence-build">
+                    <div class="sentence-build-words"></div>
+                </div>
+
+                <button type="button" class="sentence-check-button" disabled>
+                    <img src="{% static 'english/img/action_icons/check.svg' %}" alt="check">
+                </button>
+            </div>
+        </div>
+
+        <div class="line-spacer"></div>
+
+        <div class="sentence-tokens"></div>
+    </div>
+</template>
+
+<template id="sentenceBankTokenTemplate">
+    <div class="sentence-token" draggable="true">
+        <img 
+            class="sentence-token-grip" 
+            src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" 
+            alt="drag-handle-dots-2"
+            draggable="false"
+        >
+        <span class="sentence-token-text"></span>
+    </div>
+</template>
+
+<template id="sentencePlacedTokenTemplate">
+    <div class="sentence-token" draggable="true">
+        <img 
+            class="sentence-token-grip" 
+            src="{% static 'english/img/action_icons/drag-handle-dots-2.svg' %}" 
+            alt="drag-handle-dots-2"
+            draggable="false"
+        >
+        <span class="sentence-token-text"></span>
+        <button type="button" class="sentence-token-remove">
+            <img src="{% static 'english/img/action_icons/trash-2.svg' %}" alt="trash-2" draggable="false">
+        </button>
+    </div>
+</template>

@@ -1,0 +1,174 @@
+"""
+
+"""
+
+import random
+
+from english.models.sentence import Sentence
+from english.models.sentence_token import SentenceToken
+from english.models.sentence_word_variant import SentenceWordVariant
+from english.services.exceptions import ValidationError
+from english.services.sentence_text import join_tokens
+from english.services.step_handlers.base import StepHandler
+from english.models.english_task_step import EnglishTaskStep
+from english.models.student_answer import StudentAnswer
+from english.services.task_importers.sentence import SentenceImporter
+
+
+class SentenceHandler(StepHandler):
+    
+    MAX_VARIANTS_PER_TOKEN = 3
+    MAX_VARIANTS = 6
+    
+    def get_step_data(self, step: EnglishTaskStep) -> dict:
+        
+        sentence = self._get_sentence(step=step)
+        
+        if sentence.template:
+            raise ValidationError(
+                "Проходження речень з пропусками поки не підтримується"
+            )
+        
+        tokens = list(
+            sentence.tokens.order_by("order")
+        )
+        
+        tokens_bank = [
+            self._display_token(token=token) for token in tokens
+        ]
+        tokens_bank += self._get_variants(
+            task_id=step.task_id,
+            words=[
+                token.text for token in tokens if self._is_word(token.text)
+            ]
+        )
+        
+        random.shuffle(tokens_bank)
+        
+        return {
+            "id": step.id,
+            "kind": step.kind,
+            "prompt": sentence.prompt,
+            "tokens": tokens_bank # образно называю набор токенов "банкой". 
+            # На этом моменте в банке находятся и токены самого предложения (SentenceToken), 
+            # и дополнительные варианты (SentenceWordVariant)
+        }
+    
+    def check(self, step: EnglishTaskStep, data: dict) -> bool:
+        
+        sentence = self._get_sentence(step=step)
+        tokens = data.get("tokens")
+        
+        if not isinstance(tokens,list) or not tokens or not all(isinstance(token, str) for token in tokens):
+            raise ValidationError("Некоректна відповідь")
+        
+        answer = join_tokens(tokens)
+        answer = answer[:1].upper() + answer[1:]
+        
+        if answer != sentence.answer:
+            return False
+        
+        return True
+    
+    def save_answer_details(
+            self, 
+            answer: StudentAnswer, 
+            step: EnglishTaskStep, 
+            data: dict
+        ):
+        
+        pass
+    
+    def _get_variants(self, task_id: int, words: list[str]) -> list[str]:
+        
+        normalized_words = {word.lower() for word in words}
+        
+        matches = list(
+            SentenceWordVariant.objects.filter(
+                task_id=task_id,
+                normalized__in=normalized_words
+            ).values_list("row", "position", "normalized")
+        )
+        
+        if not matches:
+            return []
+        
+        groups = {}
+        
+        word_variants_by_position = SentenceWordVariant.objects.filter(
+            task_id=task_id,
+            row__in={row for row, _, _ in matches}
+        ).order_by("row", "position")
+            
+        
+        for variant in word_variants_by_position:
+            groups.setdefault(
+                variant.row, 
+                []
+            ).append(variant)
+        
+        variants = {}
+        
+        for word in normalized_words:
+            rows = [
+                row for row, position, normalized in matches if normalized == word and position == 0
+            ]
+            
+            if not rows:
+                rows = [
+                    row for row, position, normalized in matches
+                    if normalized == word
+                ]
+            
+            candidates = {}
+            
+            for row in rows:
+                for variant in groups.get(row, []):
+                    
+                    if variant.normalized in normalized_words or variant.normalized in variants or variant.text == SentenceImporter.ZERO_ARTICLE:
+                        continue
+                    
+                    candidates[variant.normalized] = self._display_variants(variant.text)
+        
+            if not candidates:
+                continue
+            
+            picked = random.sample(
+                list(candidates.items()),
+                k=random.randint(1, min(self.MAX_VARIANTS_PER_TOKEN, len(candidates)))
+            )
+
+            variants.update(picked)
+        
+        result = list(variants.values())
+        
+        if len(result) > self.MAX_VARIANTS:
+            result = random.sample(result, k=self.MAX_VARIANTS)
+        
+        return result
+    
+    def _display_variants(self, text: str) -> str:
+        
+        if text.lower() in SentenceImporter.I_FORMS:
+            return text[:1].upper() + text[1:].lower()
+        
+        return text
+    
+    def _is_word(self, text: str) -> bool:
+        return any(char.isalnum() for char in text)
+    
+    def _display_token(self, token: SentenceToken) -> str:
+        
+        if token.order == 0 and token.is_lowercase:
+            return token.text[:1].lower() + token.text[1:]
+        
+        return token.text
+    
+    def _get_sentence(self, step: EnglishTaskStep) -> Sentence:
+        
+        try:
+            return step.sentence
+        except Sentence.DoesNotExist as error:
+            raise ValidationError(
+                "Речення цього кроку відсутнє"
+            ) from error
