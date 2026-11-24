@@ -1,9 +1,61 @@
 """
+Миксин SentenceImporter: файл "Слова для речень" задания типа "Речення"
 
+Подключается в SentenceImporter, вызывается из .import_file()
+
+Что делает:
+-Получает файл из дополнительных файлов запроса - метод ._get_variants_file()
+-Разбирает и проверяет файл - метод ._parse_variants_file()
+-Записывает группы вариантов слов в БД - метод ._create_word_variants()
+
+Разбор файла:
+-Чтение строк - через ._read_rows() импортёра (пустые строки пропускаются)
+-Шапка пропускается до первой строки без кириллицы - метод ._skip_variants_header()
+-Одна строка - одна группа вариантов слов (например: carry, carried, carries)
+-Разбор строки - метод ._parse_variants_row():
+    -пустые ячейки пропускаются
+    -каждая ячейка - одно слово или "-" (нулевой артикль) - метод ._validate_variant_word()
+    -слово не длиннее MAX_TOKEN_LENGTH
+    -повторы слова в строке (без учёта регистра) убираются
+    -в группе минимум MIN_VARIANT_GROUP_SIZE разных слова
+
+Строки файла не связаны с предложениями по номеру,
+варианты подбираются по токенам предложения при прохождении
+
+Запись в БД - SentenceWordVariant:
+-row - номер группы, position - номер слова в группе
+-text - слово как в файле, normalized - в нижнем регистре (для поиска)
+-старые варианты задания перед записью удаляются
+Вызывается внутри транзакции импорта
+
+Берёт у класса, в который подключён:
+-константы VARIANTS_FILE_FIELD, VARIANTS_FILE_LABEL, CYRILLIC_PATTERN,
+MIN_VARIANT_GROUP_SIZE, ZERO_ARTICLE, MAX_TOKEN_LENGTH
+-метод ._read_rows()
+
+Из ошибок, может подниматься ValidationError:
+-файл "Слова для речень" не передан или в нём нет строк со словами
+-ошибка в строке (с названием файла и номером строки)
 """
 
+import re
 
-class SentenceWordVariantMixin():
+from django.core.files.uploadedfile import UploadedFile
+
+from english.models.english_task import EnglishTask
+from english.models.sentence_word_variant import SentenceWordVariant
+from english.services.exceptions import ValidationError
+from english.services.sentence_text import normalize_sentence, tokenize
+from english.services.task_importers.mixins.base import SentenceMixinBase
+
+
+class SentenceWordVariantMixin(SentenceMixinBase):
+    
+    VARIANTS_FILE_FIELD = "variants_file"
+    VARIANTS_FILE_LABEL = "Слова для речень"
+    CYRILLIC_PATTERN = re.compile(r"[А-Яа-яЁёІіЇїЄєҐґ]")
+    # Минимальное количество вариантов слов в группе вариантов слов
+    MIN_VARIANT_GROUP_SIZE = 2
     
     def _get_variants_file(self, extra_files: dict | None) -> UploadedFile:
             

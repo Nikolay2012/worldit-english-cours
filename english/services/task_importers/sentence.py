@@ -1,6 +1,11 @@
 """
 Импортёр задания типа "Речення" из двух csv файлов
 
+Ядро импорта: разбор файла предложений и общий порядок импорта
+Остальное вынесено в миксины:
+-SentenceMixin - создание шага с предложением, сбор списка предложений для клиента
+-SentenceWordVariantMixin - разбор и запись файла "Слова для речень"
+
 Наследует BaseEnglishTaskImporter, откуда берёт получение пустого задания
 и чтение файла (кодировка, размер, расширение)
 
@@ -14,6 +19,13 @@
 Без любого из них импорт не выполняется
 
 Импорт возможен только в пустое задание (без шагов)
+
+Порядок импорта - метод .import_file():
+-Получает пустое задание и проверяет, что передан файл "Слова для речень"
+-Разбирает и проверяет файл предложений
+-Разбирает и проверяет файл "Слова для речень"
+-Записывает предложения и варианты слов в одной транзакции
+-Возвращает список предложений задания
 
 Файл предложений:
 -Шапка пропускается до первой строки с латиницей в первой ячейке
@@ -37,27 +49,21 @@
 -Пропуски любой длины заменяются на ___ (GAP_MARKER)
 -Количество пропусков должно совпадать с количеством ответов
 -"-" в ответе - нулевой артикль (ZERO_ARTICLE), в собранном предложении на его месте ничего нет
+-Полное предложение собирается из шаблона и ответов - метод ._fill_gaps()
 -Токены предложения - только ответы для пропусков
 
-Файл "Слова для речень":
--Шапка пропускается до первой строки без кириллицы
--Одна строка - одна группа вариантов слов (например: carry, carried, carries)
--Пустые ячейки пропускаются
--Каждая ячейка - одно слово или "-"
--Повторы слова в строке (без учёта регистра) убираются
--В группе должно быть минимум 2 разных слова (MIN_VARIANT_GROUP_SIZE)
--Строки не связаны с предложениями по номеру,
-варианты подбираются по токенам предложения при прохождении
+Для обоих вариантов:
+-Токен длиннее MAX_TOKEN_LENGTH (50 символов) - ошибка
+-Ошибка в строке содержит её номер в файле - метод ._row_error()
+(для формы в модалке, без номера строки)
 
 Запись в БД (в одной транзакции, после проверки обоих файлов):
--по шагу на каждое предложение: EnglishTaskStep, Sentence, SentenceToken
--группы вариантов: SentenceWordVariant
-    -row - номер группы, position - номер слова в группе
-    -text - слово как в файле, normalized - в нижнем регистре (для поиска)
-    -старые варианты задания перед записью удаляются
+-по шагу на каждое предложение - метод ._create_steps():
+EnglishTaskStep, Sentence и SentenceToken (._create_sentence_tokens())
+-группы вариантов слов - SentenceWordVariant (из SentenceWordVariantMixin)
 
-Возвращает - метод ._get_sentences_list():
-{"sentences": [{"step_id", "answer", "prompt", "template", "gaps", "zero_gaps"}],
+Возвращает - метод ._get_sentences_list() (из SentenceMixin):
+{"sentences": [{"step_id", "answer", "prompt", "template", "gaps", "zero_gaps", "parts"}],
 "is_fill", "required_correct_answers"}
 
 Из ошибок, могут подниматься:
@@ -73,43 +79,24 @@ import re
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
-from django.db.models import Prefetch
 
 from english.models.sentence import Sentence
 from english.models.english_task import EnglishTask
-from english.models.english_task_step import EnglishTaskStep
 from english.models.sentence_token import SentenceToken
-from english.models.sentence_word_variant import SentenceWordVariant
 from english.services.exceptions import ValidationError
 from english.services.task_importers.base import BaseEnglishTaskImporter
 from english.services.sentence_text import (
     normalize_spaces, normalize_sentence, 
     tokenize, join_tokens
 )
-
-"""
-Sentence:
-_get_gap_positions
-
-import_file
-_skip_header
-_read_rows
-_is_fill
-_parse_fill_rows
-_parse_fill_row
-_row_error
-_fill_gaps
-_parse_build_rows
-_parse_build_row
-_set_lowercase_flags
-_is_first_lowercase
-_create_steps
-_validate_tokens
-_create_sentence_tokens
-"""
+from english.services.task_importers.mixins import SentenceMixin, SentenceWordVariantMixin
 
 
-class SentenceImporter(BaseEnglishTaskImporter):
+class SentenceImporter(
+        BaseEnglishTaskImporter,
+        SentenceMixin,
+        SentenceWordVariantMixin
+    ):
     
     REQUIRED_CORRECT_ANSWERS = 6
     
@@ -162,13 +149,6 @@ class SentenceImporter(BaseEnglishTaskImporter):
     BUILD_MAX_COLUMNS = 3
     FILL_MAX_COLUMNS = 5
     MIN_SENTENCE_WORDS = 2
-    
-    
-    VARIANTS_FILE_FIELD = "variants_file"
-    VARIANTS_FILE_LABEL = "Слова для речень"
-    CYRILLIC_PATTERN = re.compile(r"[А-Яа-яЁёІіЇїЄєҐґ]")
-    # Минимальное количество вариантов слов в группе вариантов слов
-    MIN_VARIANT_GROUP_SIZE = 2
     
     def import_file(
             self, 
@@ -498,21 +478,6 @@ class SentenceImporter(BaseEnglishTaskImporter):
                 order=order,
                 data=data
             )
-    
-    def _create_sentence_tokens(
-            self, 
-            sentence: Sentence, 
-            data: dict
-        ):
-        
-        SentenceToken.objects.bulk_create([
-            SentenceToken(
-                sentence=sentence,
-                text=text,
-                order=index,
-                is_lowercase=index == 0 and data["first_lowercase"]
-            ) for index, text in enumerate(data["tokens"])
-        ])
     
     def _row_error(
         self, 

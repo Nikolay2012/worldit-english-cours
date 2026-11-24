@@ -1,18 +1,49 @@
 """
+Миксин SentenceImporter: создание шага с предложением и список предложений для клиента
 
+Подключается в SentenceImporter
+Через него же доступен в SentenceStepService (создание и редактирование предложения)
+Заглушки методов и констант, которые миксин берёт у импортёра, - в SentenceMixinBase
+
+Создание шага - метод ._create_sentence_step():
+-EnglishTaskStep с видом "sentence" и порядком order
+-Sentence: перевод (prompt), полное предложение (answer), шаблон с пропусками (template)
+-SentenceToken - через ._create_sentence_tokens() импортёра
+Вызывается внутри транзакции того, кто создаёт шаг
+
+Список предложений - метод ._get_sentences_list():
+-Шаги задания по порядку, токены каждого предложения по order
+-Возвращает {"sentences": [...], "is_fill", "required_correct_answers"}
+-is_fill - есть ли в задании предложения варианта "Доповнити речення"
+
+Данные одного предложения - метод ._serialize_sentence():
+-step_id, answer, prompt, template
+-gaps и zero_gaps - позиции пропусков и нулевых артиклей
+в токенах полного предложения - метод ._get_gap_positions()
+(нужны модалке редактирования, чтобы снова отметить пропуски)
+-parts - куски предложения для отображения в списке - метод ._get_sentence_parts():
+    -{"kind": "text", "text"} - обычный текст
+    -{"kind": "gap", "text"} - слово-пропуск (в списке подчёркивается)
+    -{"kind": "zero"} - нулевой артикль (в списке ___)
+    -у "Скласти речення" - один кусок text с полным предложением
+    -первая буква первого видимого куска - заглавная - метод ._capitalize_first_part()
+
+Берёт у класса, в который подключён:
+-константы GAP_MARKER, ZERO_ARTICLE, REQUIRED_CORRECT_ANSWERS
+-метод ._create_sentence_tokens()
 """
 
 from django.db.models import Prefetch
 
 from english.models.sentence import Sentence
-from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
 from english.models.sentence_token import SentenceToken
 from english.services.sentence_text import tokenize
 from english.models.english_task import EnglishTask
+from english.services.task_importers.mixins.base import SentenceMixinBase
 
 
-class SentenceMixin():
+class SentenceMixin(SentenceMixinBase):
     
     def _get_sentences_list(self, task: EnglishTask) -> dict:
         
@@ -157,3 +188,18 @@ class SentenceMixin():
                 index += 1
         
         return (gaps, zero_gaps)
+    
+    def _create_sentence_tokens(
+            self, 
+            sentence: Sentence, 
+            data: dict
+        ):
+        
+        SentenceToken.objects.bulk_create([
+            SentenceToken(
+                sentence=sentence,
+                text=text,
+                order=index,
+                is_lowercase=index == 0 and data["first_lowercase"]
+            ) for index, text in enumerate(data["tokens"])
+        ])
