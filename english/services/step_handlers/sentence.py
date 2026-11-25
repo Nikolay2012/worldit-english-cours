@@ -80,10 +80,10 @@ class SentenceHandler(StepHandler):
             self._display_token(token=token) for token in tokens
         ]
         
-        tokens_bank += self._get_variants(
-            task_id=step.task_id,
-            words=[token.text for token in tokens],
-            allow_zero=True
+        tokens_bank += self._get_task_answer_variants(
+            step=step,
+            sentence=sentence,
+            answers=[token.text for token in tokens]
         )
         
         random.shuffle(tokens_bank)
@@ -98,6 +98,43 @@ class SentenceHandler(StepHandler):
             ),
             "tokens": tokens_bank
         }
+    
+    def _get_task_answer_variants(
+        self,
+        step: EnglishTaskStep,
+        sentence: Sentence,
+        answers: list[str]
+    ) -> list[str]:
+        normalized_answers = {
+            answer.lower() for answer in answers
+        }
+        candidates = {}
+        
+        task_answers = SentenceToken.objects.filter(
+            sentence__step__task_id=step.task_id
+        ).exclude(
+            sentence=sentence
+        ).values_list('text', flat=True)
+        
+        for text in task_answers:
+            key = text.lower()
+            
+            if key in normalized_answers:
+                continue
+            
+            if key not in candidates or text.islower():
+                candidates[key] = self._display_variants(text)
+        
+        count = min(
+            len(candidates),
+            self.MAX_VARIANTS,
+            self.MAX_VARIANTS_PER_TOKEN * len(answers)
+        )
+        
+        return random.sample(
+            list(candidates.values()),
+            k=count
+        )
     
     def _split_template(self, template: str) -> list[str]:
         
