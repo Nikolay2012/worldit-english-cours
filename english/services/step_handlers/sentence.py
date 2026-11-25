@@ -23,10 +23,15 @@ class SentenceHandler(StepHandler):
     def get_step_data(self, step: EnglishTaskStep) -> dict:
         
         sentence = self._get_sentence(step=step)
+        # Получаем токены предложения (его части)
+        # Этот этап свойственнен обоим вариантам предложений: "Скласти" (обозначено как build) и "Доповнити" (fill)
         tokens = list(
             sentence.tokens.order_by("order")
         )
         
+        # Если в записи предложения (Sentence) указан шаблон (sentence.template)
+        # То это поле варианта "Доповнити"
+        # Если template не заполнен, то это вариант "Скласти"
         if sentence.template:
             return self._get_fill_step_data(
                 step=step,
@@ -47,9 +52,15 @@ class SentenceHandler(StepHandler):
         tokens: list[SentenceToken]
     ) -> dict:
         
+        # Собранный набор токенов предложения "Скласти"
+        # На данном этапе присутствуют только те токены, 
+        # которые будут непосредственно использованы при сборке
+        # Другими словами: неправильным вариантов ещё нету
         tokens_bank = [
             self._display_token(token=token) for token in tokens
         ]
+        
+        # На этом этапе добавляются альтернативные токены, неправильные
         tokens_bank += self._get_variants(
             task_id=step.task_id,
             words=[
@@ -76,10 +87,15 @@ class SentenceHandler(StepHandler):
         tokens: list[SentenceToken]
     ) -> dict:
         
+        # Собранный набор токенов предложения "Доповнити"
+        # На данном этапе присутствуют только те токены, 
+        # которые будут непосредственно использованы при сборке
+        # Другими словами: неправильным вариантов ещё нету
         tokens_bank = [
             self._display_token(token=token) for token in tokens
         ]
         
+        # На этом этапе добавляются альтернативные токены, неправильные
         tokens_bank += self._get_task_answer_variants(
             step=step,
             sentence=sentence,
@@ -105,11 +121,14 @@ class SentenceHandler(StepHandler):
         sentence: Sentence,
         answers: list[str]
     ) -> list[str]:
+        
+        # сведение к нижнему регистру ответов 
         normalized_answers = {
             answer.lower() for answer in answers
         }
         candidates = {}
         
+        # Отбираем только текста токенов необходимого предложения (необходимое предложение - переданный sentence)
         task_answers = SentenceToken.objects.filter(
             sentence__step__task_id=step.task_id
         ).exclude(
@@ -119,18 +138,23 @@ class SentenceHandler(StepHandler):
         for text in task_answers:
             key = text.lower()
             
+            # Чтобы не прогонять все варианты токенов через нормалиацию (сведение к нижнему регистру)
             if key in normalized_answers:
                 continue
             
+            # Если вариант токена не указан в кандидатах к отправке на клиент
+            # 
             if key not in candidates or text.islower():
                 candidates[key] = self._display_variants(text)
         
+        # Подбираем количество необходимых для отображения вариантов токенов
         count = min(
             len(candidates),
             self.MAX_VARIANTS,
             self.MAX_VARIANTS_PER_TOKEN * len(answers)
         )
         
+        # Отбираем необходимое количество вариантов токенов в случайном порядке
         return random.sample(
             list(candidates.values()),
             k=count
@@ -142,8 +166,13 @@ class SentenceHandler(StepHandler):
         result = []
         
         for index, piece in enumerate(pieces):
+            # Разбиваем кусок предложения через tokenize (без ___)
             result += tokenize(piece)
             
+            # Пока не дойдем до последнего куска предложения, подставляем ___ между частями
+            # Таким образом собираем список result с кусками предложения (template-а) для отображения на клиенте:
+            # Пкак пример: I __ to school
+            # будет: ["I", "___", "to", "school"]
             if index < len(pieces) -1:
                 result.append(SentenceImporter.GAP_MARKER)
         
@@ -151,12 +180,18 @@ class SentenceHandler(StepHandler):
     
     def _check_build(self, sentence: Sentence, data: dict) -> bool:
         
+        # Получаем набор токенов, переданным с клиента
         tokens = data.get("tokens")
         
+        # Набор токенов должен бтыь списком, и каждый токен этого списка должен быть строкой
         if not isinstance(tokens, list) or not tokens or not all(isinstance(token, str) for token in tokens):
             raise ValidationError("Некоректна відповідь")
         
+        # Собираем токены в предложение - answer
+        # Такого формата ответ студента и будет проверен
         answer = join_tokens(tokens)
+        
+        # Возводим в верхний регистр первый символ предложения
         answer = answer[:1].upper() + answer[1:]
         
         return answer == sentence.answer
@@ -165,14 +200,21 @@ class SentenceHandler(StepHandler):
         answers = data.get("answers")
         expected = []
         
+        # Подготавливаем необходимое количество вставок
         for token in sentence.tokens.order_by('order'):
             expected.append(token.text)
         
+        # Набор вставок в предложений "Доповнити" (по сути токенов ответа) должен быть списком,
+        # и каждый токен (эта же вставка) должна быть строкой
         if not isinstance(answers, list) or not all(isinstance(answer, str) for answer in answers):
             raise ValidationError("Некоректна відповідь")
         
+        # Количество вставок студента должно быть равно ожидаемомму количеству вставок
+        # Также, очевидно, вставки должны присутствовать, а значит - вставки не могут быть пустыми
         if len(answers) != len(expected) or any(not answer.strip() for answer in answers):
             raise ValidationError("Заповніть усі пропуски")
+        
+        # Возвращаем правильность ответа если 
         return all(
             answer.strip().lower() == correct.lower() for answer, correct in zip(answers, expected)
         )
@@ -280,7 +322,12 @@ class SentenceHandler(StepHandler):
     
     def _display_token(self, token: SentenceToken) -> str:
         
+        # В БД токены записаны в оригинальном виде, они могут быть в верхнем регистре
+        # Если передать токены в верхнем регистре на клиент, 
+        # это будет очевидной подсказкой для проходящего студента
+        # Потому: если order токена = 0, или если в записи токена is_lowercase поставлен на True
         if token.order == 0 and token.is_lowercase:
+            # То собираем этот токен заново, сведя регистр первого символа к нулю
             return token.text[:1].lower() + token.text[1:]
         
         return token.text
