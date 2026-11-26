@@ -8,13 +8,18 @@
 Создание шага - метод ._create_sentence_step():
 -EnglishTaskStep с видом "sentence" и порядком order
 -Sentence: перевод (prompt), полное предложение (answer), шаблон с пропусками (template)
--SentenceToken - через ._create_sentence_tokens() импортёра
+-SentenceToken - метод ._create_sentence_tokens():
+    -"Скласти речення" - все токены предложения
+    -"Доповнити речення" - только ответы для пропусков
+    -is_lowercase - только у первого токена, по флагу first_lowercase
 Вызывается внутри транзакции того, кто создаёт шаг
 
 Список предложений - метод ._get_sentences_list():
 -Шаги задания по порядку, токены каждого предложения по order
 -Возвращает {"sentences": [...], "is_fill", "required_correct_answers"}
 -is_fill - есть ли в задании предложения варианта "Доповнити речення"
+-required_correct_answers - сколько правильных ответов нужно на предложение,
+из EnglishProgressService (для точек прогресса в списке)
 
 Данные одного предложения - метод ._serialize_sentence():
 -step_id, answer, prompt, template
@@ -29,8 +34,7 @@
     -первая буква первого видимого куска - заглавная - метод ._capitalize_first_part()
 
 Берёт у класса, в который подключён:
--константы GAP_MARKER, ZERO_ARTICLE, REQUIRED_CORRECT_ANSWERS
--метод ._create_sentence_tokens()
+-константы GAP_MARKER, ZERO_ARTICLE
 """
 
 from django.db.models import Prefetch
