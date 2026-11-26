@@ -105,18 +105,18 @@ function validateSentence(tokens) {
 function renderFillTemplate(stepElement, template) {
     const words = stepElement.querySelector(".sentence-build-words");
 
+    words.classList.add("sentence-fill-words");
+
     for (const piece of template) {
         if (piece === GAP_MARKER) {
-            const gap = sentenceFillGapTemplate.content.firstElementChild.cloneNode(true);
-
-            words.append(gap);
-
+            words.append(sentenceFillGapTemplate.content.firstElementChild.cloneNode(true));
             continue;
         }
 
         const text = sentenceFillTextTemplate.content.firstElementChild.cloneNode(true);
 
         text.querySelector(".sentence-token-text").textContent = piece;
+        text.classList.toggle("is-mark", !/[\p{L}\p{N}]/u.test(piece));
         words.append(text);
     }
 }
