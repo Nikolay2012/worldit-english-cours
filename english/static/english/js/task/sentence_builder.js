@@ -132,6 +132,7 @@ export function createSentenceBuilder(stepElement) {
         token.querySelector(".sentence-token-text").textContent = tokenContainer.dataset.token;
         token.dataset.sourceId = tokenContainer.dataset.id;
         token.dataset.token = tokenContainer.dataset.token;
+        token.classList.toggle("is-mark", !/[\p{L}\p{N}]/u.test(tokenContainer.dataset.token));
 
         return token;
     }
