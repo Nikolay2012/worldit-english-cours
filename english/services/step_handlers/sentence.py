@@ -87,13 +87,28 @@ class SentenceHandler(StepHandler):
         tokens: list[SentenceToken]
     ) -> dict:
         
+        answers = {}
+        
+        for token in tokens:
+            # Записываем варианты токенов через setdefault
+            # таким образом, будет записано значение только если такого ключа ещё нет
+            # Если ключ есть, то ничего не изменится
+            # Благодаря этой части, у студента не будут повторяться вставки в заданиях, 
+            # где они дублируются в предложении
+            # Примером такого задания будет: The Pacific Ocean is one of the five oceans of the world.
+            # Здесь вставка артикля the повторяется трижды
+            # Без setdefault у студента было бы три токена банке, получилось бы: a, an, the, the, the
+            # Очевидно, что нужно вставить три the
+            answers.setdefault(
+                token.text.lower(), 
+                self._display_token(token=token)
+            )
+        
         # Собранный набор токенов предложения "Доповнити"
         # На данном этапе присутствуют только те токены, 
         # которые будут непосредственно использованы при сборке
         # Другими словами: неправильным вариантов ещё нету
-        tokens_bank = [
-            self._display_token(token=token) for token in tokens
-        ]
+        tokens_bank = list(answers.values())
         
         # На этом этапе добавляются альтернативные токены, неправильные
         tokens_bank += self._get_task_answer_variants(
