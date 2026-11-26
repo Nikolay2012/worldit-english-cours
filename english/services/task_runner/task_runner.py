@@ -11,6 +11,10 @@ TaskRunner(task_id, user).answer(step_id, data) - проверка ответа 
 Ядро не знает, как устроен конкретный шаг
 Сборку данных шага и проверку ответа выполняет обработчик шага,
 который ядро получает из StepHandlerRegistry по виду шага (kind)
+Выбор следующего шага для студента зависит от типа задания (task.type)
+и вынесен в миксины:
+-WordsTaskRunnerMixin - "words"
+-SentencesTaskRunnerMixin - "sentences"
 
 Задание ищется сразу при создании (в __init__):
 -только среди заданий курса английского
@@ -24,18 +28,34 @@ TaskRunner(task_id, user).answer(step_id, data) - проверка ответа 
 -прогресс считается по позиции шага в задании
 -после обновления страницы прохождение начинается с первого шага
 
-Студент:
--шаги задания делятся по order на выборки по 6 слов (WORDS_BATCH_SIZE)
--студент проходит выборки по очереди: следующая открывается,
-когда у всех слов текущей по 6 правильных ответов (REQUIRED_CORRECT_ANSWERS)
--в выборке показывается случайное слово среди тех,
-у кого правильных ответов меньше всего, кроме последнего отвеченного
+Студент, общее для всех типов:
 -показанный, но не отвеченный шаг хранится в StudentProgress.current_step
 и возвращается снова при обновлении страницы
 -на один показ - один ответ: после ответа current_step обнуляется
 -каждый ответ записывается в StudentAnswer,
-прогресс (StudentProgress) пересчитывается после каждого ответа
--процент - правильные ответы / (шагов × 6)
+подробности ответа записывает обработчик шага (.save_answer_details())
+-прогресс (StudentProgress) пересчитывается после каждого ответа
+-каждый шаг даёт не больше правильных ответов, чем от него требуется
+-задание выполнено, когда правильных ответов не меньше,
+чем шагов × требуемые правильные ответы
+
+Требуемые правильные ответы на шаг берутся из EnglishProgressService по типу задания:
+-"words" - 6 на слово
+-"sentences" - 1 на предложение
+
+Студент, "Слова" (WordsTaskRunnerMixin):
+-шаги делятся по order на выборки по 6 слов
+-следующая выборка открывается, когда у всех слов текущей по 6 правильных ответов
+-в выборке показывается случайное слово среди тех,
+у кого правильных ответов меньше всего, кроме последнего отвеченного
+
+Студент, "Речення" (SentencesTaskRunnerMixin), оба варианта ("Скласти" и "Доповнити"):
+-выборок нет, кандидаты - все предложения без правильного ответа
+-показывается случайное предложение из кандидатов, кроме последнего отвеченного
+-неверно отвеченное предложение остаётся среди кандидатов и возвращается позже
+
+Процент студента считает EnglishProgressService.get_task_percent():
+правильные ответы / (шагов × требуемые правильные ответы) × 100, не больше 100
 
 Возвращаемые данные:
 -.get_next_step() - {"step": данные шага или None, "progress": {"percent", "is_completed"}}
@@ -45,8 +65,11 @@ TaskRunner(task_id, user).answer(step_id, data) - проверка ответа 
 Из ошибок, могут подниматься:
 -NotFoundError - задание не найдено (нет, другой курс или в архиве)
 или шаг не найден в этом задании
--ValidationError - от обработчика шага (некорректный ответ), реестра (неизвестный вид шага)
-или повторный ответ на уже отвеченный показ
+-ValidationError:
+    -от обработчика шага - некорректный ответ или повреждённые данные шага
+    -от реестра - неизвестный вид шага
+    -тип задания не поддерживает прохождение студентом
+    -повторный ответ на уже отвеченный показ
 """
 
 from django.db import transaction
@@ -60,13 +83,16 @@ from english.models.english_task_step import EnglishTaskStep
 from english.models.student_answer import StudentAnswer
 from english.models.student_progress import StudentProgress
 from english.services.exceptions import NotFoundError, ValidationError
+from english.services.progress import EnglishProgressService
 from english.services.step_handlers.registry import StepHandlerRegistry
 from english.services.task_runner.mixins.words import WordsTaskRunnerMixin
+from english.services.task_runner.mixins.sentences import SentencesTaskRunnerMixin
 from users.models import CustomUser
 
 
 class TaskRunner(
-        WordsTaskRunnerMixin
+        WordsTaskRunnerMixin,
+        SentencesTaskRunnerMixin
     ):
     
     def __init__(self, task_id: int, user: CustomUser):
@@ -205,10 +231,11 @@ class TaskRunner(
             step__task=self.task
         ).count()
         
+        required = self._get_required_correct_answers()
         correct_count = 0
         
         for correct in correct_by_step.values():
-            correct_count += correct
+            correct_count += min(correct, required)
         
         progress.correct_count = correct_count
         # Часть защиты от повторного ответа на вопрос, во время обработки ответа
@@ -219,12 +246,12 @@ class TaskRunner(
         progress.current_step = None
         
         # Если количество правильных ответов студента более или равно максимальному 
-        # количеству правильных (steps_count * self.REQUIRED_CORRECT_ANSWER)
+        # количеству правильных (steps_count * required)
         # То задание считается завершенным и в записи прогресса указываются соответствующие данные
-        if correct_count >= steps_count * self.REQUIRED_CORRECT_ANSWERS:
+        if correct_count >= steps_count * required:
             progress.status = "completed"
             progress.completed_at = timezone.now()
-            
+        
         progress.save()
     
     def _get_staff_next_step(
@@ -255,6 +282,7 @@ class TaskRunner(
         
         next_step_methods = {
             "words": self._get_student_words_next_step,
+            "sentences": self._get_student_sentences_next_step,
         }
         
         method = next_step_methods.get(self.task.type)
@@ -263,6 +291,11 @@ class TaskRunner(
             raise ValidationError("Для цього типу завдання проходження не підтримується")
         
         return method()
+    
+    def _get_required_correct_answers(self) -> int:
+        return EnglishProgressService.get_required_correct_answers(
+            self.task.type
+        )
     
     def _get_last_answered_step_id(self) -> int | None:
         
@@ -306,14 +339,22 @@ class TaskRunner(
             progress: StudentProgress
         ) -> dict:
         
+        percent = EnglishProgressService(
+            student=self.student
+        ).get_task_percent(
+            steps_count=steps_count,
+            correct_count=progress.correct_count,
+            task_type=self.task.type
+        )
+        
         if steps_count == 0:
             return {
-                "percent": 0, 
+                "percent": percent, 
                 "is_completed": False
             }
         
         return {
-            "percent": round(progress.correct_count / (steps_count * self.REQUIRED_CORRECT_ANSWERS) * 100),
+            "percent": percent,
             "is_completed": progress.status == "completed"
         }
     

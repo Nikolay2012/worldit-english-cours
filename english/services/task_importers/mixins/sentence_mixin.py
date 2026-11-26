@@ -38,6 +38,7 @@ from django.db.models import Prefetch
 from english.models.sentence import Sentence
 from english.models.english_task_step import EnglishTaskStep
 from english.models.sentence_token import SentenceToken
+from english.services.progress import EnglishProgressService
 from english.services.sentence_text import tokenize
 from english.models.english_task import EnglishTask
 from english.services.task_importers.mixins.base import SentenceMixinBase
@@ -61,7 +62,7 @@ class SentenceMixin(SentenceMixinBase):
                 self._serialize_sentence(sentence=step.sentence, step_id=step.id) for step in steps
             ],
             "is_fill": any(step.sentence.is_fill for step in steps),
-            "required_correct_answers": self.REQUIRED_CORRECT_ANSWERS,
+            "required_correct_answers": EnglishProgressService.get_required_correct_answers("sentences"),
         }
     
     def _serialize_sentence(

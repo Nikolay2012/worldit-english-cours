@@ -30,8 +30,14 @@ GET /courses/english/modules/<pk>/ (name="english:english_module")
 
 Прогресс прикрепляется к заданиям временными атрибутами (не поля модели,
 в БД не сохраняются) - метод ._attach_tasks_progress():
--task.progress_percent - процент прохождения: правильные ответы / (шагов × 6)
+-task.progress_percent - процент прохождения, считается в EnglishProgressService
+с учётом типа задания: правильные ответы / (шагов × требуемые правильные ответы),
+не больше 100
+(требуемые правильные ответы: "Слова" - 6 на слово, "Речення" - 1 на предложение)
 -task.is_completed - задание выполнено (status = "completed")
+-у заданий без записи прогресса, без шагов и у персонала - 0% и не выполнено
+Атрибуты ставятся на задания из prefetch уроков,
+поэтому шаблон получает те же объекты с уже проставленным прогрессом
 
 Запросов к БД не зависит от количества уроков:
 модуль, уроки, по одному prefetch на каждый блок заданий,
@@ -65,6 +71,7 @@ from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
 from english.models.open_english_task import OpenEnglishTask
 from english.models.student_progress import StudentProgress
+from english.services.progress import EnglishProgressService
 
 
 @method_decorator(
@@ -157,10 +164,14 @@ class ModuleView(ListView):
                 task.is_completed = False
                 
                 if progress is not None and steps_count:
-                    task.progress_percent = round(
-                        progress.correct_count / (steps_count * 6) * 100
+                    task.progress_percent = EnglishProgressService(
+                        student=student
+                    ).get_task_percent(
+                        steps_count=steps_count,
+                        correct_count=progress.correct_count,
+                        task_type=task.type
                     )
-                    task.is_completed = True if progress.status == "completed" else False
+                    task.is_completed = progress.status == "completed"
     
     def _get_header_links(self) -> list[tuple]:
         return [

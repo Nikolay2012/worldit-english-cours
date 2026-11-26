@@ -7,7 +7,8 @@
 правильные ответы по шагам, последний отвеченный шаг и процент прогресса
 
 Константы:
--REQUIRED_CORRECT_ANSWERS = 6 - правильных ответов, после которых слово считается пройденным
+-REQUIRED_CORRECT_ANSWERS - правильных ответов, после которых слово считается пройденным,
+берётся из EnglishProgressService ("words" - 6), чтобы число было в одном месте
 -WORDS_BATCH_SIZE = 6 - размер выборки слов, которую студент проходит за раз
 
 Выбор следующего шага - метод ._get_student_words_next_step():
@@ -38,6 +39,7 @@
 import random
 
 from english.models.english_task_step import EnglishTaskStep
+from english.services.progress import EnglishProgressService
 from english.services.step_handlers.registry import StepHandlerRegistry
 from english.services.task_runner.mixins.base import TaskRunnerBase
 
@@ -46,7 +48,7 @@ class WordsTaskRunnerMixin(TaskRunnerBase):
     
     # Количество правильных ответов, которое должно быть дано по слову, 
     # для того чтобы сервер оценил его как пройденное верно
-    REQUIRED_CORRECT_ANSWERS = 6
+    REQUIRED_CORRECT_ANSWERS = EnglishProgressService.get_required_correct_answers("words")
     
     # Партия слов (6 штук), которые будут отображены студенту до тех пор, 
     # пока он корректно не ответит на все вопросы по этим словам

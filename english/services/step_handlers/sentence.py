@@ -250,7 +250,11 @@ class SentenceHandler(StepHandler):
             data: dict
         ):
         
-        pass
+        answer.built_sentence = self._get_built_sentence(
+            sentence=self._get_sentence(step=step),
+            data=data
+        )
+        answer.save(update_fields=["built_sentence"])
     
     def _get_variants(
             self, 
@@ -355,3 +359,33 @@ class SentenceHandler(StepHandler):
             raise ValidationError(
                 "Речення цього кроку відсутнє"
             ) from error
+    
+    # Метод собирает предложение из токенов, которые составил студент
+    # По собранному предложению будет определено его совпадение с исходным предложением,
+    # вне зависимости от варианта предложения, будь-то "Скласти" или же "Доповнити"
+    # Сравниваются только собранные предложения, а не отдельные токены
+    def _get_built_sentence(self, sentence: Sentence, data: dict) -> str:
+        
+        # Если предложение варинта "Скласти"
+        if not sentence.template:
+            built = join_tokens(
+                data["tokens"]
+            )
+        
+        # Если предложение варианта "Допвонити", т. е. у него записан sentence.template
+        else :
+            pieces = sentence.template.split(
+                SentenceImporter.GAP_MARKER
+            )
+            
+            filled = pieces[0]
+            
+            for answer, piece in zip(data["answers"], pieces[1:]):
+                if answer.strip() != SentenceImporter.ZERO_ARTICLE:
+                    filled += answer.strip()
+                
+                filled += piece
+            
+            built = join_tokens(tokenize(filled))
+            
+        return built[:1].upper() + built[1:]
