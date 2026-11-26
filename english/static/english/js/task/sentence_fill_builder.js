@@ -13,12 +13,14 @@ export function createSentenceFillBuilder(stepElement) {
     sentenceTokens.addEventListener("dragstart", (event) => {
         const source = event.target.closest(".sentence-token");
 
-        if (isLocked || !source || source.classList.contains("is-used")) {
+        if (isLocked || !source) {
             return;
         }
 
+        event.dataTransfer.effectAllowed = "copy";
+
         activeDrag = {
-            source: source,
+            text: source.dataset.token,
             fromGap: null,
             dropped: false
         };
@@ -32,7 +34,7 @@ export function createSentenceFillBuilder(stepElement) {
         }
 
         activeDrag = {
-            source: getSource(gap),
+            text: gap.dataset.token,
             fromGap: gap,
             dropped: false
         };
@@ -76,7 +78,7 @@ export function createSentenceFillBuilder(stepElement) {
             clearGap(activeDrag.fromGap);
         }
 
-        fillGap(gap, activeDrag.source);
+        fillGap(gap, activeDrag.text);
     });
 
     stepElement.addEventListener("dragend", () => {
@@ -93,7 +95,7 @@ export function createSentenceFillBuilder(stepElement) {
     sentenceTokens.addEventListener("click", (event) => {
         const source = event.target.closest(".sentence-token");
 
-        if (isLocked || !source || source.classList.contains("is-used")) {
+        if (isLocked || !source) {
             return;
         }
 
@@ -103,7 +105,7 @@ export function createSentenceFillBuilder(stepElement) {
             return;
         }
 
-        fillGap(gap, source);
+        fillGap(gap, source.dataset.token);
     });
 
     sentenceFillWords.addEventListener("click", (event) => {
@@ -117,31 +119,21 @@ export function createSentenceFillBuilder(stepElement) {
         updateCheckButton();
     });
 
-    function fillGap(gap, source) {
-
-        if (!gap.classList.contains("is-empty")) {
-            clearGap(gap);
-        }
-
+    function fillGap(gap, text) {
         const token = placedTokenTemplate.content.firstElementChild.cloneNode(true);
 
-        token.querySelector(".sentence-token-text").textContent = getGapText(gap, source.dataset.token);
+        token.querySelector(".sentence-token-text").textContent = getGapText(gap, text);
         token.draggable = !isLocked;
 
         gap.replaceChildren(token);
-        gap.dataset.sourceId = source.dataset.id;
-        gap.dataset.token = source.dataset.token;
+        gap.dataset.token = text;
         gap.classList.remove("is-empty");
 
-        markSourceUsed(source);
         clearDropTargets();
         updateCheckButton();
     }
 
     function clearGap(gap) {
-        releaseSource(getSource(gap));
-
-        delete gap.dataset.sourceId;
         delete gap.dataset.token;
 
         gap.classList.add("is-empty");
@@ -159,15 +151,6 @@ export function createSentenceFillBuilder(stepElement) {
         }
 
         return text.charAt(0).toUpperCase() + text.slice(1);
-    }
-
-    function getSource(gap) {
-
-        if (!gap.dataset.sourceId) {
-            return null;
-        }
-
-        return sentenceTokens.querySelector(`[data-id="${gap.dataset.sourceId}"]`);
     }
 
     function setDropTarget(gap) {
@@ -188,21 +171,6 @@ export function createSentenceFillBuilder(stepElement) {
         }
     }
 
-    function markSourceUsed(source) {
-        source.classList.add("is-used");
-        source.draggable = false;
-    }
-
-    function releaseSource(source) {
-
-        if (!source) {
-            return;
-        }
-
-        source.classList.remove("is-used");
-        source.draggable = true;
-    }
-
     function updateCheckButton() {
         sentenceCheckButton.disabled = isLocked
             || sentenceFillWords.querySelector(".sentence-fill-gap.is-empty") !== null;
@@ -211,7 +179,7 @@ export function createSentenceFillBuilder(stepElement) {
     function setTokensDraggable(isDraggable) {
 
         for (const token of sentenceTokens.querySelectorAll(".sentence-token")) {
-            token.draggable = isDraggable && !token.classList.contains("is-used");
+            token.draggable = isDraggable;
         }
 
         for (const token of sentenceFillWords.querySelectorAll(".sentence-fill-gap:not(.is-empty) .sentence-token")) {
