@@ -434,3 +434,52 @@ class SentenceStepService(SentenceImporter):
                 for index, text in enumerate(parsed_form["tokens"])
             ]
         }
+    
+    def save_batch(self, task_id: int, changes) -> None:
+        
+        if not isinstance(changes, list) or not changes:
+            raise ValidationError("Некоректні дані змін")
+        
+        with transaction.atomic():
+            for change in changes:
+                
+                # Объект изменений и данные, указанные в нём, 
+                # должны быть в формате словаря
+                if not isinstance(change, dict) or \
+                    not isinstance(change.get("data"), dict):
+                        raise ValidationError("Некоректні дані змін")
+                
+                data = change["data"]
+                
+                try:
+                    self._save_batch_change(
+                        task_id=task_id,
+                        change=change,
+                        data=data
+                    )
+                except ValidationError as error:
+                    raise ValidationError(
+                        f"«{data.get('answer', '')}»: {error.message}"
+                    ) from error
+    
+    def _save_batch_change(
+        self,
+        task_id: int,
+        change: dict,
+        data: dict
+    ):
+        
+        mode = change.get("mode")
+        
+        if mode == "create":
+            self.create(
+                task_id=task_id, 
+                data=data)
+        elif mode == "edit":
+            self.update(
+                task_id=task_id,
+                data=data,
+                step_id=change.get("step_id")
+            )
+        else:
+            raise ValidationError("Невідомий тип зміни")

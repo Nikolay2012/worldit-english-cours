@@ -56,13 +56,25 @@ if (sentencesPanel) {
             openUploadCsvFromSentencesPanel("delete");
         });
 
-        saveSentencesPanelButton.addEventListener("click", () => {
+        saveSentencesPanelButton.addEventListener("click", async () => {
+            
             if (pendingSentenceChanges.size === 0) {
                 setSentencesPanelOpen(false);
                 return;
             }
 
-            console.log(buildSentencesBatchData());
+            saveSentencesPanelButton.disabled = true;
+
+            try {
+                await sentencesBatchRequest(
+                    sentencesPanel.dataset.sentencesBatchUrl,
+                    buildSentencesBatchData()
+                );
+                window.location.reload();
+            } catch (error) {
+                showMessage(error.message);
+                saveSentencesPanelButton.disabled = false;
+            }
         });
 
         sentencesPanelBody.addEventListener("click", (event) => {
@@ -227,6 +239,7 @@ function buildSentencesBatchData() {
     };
 }
 
+// запрос на получение прогресса по предложениям
 async function sentencesPanelRequest(url) {
     const response = await fetch(url);
     const responseData = await response.json();
@@ -236,4 +249,24 @@ async function sentencesPanelRequest(url) {
     }
 
     return responseData.data;
+}
+
+// запрос на сохранение отредактированных/созданных предложений
+async function sentencesBatchRequest(url, data) {
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+        },
+        body: JSON.stringify(data)
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok || !responseData.ok) {
+        throw new Error(responseData.error || "Не вдалося зберегти зміни");
+    }
+
+    return responseData;
 }

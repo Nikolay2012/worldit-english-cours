@@ -9,3 +9,4 @@ from .words_batch import WordsBatchEndpoint
 from .sentence import SentenceEndpoint
 from .sentence_preview import SentencePreviewEndpoint
 from .sentences_progress import SentencesProgressEndpoint
+from .sentence_batch import SentencesBatchEndpoint

@@ -5,6 +5,7 @@
 <div class="words-panel sentences-panel" id="sentencesPanel"
     data-sentences-progress-url="{% url 'english:api:api_sentences_progress' task.id %}"
     data-can-edit="{% if can_edit_sentences %}true{% else %}false{% endif %}"
+    data-sentences-batch-url="{% url 'english:api:api_sentences_batch' task.id %}"
     data-empty-text="{% if can_edit_sentences %}Жодного речення{% else %}Жодної відповіді{% endif %}">
 
     <div class="words-panel-header">
