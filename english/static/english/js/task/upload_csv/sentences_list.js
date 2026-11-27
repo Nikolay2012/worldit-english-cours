@@ -311,17 +311,19 @@ function collectSentenceChange() {
         prompt: sentencePromptInput.value.trim()
     };
 
+    let parts = null;
+
     if (uploadCsvModal.classList.contains("is-fill-sentences")) {
         data.gaps = sentenceFormState.gaps.slice().sort((a, b) => a - b);
-        data.inserts = sentenceFormState.inserts.map(
-            (insert) => ({...insert})
-        );
+        data.inserts = sentenceFormState.inserts.map((insert) => ({...insert}));
+        parts = buildSentenceChangeParts();
     }
 
     return {
         mode: sentenceFormState.mode,
         stepId: sentenceFormState.stepId,
-        data: data
+        data: data,
+        parts: parts
     };
 }
 
@@ -331,6 +333,69 @@ function restoreSentenceChange(change) {
     sentenceFormState.previewAnswer = change.data.answer;
     sentenceFormState.gaps = change.data.gaps ? change.data.gaps.slice() : [];
     sentenceFormState.inserts = change.data.inserts
-        ? change.data.inserts.map((insert) => ({ ...insert }))
+        ? change.data.inserts.map((insert) => ({...insert}))
         : [];
+}
+
+// Шаблолн текста, определяющий то, 
+// входит ли первый символ части предложения (part в массиве parts)
+// в набор знаков (, . ! ? : ;)
+// Необходимо для выделения тех случаев, когда попадаются именно знаки,
+// ведь перед знаками не нужен пробел, они «прилепают» в прошлой части
+const SENTENCE_NO_SPACE_BEFORE = /^[,.!?:;)]/;
+
+function buildSentenceChangeParts() {
+    const parts = [];
+
+    for (let position = 0; position <= sentenceGapsTokens.length; position++) {
+        for (const insert of sentenceFormState.inserts) {
+            
+            if (insert.position !== position) {
+                continue;
+            }
+
+            parts.push(
+                insert.kind === "zero"
+                    ? {kind: "zero"}
+                    : {kind: "text", text: insert.text}
+            );
+        }
+
+        if (position === sentenceGapsTokens.length) {
+            break;
+        }
+
+        const token = sentenceGapsTokens[position];
+
+        parts.push({
+            kind: sentenceFormState.gaps.includes(token.index) ? "gap" : "text",
+            text: token.text
+        });
+    }
+
+    return addSentencePartsSpaces(parts);
+}
+
+function addSentencePartsSpaces(parts) {
+    const result = [];
+
+    parts.forEach((part, index) => {
+        // Проверка на то, прилипает ли часть предложения к предыдущей часть
+        // Прилепает к предыдущей части только знак (, . ; : - ! ?)
+        const isGlued = part.kind !== "zero" 
+        && SENTENCE_NO_SPACE_BEFORE.test(part.text);
+
+        // Если часть не первая, и не прилепает ли она к предыдущей
+        if (index > 0 && !isGlued) {
+            // Тогда добавляем пробел перед следующей частью
+            result.push({
+                kind: "text", 
+                text: " "
+            });
+        }
+
+        result.push(part);
+    });
+
+    return result;
 }

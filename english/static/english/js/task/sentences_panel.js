@@ -196,7 +196,12 @@ function createSentencesPanelRow(key, sentence, change) {
     const text = row.querySelector(".sentences-panel-text");
 
     if (change) {
-        text.textContent = change.data.answer;
+        if (change.parts) {
+            renderSentenceText(text, change.parts);
+        } else {
+            text.textContent = change.data.answer;
+        }
+
         row.title = change.data.answer;
     } else {
         renderSentenceText(text, sentence.parts);
