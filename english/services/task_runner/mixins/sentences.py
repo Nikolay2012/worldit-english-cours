@@ -33,11 +33,48 @@
 
 import random
 
+from django.db.models import Prefetch
+from django.db.models.aggregates import Min
+
+from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
+from english.models.sentence_token import SentenceToken
+from english.models.student_answer import StudentAnswer
+from english.services.exceptions import ValidationError
+from english.services.step_handlers.registry import StepHandlerRegistry
 from english.services.task_runner.mixins.base import TaskRunnerBase
 
 
 class SentencesTaskRunnerMixin(TaskRunnerBase):
+    
+    def get_sentences_progress(self) -> dict:
+        
+        if self.task.type != "sentences":
+            raise ValidationError(
+                "Історія відповідей доступна лише для речень"
+            )
+        
+        steps = self._get_sentence_steps()
+        
+        if not self._is_staff():
+            steps_by_id = {
+                step.id: step for step in steps
+            }
+            
+            steps = [
+                steps_by_id[step_id]
+                for step_id in self._get_correct_step_ids()
+                if step_id in steps_by_id
+            ]
+        
+        registry = StepHandlerRegistry()
+        
+        return {
+            "sentences": [
+                registry.get_handler(kind=step.kind).get_list_item(step=step)
+                for step in steps
+            ]
+        }
     
     def _get_student_sentences_next_step(self) -> tuple:
         
@@ -111,3 +148,34 @@ class SentencesTaskRunnerMixin(TaskRunnerBase):
             ]
         
         return candidates
+    
+    def _get_sentence_steps(self) -> list[EnglishTaskStep]:
+        
+        return list(
+            self.task.steps.select_related(
+                "sentence"
+            ).prefetch_related(
+                Prefetch(
+                    "sentence__tokens",
+                    queryset=SentenceToken.objects.order_by("order")
+                )
+            ).order_by("order")
+        )
+    
+    def _get_correct_step_ids(self):
+        
+        return list(
+            StudentAnswer.objects.filter(
+                student=self.student,
+                step__task=self.task,
+                is_correct=True
+            ).values(
+                "step_id"
+            ).annotate(
+                first_correct_id=Min("id")
+            ).order_by(
+                "first_correct_id"
+            ).values_list(
+                "step_id", flat=True
+            )
+        )

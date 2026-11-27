@@ -133,6 +133,13 @@ class SentenceHandler(StepHandler):
             # и дополнительные варианты (SentenceWordVariant)
         }
     
+    def get_list_item(self, step: EnglishTaskStep) -> dict:
+        
+        return SentenceImporter()._serialize_sentence(
+            sentence=self._get_sentence(step=step),
+            step_id=step.id
+        )
+    
     def _get_fill_step_data(
         self,
         step: EnglishTaskStep,

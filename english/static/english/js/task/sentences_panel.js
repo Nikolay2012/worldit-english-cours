@@ -125,7 +125,11 @@ function renderSentencesPanel(sentences) {
 function createSentencesPanelRow(sentence) {
     const row = sentencesPanelRowTemplate.content.firstElementChild.cloneNode(true);
 
-    row.querySelector(".sentences-panel-text").textContent = sentence.text;
+    renderSentenceText(
+        row.querySelector(".sentences-panel-text"),
+        sentence.parts
+    );
+    row.title = sentence.answer;
 
     if (canEditSentences) {
         row.classList.add("is-editable");
