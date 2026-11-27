@@ -82,6 +82,11 @@ deleteWordsListButton.addEventListener("click", () => {
 // «Скасувати» в подтверждении удаления списка - возврат к списку
 cancelDeleteListButton.addEventListener("click", () => {
     
+    if (isOpenedFromSentencesPanel) {
+        returnToSentencesPanel();
+        return;
+    }
+    
     if (isOpenedFromWordsPanel) {
         returnToWordsPanel();
 

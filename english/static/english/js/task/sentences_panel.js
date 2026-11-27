@@ -2,13 +2,20 @@ const sentencesPanel = document.getElementById("sentencesPanel");
 const sentencesPanelCover = document.getElementById("sentencesPanelCover");
 const sentencesPanelBody = document.getElementById("sentencesPanelBody");
 const closeSentencesPanelButton = document.getElementById("closeSentencesPanelButton");
-const closeSentencesPanelFooterButton = document.getElementById("closeSentencesPanelFooterButton");
+const saveSentencesPanelButton = document.getElementById("saveSentencesPanelButton");
 const deleteSentencesPanelListButton = document.getElementById("deleteSentencesPanelListButton");
 const sentencesPanelRowTemplate = document.getElementById("sentencesPanelRowTemplate");
 const sentencesPanelEmptyTemplate = document.getElementById("sentencesPanelEmptyTemplate");
 const sentencesPanelAddTemplate = document.getElementById("sentencesPanelAddTemplate");
 
 const canEditSentences = sentencesPanel?.dataset.canEdit === "true";
+
+const sentencesPanelByKey = new Map();
+const pendingSentenceChanges = new Map();
+
+let sentencesPanelData = [];
+let editingSentenceKey = null;
+let newSentenceCounter = 0;
 
 let isSentencesPanelLoading = false;
 
@@ -17,7 +24,10 @@ if (sentencesPanel) {
     for (const button of document.querySelectorAll("[data-open-sentences-panel]")) {
         button.addEventListener("click", () => {
             setSentencesPanelOpen(true);
-            loadSentencesPanel();
+
+            if (pendingSentenceChanges.size === 0) {
+                loadSentencesPanel();
+            }
         });
     }
 
@@ -30,35 +40,68 @@ if (sentencesPanel) {
     });
 
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && sentencesPanel.classList.contains("is-open")) {
-            setSentencesPanelOpen(false);
+        if (event.key !== "Escape" || !sentencesPanel.classList.contains("is-open")) {
+            return;
         }
+
+        if (canEditSentences && isOpenedFromSentencesPanel) {
+            return;
+        }
+
+        setSentencesPanelOpen(false);
     });
 
     if (canEditSentences) {
-        closeSentencesPanelFooterButton.addEventListener("click", () => {
-            setSentencesPanelOpen(false);
+        deleteSentencesPanelListButton.addEventListener("click", () => {
+            openUploadCsvFromSentencesPanel("delete");
         });
 
-        deleteSentencesPanelListButton.addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("sentencesPanelDelete"));
+        saveSentencesPanelButton.addEventListener("click", () => {
+            if (pendingSentenceChanges.size === 0) {
+                setSentencesPanelOpen(false);
+                return;
+            }
+
+            console.log(buildSentencesBatchData());
         });
 
         sentencesPanelBody.addEventListener("click", (event) => {
             if (event.target.closest(".sentences-panel-add-button")) {
-                document.dispatchEvent(new CustomEvent("sentencesPanelCreate"));
+                newSentenceCounter += 1;
+                editingSentenceKey = `new-${newSentenceCounter}`;
+
+                openUploadCsvFromSentencesPanel("create", {
+                    isFill: isSentencesPanelFill()
+                });
                 return;
             }
 
             const row = event.target.closest(".sentences-panel-row.is-editable");
 
-            if (row) {
-                document.dispatchEvent(new CustomEvent("sentencesPanelEdit", {
-                    detail: {
-                        stepId: Number(row.dataset.stepId)
-                    }
-                }));
+            if (!row) {
+                return;
             }
+
+            const item = sentencesPanelByKey.get(row.dataset.sentenceKey);
+
+            editingSentenceKey = row.dataset.sentenceKey;
+
+            openUploadCsvFromSentencesPanel(item.mode, {
+                sentence: item.sentence,
+                change: item.change,
+                isFill: isSentencesPanelFill()
+            });
+        });
+
+        document.addEventListener("sentencesPanelReturn", (event) => {
+            const change = event.detail?.change;
+
+            if (change && editingSentenceKey) {
+                pendingSentenceChanges.set(editingSentenceKey, change);
+                renderSentencesPanel();
+            }
+
+            editingSentenceKey = null;
         });
     }
 }
@@ -87,7 +130,8 @@ async function loadSentencesPanel() {
             sentencesPanel.dataset.sentencesProgressUrl
         );
 
-        renderSentencesPanel(data.sentences);
+        sentencesPanelData = data.sentences;
+        renderSentencesPanel();
     } catch (error) {
         showMessage(error.message);
     } finally {
@@ -95,23 +139,36 @@ async function loadSentencesPanel() {
     }
 }
 
-function renderSentencesPanel(sentences) {
+function renderSentencesPanel() {
     sentencesPanelBody.replaceChildren();
+    sentencesPanelByKey.clear();
 
-    if (sentences.length === 0) {
+    const list = document.createElement("ul");
+
+    list.className = "words-panel-list";
+
+    for (const sentence of sentencesPanelData) {
+        const key = String(sentence.step_id);
+
+        list.append(createSentencesPanelRow(
+            key,
+            sentence,
+            pendingSentenceChanges.get(key)
+        ));
+    }
+
+    for (const [key, change] of pendingSentenceChanges) {
+        if (change.mode === "create") {
+            list.append(createSentencesPanelRow(key, null, change));
+        }
+    }
+
+    if (list.children.length === 0) {
         const empty = sentencesPanelEmptyTemplate.content.firstElementChild.cloneNode(true);
 
         empty.textContent = sentencesPanel.dataset.emptyText;
         sentencesPanelBody.append(empty);
     } else {
-        const list = document.createElement("ul");
-
-        list.className = "words-panel-list";
-
-        for (const sentence of sentences) {
-            list.append(createSentencesPanelRow(sentence));
-        }
-
         sentencesPanelBody.append(list);
     }
 
@@ -122,21 +179,52 @@ function renderSentencesPanel(sentences) {
     }
 }
 
-function createSentencesPanelRow(sentence) {
+function createSentencesPanelRow(key, sentence, change) {
     const row = sentencesPanelRowTemplate.content.firstElementChild.cloneNode(true);
+    const text = row.querySelector(".sentences-panel-text");
 
-    renderSentenceText(
-        row.querySelector(".sentences-panel-text"),
-        sentence.parts
-    );
-    row.title = sentence.answer;
+    if (change) {
+        text.textContent = change.data.answer;
+        row.title = change.data.answer;
+    } else {
+        renderSentenceText(text, sentence.parts);
+        row.title = sentence.answer;
+    }
 
     if (canEditSentences) {
         row.classList.add("is-editable");
-        row.dataset.stepId = sentence.step_id;
+        row.classList.toggle("is-changed", Boolean(change));
+        row.dataset.sentenceKey = key;
+
+        sentencesPanelByKey.set(key, {
+            mode: sentence ? "edit" : "create",
+            sentence: sentence,
+            change: change
+        });
     }
 
     return row;
+}
+
+function isSentencesPanelFill() {
+    return sentencesPanelData.some((sentence) => Boolean(sentence.template));
+}
+
+function buildSentencesBatchData() {
+    const changes = [];
+
+    for (const [key, change] of pendingSentenceChanges) {
+        changes.push({
+            key: key,
+            mode: change.mode,
+            step_id: change.stepId,
+            data: change.data
+        });
+    }
+
+    return {
+        changes: changes
+    };
 }
 
 async function sentencesPanelRequest(url) {

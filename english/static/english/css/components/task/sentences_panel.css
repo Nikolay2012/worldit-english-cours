@@ -22,3 +22,8 @@
 .sentences-panel-add-button {
     margin-top: 16px;
 }
+
+.sentences-panel-row.is-changed .sentences-panel-text::after {
+    content: " •";
+    color: #F98232;
+}

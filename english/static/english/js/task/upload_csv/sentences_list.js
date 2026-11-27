@@ -20,6 +20,11 @@ saveSentenceButton.addEventListener('click', async (event) => {
         return;
     }
 
+    if (isOpenedFromSentencesPanel) {
+        returnToSentencesPanel(collectSentenceChange());
+        return;
+    }
+
     saveSentenceButton.disabled = true;
 
     try {
@@ -138,6 +143,12 @@ function createSentenceRow(sentence) {
 }
 
 cancelSentenceButton.addEventListener("click", () => {
+
+    if (isOpenedFromSentencesPanel) {
+        returnToSentencesPanel();
+        return;
+    }
+
     closeSentenceForm();
 });
 
@@ -250,4 +261,76 @@ function renderSentenceText(element, parts) {
 
         element.append(span);
     }
+}
+
+function openUploadCsvFromSentencesPanel(mode, options = {}) {
+    resetUploadCsvModal();
+    isOpenedFromSentencesPanel = true;
+
+    uploadCsvModal.classList.remove(
+        "is-sentence-form", 
+        "is-sentence-gaps"
+    );
+    
+    setUploadCsvList(true);
+
+    if (mode === "delete") {
+        setUploadCsvConfirmDelete(true);
+        openModal(uploadCsvModal);
+        return;
+    }
+
+    uploadCsvModal.classList.toggle(
+        "is-fill-sentences", 
+        Boolean(options.isFill)
+    );
+    openSentenceForm(mode, options.sentence);
+
+    if (options.change) {
+        restoreSentenceChange(options.change);
+    }
+
+    openModal(uploadCsvModal);
+}
+
+function returnToSentencesPanel(change = null) {
+    isOpenedFromSentencesPanel = false;
+    closeSentenceForm();
+    closeModal();
+
+    document.dispatchEvent(new CustomEvent("sentencesPanelReturn", {
+        detail: {
+            change: change
+        }
+    }));
+}
+
+function collectSentenceChange() {
+    const data = {
+        answer: sentenceAnswerInput.value.trim(),
+        prompt: sentencePromptInput.value.trim()
+    };
+
+    if (uploadCsvModal.classList.contains("is-fill-sentences")) {
+        data.gaps = sentenceFormState.gaps.slice().sort((a, b) => a - b);
+        data.inserts = sentenceFormState.inserts.map(
+            (insert) => ({...insert})
+        );
+    }
+
+    return {
+        mode: sentenceFormState.mode,
+        stepId: sentenceFormState.stepId,
+        data: data
+    };
+}
+
+function restoreSentenceChange(change) {
+    sentenceAnswerInput.value = change.data.answer;
+    sentencePromptInput.value = change.data.prompt;
+    sentenceFormState.previewAnswer = change.data.answer;
+    sentenceFormState.gaps = change.data.gaps ? change.data.gaps.slice() : [];
+    sentenceFormState.inserts = change.data.inserts
+        ? change.data.inserts.map((insert) => ({ ...insert }))
+        : [];
 }

@@ -18,3 +18,5 @@ let sentenceFormState = {
 let imageStates = [];
 
 let isOpenedFromWordsPanel = false;
+
+let isOpenedFromSentencesPanel = false;

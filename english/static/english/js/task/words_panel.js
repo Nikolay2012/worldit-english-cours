@@ -211,7 +211,7 @@ function createWordsPanelRow(key, word, change, requiredCorrectAnswers) {
         wordsPanelWordsByKey.set(key, {
             step_id: word.step_id,
             category: change ? change.category : null,
-            question: { text: word.text },
+            question: {text: word.text},
             translation: word.translation,
             images: word.images,
             pendingImageStates: change ? change.imageStates : null

@@ -107,6 +107,13 @@ backSentenceGapsButton.addEventListener("click", () => {
 });
 
 saveSentenceGapsButton.addEventListener("click", async () => {
+    
+    if (isOpenedFromSentencesPanel) {
+        clearPlacingToken();
+        returnToSentencesPanel(collectSentenceChange());
+        return;
+    }
+
     saveSentenceGapsButton.disabled = true;
 
     try {

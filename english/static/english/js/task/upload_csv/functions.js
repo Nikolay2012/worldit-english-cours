@@ -97,6 +97,7 @@ function resetUploadCsvModal() {
     resetWordForm();
 
     isOpenedFromWordsPanel = false;
+    isOpenedFromSentencesPanel = false;
 }
 
 function createCategory(category) {
@@ -286,6 +287,19 @@ function collectWordFormData() {
 
 function reloadIfListLoaded() {
     
+    if (isOpenedFromSentencesPanel) {
+        isOpenedFromSentencesPanel = false;
+
+        document.dispatchEvent(
+            new CustomEvent("sentencesPanelReturn", {
+                detail: {
+                    change: null
+                }
+            })
+        );
+        return;
+    }
+
     if (isOpenedFromWordsPanel) {
         resetUploadCsvModal();
 
