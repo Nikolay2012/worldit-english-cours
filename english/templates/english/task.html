@@ -19,6 +19,8 @@ World IT
     {% if task.type == "sentences" %}
         <link rel="stylesheet" href="{% static 'english/css/components/task/steps/sentence.css' %}">
         <link rel="stylesheet" href="{% static 'english/css/components/task/theory_modal.css' %}">
+        <link rel="stylesheet" href="{% static 'english/css/components/task/words_panel.css' %}">
+        <link rel="stylesheet" href="{% static 'english/css/components/task/sentences_panel.css' %}">
     {% endif %}
 {% endblock %}
 
@@ -52,11 +54,19 @@ World IT
                     <img src="{% static 'english/img/action_icons/question-mark-circled.svg' %}" alt="question-mark-circled">
                     Допомога
                 </button>
-    
-                <button type="button" class="button answers-history-button" id="openAnswersHistoryButton">
-                    <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="answers-history">
-                    Історія відповідей
-                </button>
+
+                {% if can_edit_sentences %}
+                    <button type="button" class="button words-list-button" data-open-sentences-panel>
+                        <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="list">
+                        Список речень
+                    </button>
+                    
+                {% else %}
+                    <button type="button" class="button answers-history-button" id="openAnswersHistoryButton" data-open-sentences-panel>
+                        <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="answers-history">
+                        Історія відповідей
+                    </button>
+                {% endif %}
             </div>
         {% endif %}
     </div>
@@ -82,6 +92,10 @@ World IT
     
     {% if can_open_words_list %}
         {% include "english/components/task/words_panel.html" %}
+    {% endif %}
+
+    {% if can_open_answers_history %}
+        {% include "english/components/task/sentences_panel.html" %}
     {% endif %}
 
     {% csrf_token %}
@@ -111,6 +125,8 @@ World IT
         {% if can_open_theory and can_open_answers_list %}
             <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
         {% endif %}
+
+        <script src="{% static 'english/js/task/sentences_panel.js' %}"></script>
         <script src="{% static 'english/js/task/upload_csv/sentences_list.js' %}"></script>
         <script src="{% static 'english/js/task/upload_csv/sentences_configure.js' %}"></script>
     {% endif %}

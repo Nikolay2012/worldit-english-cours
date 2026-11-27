@@ -1,0 +1,20 @@
+.sentences-panel-row {
+    grid-template-columns: 1fr;
+    max-height: none;
+}
+
+.sentences-panel-text {
+    min-width: 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.sentences-panel-empty {
+    margin: 24px 0 0;
+    font-size: 0.875rem;
+    color: var(--text-fg-primary);
+}
+
+.sentences-panel-add-button {
+    margin-top: 16px;
+}

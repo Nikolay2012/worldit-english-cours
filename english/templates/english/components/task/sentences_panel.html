@@ -1,0 +1,56 @@
+{% load static %}
+
+<div class="words-panel-cover" id="sentencesPanelCover"></div>
+
+<div class="words-panel sentences-panel" id="sentencesPanel"
+    data-sentences-progress-url="{% url 'english:api:api_sentences_progress' task.id %}"
+    data-can-edit="{% if can_edit_sentences %}true{% else %}false{% endif %}"
+    data-empty-text="{% if can_edit_sentences %}Жодного речення{% else %}Жодної відповіді{% endif %}">
+
+    <div class="words-panel-header">
+        <h3 class="words-panel-title">
+            {% if can_edit_sentences %}
+                Список речень
+            {% else %}
+                Історія відповідей
+            {% endif %}
+        </h3>
+
+        <button type="button" class="words-panel-close" id="closeSentencesPanelButton">
+            <img src="{% static 'english/img/action_icons/close.svg' %}" alt="close">
+        </button>
+    </div>
+
+    <div class="words-panel-body" id="sentencesPanelBody"></div>
+
+    {% if can_edit_sentences %}
+        <div class="words-panel-footer">
+            <button type="button" class="button upload-csv-cancel" id="deleteSentencesPanelListButton">
+                <img src="{% static 'english/img/action_icons/trash-2.svg' %}" alt="trash-2">
+                Видалити список
+            </button>
+            <button type="button" class="button upload-csv-confirm" id="closeSentencesPanelFooterButton">
+                Закрити
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<template id="sentencesPanelRowTemplate">
+    <li class="words-panel-row sentences-panel-row">
+        <span class="sentences-panel-text"></span>
+    </li>
+</template>
+
+<template id="sentencesPanelEmptyTemplate">
+    <p class="sentences-panel-empty"></p>
+</template>
+
+{% if can_edit_sentences %}
+    <template id="sentencesPanelAddTemplate">
+        <button type="button" class="button add-words-button sentences-panel-add-button">
+            <img src="{% static 'english/img/action_icons/plus.svg' %}" alt="plus">
+            Додати речення
+        </button>
+    </template>
+{% endif %}
