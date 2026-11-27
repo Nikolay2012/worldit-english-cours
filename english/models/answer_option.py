@@ -3,6 +3,11 @@ from django.db import models
 
 class AnswerOption(models.Model):
     
+    language_choices = (
+        ("en", "Англійська"),
+        ("uk", "Українська")
+    )
+    
     question = models.ForeignKey(
         "english.Question",
         related_name="options",
@@ -10,6 +15,11 @@ class AnswerOption(models.Model):
     )
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
+    language = models.CharField(
+        max_length=2, 
+        choices=language_choices,
+        default="uk"
+    )
     order = models.IntegerField()
     
     def __str__(self):
@@ -17,13 +27,14 @@ class AnswerOption(models.Model):
     
     class Meta:
         constraints = [
+            # Порядок кожного варіанту відповіді має бути унікальним для питання (враховуючи мову відповіді)
             models.UniqueConstraint(
-                fields=["question", "order"],
+                fields=["question", "language", "order"],
                 name="unique_answer_option_order_in_question"
             ),
-            # Кожен варіант відповіді на питання має бути унікальник
+            # Кожен варіант відповіді на питання має бути унікальними (враховуючи мову відповіді)
             models.UniqueConstraint(
-                fields=["question", "text"],
+                fields=["question", "language", "text"],
                 name="unique_answer_option_text_in_question"
             )
         ]

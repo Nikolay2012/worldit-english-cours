@@ -5,29 +5,41 @@
 Реализует методы интерфейса StepHandler:
 -.get_step_data() - сборка данных шага для клиента
 -.check() - проверка ответа пользователя
+-.save_answer_details() - запись выбранного варианта в ответ студента (selected_options)
+-.get_list_item() - данные слова для списка слов (слово, перевод, картинки)
 
 Сейчас используется в заданиях типа "Слова"
 В дальнейшем подойдёт и для чтения и видео:
 у них отличается только способ подачи вопроса (prompt), а проверка ответа та же
 
 Сборка шага - метод .get_step_data():
+-Вид вопроса выбирается случайно - метод ._get_prompt():
+    -текстом (слово) - вес 2
+    -или одной из картинок вопроса, которые не плейсхолдеры - вес 1 у каждой
+    если у вопроса нет настоящих картинок - вопрос всегда текстом
+-Язык вариантов ответа зависит от вида вопроса (AnswerOption.language):
+    -текст - uk (переводы)
+    -картинка - en (английские слова)
+-Набор вариантов считается целым, если в нём минимум 2 варианта
+и ровно один правильный - метод ._get_options()
+-Если набор en не целый, вопрос заменяется на текстовый с вариантами uk
 -Варианты ответа перемешиваются на сервере
 -Клиенту уходят только id и текст вариантов, без is_correct
--Вид вопроса выбирается случайно - метод ._get_prompt():
-    -текстом (слово)
-    -или одной из картинок вопроса, которые не плейсхолдеры
-    если у вопроса нет настоящих картинок - вопрос всегда текстом
 
 Проверка ответа - метод .check():
 -От клиента приходит {"option_id": ...}
--Вариант ищется только среди вариантов этого вопроса
+-Вариант ищется только среди вариантов этого вопроса (обоих языков)
 -Возвращается is_correct выбранного варианта
 
+Список слов - метод .get_list_item():
+-перевод берётся из правильного варианта uk
+-если такого варианта нет - перевод пустая строка
+
 Из ошибок, может подниматься ValidationError:
+-у шага нет вопроса (Question)
+-набор вариантов uk не целый (и en тоже, если вопрос картинкой)
 -option_id не передан или не число
 -вариант ответа не принадлежит вопросу этого шага
-
-.save_answer_details() - запись выбранного варианта в ответ студента (selected_options)
 """
 
 import random
@@ -46,9 +58,32 @@ class QuestionHandler(StepHandler):
     # (слово «реализуем» здесь лишь условное, имитируем интерфейсы)
     def get_step_data(self, step: EnglishTaskStep) -> dict:
         
-        question: Question = step.question
+        try:
+            question: Question = step.question
+        except Question.DoesNotExist as error:
+            raise ValidationError(
+                "Питання цього кроку відсутнє"
+            ) from error
         
-        answer_options = list(question.options.all())
+        prompt = self._get_prompt(question=question)
+        
+        language = "en" if prompt['kind'] == 'image' else "uk"
+        answer_options = self._get_options(
+            question=question,
+            language=language
+        )
+        
+        # Если английских вариантов ответа, по каким-то причинам нету, 
+        # во избежание ошибок подтянем текстовый вариант вопроса с украинскими ответами
+        if answer_options is None and language == "en":
+            prompt = {"kind": "text", "text": question.text}
+            answer_options = self._get_options(question=question, language="uk")
+        
+        if answer_options is None:
+            raise ValidationError(
+                "Варіанти відповіді цього кроку пошкоджені або відсутні"
+            )
+        
         # КАк и было решено: сервер перемешивает варианты ответа
         # Для того чтобы исходный порядок нельзя было восстановить на клиенте
         random.shuffle(answer_options)
@@ -56,7 +91,7 @@ class QuestionHandler(StepHandler):
         return {
             "id": step.id,
             "kind": step.kind,
-            "prompt": self._get_prompt(question=question),
+            "prompt": prompt,
             "options": [
                 {"id": option.id, "text": option.text}
                 for option in answer_options
@@ -89,7 +124,9 @@ class QuestionHandler(StepHandler):
         translation = ""
         
         for option in question.options.all():
-            if option.is_correct:
+            # потому что берем только правильный переводы
+            # иначе в списке слов может отобразиться английское слово в столбце "перевода"
+            if option.is_correct and option.language == "uk":
                 translation = option.text
                 
                 break
@@ -128,6 +165,26 @@ class QuestionHandler(StepHandler):
             
         return option
     
+    def _get_options(
+        self, 
+        question: Question, 
+        language: str
+    ) -> list[AnswerOption] |None:
+        
+        options = [
+            option for option in question.options.all()
+            if option.language == language
+        ]
+        
+        correct_count = sum(
+            1 for option in options if option.is_correct
+        )
+        
+        if len(options) < 2 or correct_count != 1:
+            return None
+        
+        return options
+    
     def _get_prompt(self, question: Question) -> dict:
         
         # Отбираем QuestionImage-ы вопроса
@@ -143,8 +200,14 @@ class QuestionHandler(StepHandler):
         
         # Если попался текст, то на странице будет отображен текст вопроса
         if prompt_choice == "text":
-            return {"kind": "text", "text": question.text}
+            return {
+                "kind": "text", 
+                "text": question.text
+            }
         
         # Если попалась картинка, передаем на нее ссылку (media-url)
         # В браузере, в таком случае, будет отображена картинка
-        return {"kind": "image", "url": prompt_choice.image.url}
+        return {
+            "kind": "image", 
+            "url": prompt_choice.image.url
+        }

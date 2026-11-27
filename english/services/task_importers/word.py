@@ -4,19 +4,43 @@
 Наследует BaseEnglishTaskImporter, откуда берёт получение задания,
 чтение файла и парсинг csv по рядкам
 
+Наследуется WordStepService, который использует отсюда
+создание шага (._create_word_step()), сбор списка слов (._get_words_list())
+и константы (ANSWER_OPTIONS_COUNT, PLACEHOLDER_IMAGE)
+
 Здесь находится всё, что свойственно только заданию "Слова":
 -Столбцы csv (COLUMNS, REQUIRED_COLUMNS) и проверка одного ряда - метод ._parse_row()
--Проверка, что в файле хватает разных переводов для вариантов ответа
+-Проверки всего файла
 -Скачивание изображений по ссылкам из csv - через ImageDownloader
 -Создание категорий слов - метод ._get_or_create_categories()
 -Создание шагов задания, вопросов, вариантов ответа и изображений - метод ._create_word_step()
 -Сбор списка слов по категориям для клиента - метод ._get_words_list()
 
-Скачивание изображений идёт до транзакции,
-а запись в БД - внутри одной транзакции,
+Проверки файла (до скачивания изображений):
+-слово не повторяется в файле (без учёта регистра)
+-перевод не повторяется в файле (без учёта регистра)
+-в файле минимум 6 (ANSWER_OPTIONS_COUNT) разных слов и разных переводов,
+чтобы хватило на 5 неправильных вариантов в каждом наборе
+
+У каждого вопроса создаются два набора вариантов ответа (AnswerOption.language):
+-uk - правильный перевод и 5 случайных переводов других слов файла
+-en - правильное слово и 5 случайных других слов файла
+uk показывается, когда вопрос задан текстом, en - когда картинкой
+Порядок вариантов перемешивается при создании
+
+Изображения:
+-скачиваются до транзакции, чтобы не держать её открытой во время сетевых запросов
+-если картинку не удалось скачать или ссылки нет - записывается плейсхолдер
+
+Запись в БД - внутри одной транзакции,
 чтобы задание не осталось записанным частично
 
-Из ошибок, может подниматься ValidationError,
+Возвращает список слов задания по категориям (._get_words_list()):
+-перевод слова - правильный вариант uk
+-варианты ответа отдаются вместе с языком (language)
+
+Из ошибок, может подниматься ValidationError (повтор слова или перевода,
+не хватает разных слов или переводов, ошибка в ряду),
 а также ошибки базового импортёра
 """
 
@@ -76,6 +100,25 @@ class WordImporter(BaseEnglishTaskImporter):
         if len(all_translations) < self.ANSWER_OPTIONS_COUNT:
             raise ValidationError(f"У файлі має бути щонайменше {self.ANSWER_OPTIONS_COUNT} різних перекладів")
         
+        all_words = set()
+        
+        for row in rows:
+            word_key = row["word"].lower()
+            
+            if word_key in all_words:
+                raise ValidationError(
+                    f"Слово «{word_key}» повторюється у файлі"
+                )
+            
+            all_words.add(word_key)
+        
+        all_words = {row["word"] for row in rows}
+        
+        if len(all_words) < self.ANSWER_OPTIONS_COUNT:
+            raise ValidationError(
+                f"У файлі має бути щонайменше {self.ANSWER_OPTIONS_COUNT} різних слів"
+            )
+        
         # Изображения
         urls = {}
         
@@ -102,6 +145,7 @@ class WordImporter(BaseEnglishTaskImporter):
                     order=order,
                     row=row,
                     category=categories[row["category"]],
+                    all_words=all_words,
                     all_translations=all_translations,
                     image_files=(
                         images_data[(order, 0)], # зображення 1
@@ -152,7 +196,10 @@ class WordImporter(BaseEnglishTaskImporter):
         
         question = step.question
         options = list(question.options.all())
-        correct = next((option for option in options if option.is_correct), None)
+        correct = next(
+            (option for option in options if option.is_correct and option.language == "uk"), 
+            None
+        )
 
         return {
             "step_id": step.id,
@@ -171,6 +218,7 @@ class WordImporter(BaseEnglishTaskImporter):
         return {
             "id": option.id,
             "text": option.text,
+            "language": option.language,
             "is_correct": option.is_correct,
             "order": option.order,
         }
@@ -190,6 +238,7 @@ class WordImporter(BaseEnglishTaskImporter):
             order: int,
             row: dict[str, str],
             category: WordCategory,
+            all_words: set[str],
             all_translations: set[str],
             image_files: tuple
         ):
@@ -216,7 +265,14 @@ class WordImporter(BaseEnglishTaskImporter):
         self._create_answer_options(
             question=question,
             correct=row["translation"],
-            all_translations=all_translations
+            all_options=all_translations,
+            language="uk"
+        )
+        self._create_answer_options(
+            question=question,
+            correct=row["word"],
+            all_options=all_words,
+            language="en"
         )
         
         self._create_question_images(
@@ -229,12 +285,13 @@ class WordImporter(BaseEnglishTaskImporter):
             self,
             question: Question,
             correct: str,
-            all_translations: set[str]
+            language: str,
+            all_options: set[str]
         ):
         
         # {correct} - специально оборачиваем правильный вариант ответа в множество
         # для возможности удаления правильного варианта ответа из выборки
-        wrong_options = list(all_translations - {correct})
+        wrong_options = list(all_options - {correct})
         
         wrong_options_after_sample = random.sample(
             wrong_options,
@@ -256,13 +313,15 @@ class WordImporter(BaseEnglishTaskImporter):
         # путём вмешательства в работу JS клиента со стороны пользователя
         random.shuffle(options)
         
-        for option_order, (text, is_correct) in enumerate(options):
-            AnswerOption.objects.create(
+        AnswerOption.objects.bulk_create([
+            AnswerOption(
                 question=question,
                 is_correct=is_correct,
                 text=text,
+                language=language,
                 order=option_order
-            )
+            ) for option_order, (text, is_correct) in enumerate(options)
+        ])
     
     def _create_question_images(
             self,
