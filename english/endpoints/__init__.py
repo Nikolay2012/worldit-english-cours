@@ -8,3 +8,4 @@ from .words_progress import WordsProgressEndpoint
 from .words_batch import WordsBatchEndpoint
 from .sentence import SentenceEndpoint
 from .sentence_preview import SentencePreviewEndpoint
+from .sentences_progress import SentencesProgressEndpoint

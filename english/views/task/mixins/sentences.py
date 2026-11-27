@@ -27,6 +27,7 @@ class SentencesTaskContentMixin(TaskContentBase):
         
         return {
             "can_open_answers_list": has_steps,
+            "can_edit_sentences": self._is_staff(),
             "import_title": "Завантажте список речень",
             "import_text": [
                 "Увага!",

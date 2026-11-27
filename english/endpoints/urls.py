@@ -6,6 +6,7 @@ from django.urls import path
 from english.endpoints.lesson_tasks import LessonTasksEndpoint
 from english.endpoints.next_step import NextStepEndpoint
 from english.endpoints.sentence import SentenceEndpoint
+from english.endpoints.sentences_progress import SentencesProgressEndpoint
 from english.endpoints.step_answer import StepAnswerEndpoint
 from english.endpoints.task_import import TaskImportEndpoint
 from english.endpoints.task_steps import TaskStepsEndpoint
@@ -77,5 +78,10 @@ urlpatterns = [
         "tasks/<int:task_id>/sentences/preview/", 
         SentencePreviewEndpoint.as_view(), 
         name="api_preview_sentence"
-    )
+    ),
+    path(
+        "tasks/<int:task_id>/sentences-progress/",
+        SentencesProgressEndpoint.as_view(),
+        name="api_sentences_progress"
+    ),
 ]
