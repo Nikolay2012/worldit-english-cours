@@ -21,6 +21,7 @@
 
 Строки файла не связаны с предложениями по номеру,
 варианты подбираются по токенам предложения при прохождении
+(SentenceHandler._get_variants(), только в "Скласти речення")
 
 Запись в БД - SentenceWordVariant:
 -row - номер группы, position - номер слова в группе
@@ -28,9 +29,14 @@
 -старые варианты задания перед записью удаляются
 Вызывается внутри транзакции импорта
 
+Свои константы:
+-VARIANTS_FILE_FIELD = "variants_file" - имя поля файла в запросе
+-VARIANTS_FILE_LABEL = "Слова для речень" - название файла в текстах ошибок
+-CYRILLIC_PATTERN - кириллица (русская и украинская), по ней пропускается шапка
+-MIN_VARIANT_GROUP_SIZE = 2 - минимум разных слов в группе
+
 Берёт у класса, в который подключён:
--константы VARIANTS_FILE_FIELD, VARIANTS_FILE_LABEL, CYRILLIC_PATTERN,
-MIN_VARIANT_GROUP_SIZE, ZERO_ARTICLE, MAX_TOKEN_LENGTH
+-константы ZERO_ARTICLE, MAX_TOKEN_LENGTH
 -метод ._read_rows()
 
 Из ошибок, может подниматься ValidationError:

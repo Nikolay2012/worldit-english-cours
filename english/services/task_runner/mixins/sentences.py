@@ -1,5 +1,6 @@
 """
-Миксин TaskRunner с логикой прохождения задания типа "Речення" студентом
+Миксин TaskRunner с логикой задания типа "Речення":
+прохождение студентом и список предложений для боковой панели
 
 Подключается в TaskRunner, вызывается через словарь методов
 в TaskRunner._get_student_next_step() по типу задания ("sentences")
@@ -27,8 +28,23 @@
 -Если кандидатов нет - задание пройдено, шаг None
 -Из кандидатов выбирается случайный шаг и записывается в current_step
 
+Список предложений для боковой панели - метод .get_sentences_progress():
+-Используется SentencesProgressEndpoint
+-Только для задания типа "sentences", иначе ValidationError
+-Шаги с предложениями и токенами по order - метод ._get_sentence_steps()
+(select_related + Prefetch, чтобы не было запроса на каждое предложение)
+-Персонал - «Список речень»: все предложения задания по order
+-Студент - «Історія відповідей»: только предложения с правильным ответом -
+метод ._get_correct_step_ids():
+    -id шагов с правильным ответом, без повторов
+    -по порядку первого правильного ответа (лента: новое внизу)
+    -шаги, удалённые после ответа, пропускаются
+-Данные одного предложения собирает обработчик шага (.get_list_item())
+
 Возвращаемые данные:
 -._get_student_sentences_next_step() - (шаг или None, {"percent", "is_completed"})
+-.get_sentences_progress() - {"sentences": [{"step_id", "answer", "prompt",
+"template", "gaps", "zero_gaps", "parts"}]}
 """
 
 import random
@@ -36,7 +52,6 @@ import random
 from django.db.models import Prefetch
 from django.db.models.aggregates import Min
 
-from english.models.english_task import EnglishTask
 from english.models.english_task_step import EnglishTaskStep
 from english.models.sentence_token import SentenceToken
 from english.models.student_answer import StudentAnswer

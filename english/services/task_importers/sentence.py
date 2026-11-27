@@ -13,6 +13,10 @@
 разбор предложения, регистр первого слова, создание шага с токенами,
 сбор списка предложений и константы
 
+Используется SentenceHandler (прохождение и боковая панель):
+-константы GAP_MARKER, ZERO_ARTICLE, I_FORMS
+-._serialize_sentence() - данные предложения для боковой панели (.get_list_item())
+
 Файлы (из модалки загрузки):
 -file - предложения
 -variants_file (VARIANTS_FILE_FIELD) - "Слова для речень", приходит в extra_files
@@ -97,8 +101,6 @@ class SentenceImporter(
         SentenceMixin,
         SentenceWordVariantMixin
     ):
-    
-    REQUIRED_CORRECT_ANSWERS = 6
     
     # Токеном является любая часть предложения, будь-то слово или знак (. , ; : и пр.)
     # Максимальная длина токена установлена базой (БД) в 50 символов. 

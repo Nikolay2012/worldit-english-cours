@@ -9,8 +9,10 @@
 -self.request - текущий запрос
 -self._is_staff() - персонал (admin)
 
-Миксины собирают только свою часть контекста,
-например WordsTaskContentMixin._get_words_context()
+Миксины собирают только свою часть контекста:
+-WordsTaskContentMixin._get_words_context() - задание типа "Слова"
+-SentencesTaskContentMixin._get_sentences_context() - задание типа "Речення"
+(в том числе can_edit_sentences через self._is_staff())
 """
 
 from typing import TYPE_CHECKING

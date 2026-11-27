@@ -1,5 +1,63 @@
 """
+Ядро прохождения задания - TaskRunner
 
+Используется эндпоинтами:
+-NextStepEndpoint - следующий шаг (.get_next_step())
+-AnswerEndpoint - ответ на шаг (.answer())
+-WordsProgressEndpoint - панель «Список слів» (.get_words_progress())
+-SentencesProgressEndpoint - панель «Список речень» / «Історія відповідей» (.get_sentences_progress())
+
+Логика по типу задания вынесена в миксины:
+-WordsTaskRunnerMixin - «Слова»: выбор слова из выборки по 6, список слов с прогрессом
+-SentencesTaskRunnerMixin - «Речення»: выбор предложения без правильного ответа,
+список предложений для панели
+Общие методы для миксинов - в TaskRunnerBase (заглушки)
+
+Создание - TaskRunner(task_id, user):
+-task - активное задание курса английского (settings.ENGLISH_COURSE_ID)
+-student - профиль студента пользователя (у персонала None)
+-STAFF_TYPES = ["admin"] - типы персонала, у которых прогресс не записывается
+
+Следующий шаг - метод .get_next_step(after_step_id):
+-Персонал - метод ._get_staff_next_step():
+    -без after_step_id - первый шаг по order
+    -с after_step_id - следующий по order после него
+    -процент - доля шагов до текущего - метод ._get_staff_progress()
+-Студент - метод ._get_student_next_step():
+    -метод выбора по типу задания (словарь next_step_methods)
+    -"words" - ._get_student_words_next_step()
+    -"sentences" - ._get_student_sentences_next_step()
+-Данные шага собирает обработчик по виду шага (StepHandlerRegistry)
+-Возвращает {"step": {...} или None, "progress": {"percent", "is_completed"}}
+step = None - задание пройдено
+
+Ответ на шаг - метод .answer(step_id, data):
+-Персонал - метод ._staff_answer(): только проверка, без записи в БД
+-Студент - метод ._student_answer():
+    -проверка ответа обработчиком шага (.check())
+    -в транзакции с блокировкой записи прогресса (select_for_update):
+        -шаг должен совпадать с StudentProgress.current_step
+        (защита от повторного ответа)
+        -StudentAnswer и подробности ответа (.save_answer_details())
+        -пересчёт прогресса - метод ._update_progress_record()
+-Возвращает {"is_correct", "progress": {"percent", "is_completed"}}
+
+Пересчёт прогресса студента - метод ._update_progress_record():
+-answered_count - все ответы студента в задании
+-correct_count - правильные ответы по шагам, по каждому шагу не больше required
+-required - правильных ответов на шаг по типу задания
+(EnglishProgressService: "words" - 6, "sentences" - 1)
+-current_step сбрасывается в None
+-задание завершено, если correct_count >= шаги × required
+
+Процент студента - метод ._get_student_progress():
+-считает EnglishProgressService.get_task_percent() с учётом типа задания
+-is_completed - есть шаги и статус "completed"
+
+Из ошибок, могут подниматься:
+-NotFoundError - задание не найдено или неактивно, шаг не найден в задании
+-ValidationError - тип задания без прохождения, неактуальный шаг
+(повторный ответ или нет записи прогресса), некорректный ответ
 """
 
 from django.db import transaction

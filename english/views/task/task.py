@@ -29,9 +29,14 @@ GET /courses/english/modules/<module_id>/lessons/<lesson_id>/tasks/<task_id>/
 -task - задание
 -content_component - путь к шаблону компонента
 -can_import - показывать ли кнопку «Завантажити» (персонал и шагов нет)
--can_open_words_list - показывать ли кнопку «Список слів» (есть шаги и тип "words")
--can_edit_words - может ли редактировать список слов в боковой панели (персонал)
 -header_links - хлебные крошки
+-can_open_theory - показывать ли кнопку «Допомога» (тип "sentences")
+-can_open_answers_history - подключать ли боковую панель предложений (тип "sentences")
+-данные по типу задания - метод ._get_type_context():
+    -"words" - WordsTaskContentMixin._get_words_context()
+    (can_open_words_list, can_edit_words и тексты загрузки)
+    -"sentences" - SentencesTaskContentMixin._get_sentences_context()
+    (can_open_answers_list, can_edit_sentences и тексты загрузки)
 """
 
 from django.contrib import messages
