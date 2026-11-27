@@ -129,6 +129,8 @@ class EnglishTaskView(
             can_import=self._is_staff() and not has_steps,
             content_component=self._get_content_component(has_steps=has_steps),
             header_links=self._get_header_links(),
+            can_open_theory = True if self.object.type == "sentences" else False,
+            can_open_answers_history = True if self.object.type == "sentences" else False,
             **self._get_type_context(has_steps=has_steps)
         )
         

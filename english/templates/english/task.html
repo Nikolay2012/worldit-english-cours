@@ -46,11 +46,18 @@ World IT
             </button>
         {% endif %}
 
-        {% if can_open_theory %}
-            <button type="button" class="button theory-modal-button" id="openTheoryModalButton">
-                <img src="{% static 'english/img/action_icons/question-mark-circled.svg' %}" alt="question-mark-circled">
-                Допомога
-            </button>
+        {% if can_open_theory and can_open_answers_history and can_open_answers_list %}
+            <div class="task-additional-actions-container">
+                <button type="button" class="button theory-modal-button" id="openTheoryModalButton">
+                    <img src="{% static 'english/img/action_icons/question-mark-circled.svg' %}" alt="question-mark-circled">
+                    Допомога
+                </button>
+    
+                <button type="button" class="button answers-history-button" id="openAnswersHistoryButton">
+                    <img src="{% static 'english/img/action_icons/Component 16.svg' %}" alt="answers-history">
+                    Історія відповідей
+                </button>
+            </div>
         {% endif %}
     </div>
 
@@ -101,7 +108,7 @@ World IT
     {% endif %}
 
     {% if task.type == "sentences" %}
-        {% if can_open_theory %}
+        {% if can_open_theory and can_open_answers_list %}
             <script src="{% static 'english/js/task/theory_modal.js' %}"></script>
         {% endif %}
         <script src="{% static 'english/js/task/upload_csv/sentences_list.js' %}"></script>
