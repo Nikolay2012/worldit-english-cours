@@ -143,6 +143,8 @@ main {
 .pill-container p {
     color: #F98232;
     font-size: 0.875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .module-container .nav-buttons-container {
